@@ -6,9 +6,9 @@
 #ifdef PEER_DEBUG
     void peer_log(const char* message, ...);
 
-    #define PEER_INFO(msg, ...) peer_log("[info] %s:%d %s(): "msg"\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
-    #define PEER_WARN(msg, ...) peer_log("[warn] %s:%d %s(): "msg"\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
-    #define PEER_ERROR(msg, ...) peer_log("[ERROR] %s:%d %s(): "msg"\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
+    #define PEER_INFO(msg, ...) peer_log("[info] %s:%d %s(): "msg"\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+    #define PEER_WARN(msg, ...) peer_log("[warn] %s:%d %s(): "msg"\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+    #define PEER_ERROR(msg, ...) peer_log("[ERROR] %s:%d %s(): "msg"\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #else
     #define PEER_INFO(msg, ...)
     #define PEER_WARN(msg, ...)
