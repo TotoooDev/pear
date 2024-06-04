@@ -3,8 +3,8 @@
 
 #include <core/types.h>
 
-void window_set_next_width(u32 width);
-void window_set_next_height(u32 height);
-void window_set_next_title(const char* title);
+void window_set_width(u32 width);
+void window_set_height(u32 height);
+void window_set_title(const char* title);
 
 #endif

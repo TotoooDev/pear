@@ -3,11 +3,7 @@
 #include <graphics/window.h>
 
 int main(int argc, char* argv[]) {
-    app_start();
-    app_stop();
-
-    Window* window = window_new();
-    window_delete(window);
+    app_run();
 
     PEER_INFO("goodbye!");
 

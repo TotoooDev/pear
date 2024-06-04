@@ -1,8 +1,9 @@
 #ifdef PEER_PLATFORM_LINUX
 
 #include <graphics/window.h>
-#include <core/log.h>
 #include <graphics/platform/linux/window.h>
+#include <event/event_dispatcher.h>
+#include <core/log.h>
 #include <stdlib.h>
 #include <GLFW/glfw3.h>
 
@@ -11,38 +12,39 @@ typedef struct Window {
     bool should_close;
 } Window;
 
-static u32 window_num_windows = 0;
-static u32 window_next_width = 1280;
-static u32 window_next_height = 720;
-static const char* window_next_title = "New window";
+static u32 window_width = 1280;
+static u32 window_height = 720;
+static const char* window_title = "New window";
 
-void window_set_next_width(u32 width) {
-    window_next_width = width;
+void window_close_callback(GLFWwindow* window) {
+    event_send(EVENT_TYPE_QUIT, NULL);
 }
 
-void window_set_next_height(u32 height) {
-    window_next_height = height;
+void window_set_width(u32 width) {
+    window_width = width;
 }
 
-void window_set_next_title(const char* title) {
-    window_next_title = title;
+void window_set_height(u32 height) {
+    window_height = height;
+}
+
+void window_set_title(const char* title) {
+    window_title = title;
 }
 
 Window* window_new() {
-    if (window_num_windows == 0) {
-        if (glfwInit() != GLFW_TRUE)
-            PEER_ERROR("failed to initialize glfw!");
-    }
+    if (glfwInit() != GLFW_TRUE)
+        PEER_ERROR("failed to initialize glfw!");
 
     Window* window = (Window*)malloc(sizeof(Window));
 
-    window->window = glfwCreateWindow(window_next_width, window_next_height, window_next_title, NULL, NULL);
+    window->window = glfwCreateWindow(window_width, window_height, window_title, NULL, NULL);
     window->should_close = false;
 
     if (window->window == NULL)
         PEER_ERROR("failed to create window!");
+    glfwSetWindowCloseCallback(window->window, window_close_callback);
 
-    window_num_windows++;
     return window;
 }
 
@@ -51,9 +53,11 @@ void window_delete(Window* window) {
 
     free(window);
 
-    window_num_windows--;
-    if (window_num_windows == 0)
-        glfwTerminate();
+    glfwTerminate();
+}
+
+void window_update(Window* window) {
+    glfwPollEvents();
 }
 
 bool window_should_close(Window* window) {
