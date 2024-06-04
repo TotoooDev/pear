@@ -1,0 +1,13 @@
+#ifndef PEER_WINDOW_H
+#define PEER_WINDOW_H
+
+#include <core/types.h>
+
+typedef struct Window Window;
+
+Window* window_new();
+void window_delete(Window* window);
+
+bool window_should_close(Window* window);
+
+#endif
