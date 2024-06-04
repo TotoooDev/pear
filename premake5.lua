@@ -73,7 +73,9 @@ project "peer-project"
     filter "system:linux"
         defines "PEER_PLATFORM_LINUX"
         links {
-            "glfw"
+            "glfw",
+            "GL",
+            "GLEW"
         }
         postbuildcommands ("cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/")
 

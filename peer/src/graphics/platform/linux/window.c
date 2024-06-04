@@ -35,6 +35,9 @@ void window_set_title(const char* title) {
 Window* window_new() {
     if (glfwInit() != GLFW_TRUE)
         PEER_ERROR("failed to initialize glfw!");
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     Window* window = (Window*)malloc(sizeof(Window));
 
@@ -44,6 +47,7 @@ Window* window_new() {
     if (window->window == NULL)
         PEER_ERROR("failed to create window!");
     glfwSetWindowCloseCallback(window->window, window_close_callback);
+    glfwMakeContextCurrent(window->window);
 
     return window;
 }
@@ -58,6 +62,7 @@ void window_delete(Window* window) {
 
 void window_update(Window* window) {
     glfwPollEvents();
+    glfwSwapBuffers(window->window);
 }
 
 bool window_should_close(Window* window) {

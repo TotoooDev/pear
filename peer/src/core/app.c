@@ -1,5 +1,6 @@
 #include <core/app.h>
 #include <graphics/window.h>
+#include <graphics/renderer.h>
 #include <event/event_dispatcher.h>
 #include <core/log.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 typedef struct App {
     bool is_running;
     Window* window;
+    Renderer* renderer;
 } App;
 
 static App* app = NULL;
@@ -23,6 +25,7 @@ App* app_new() {
 
     app->is_running = true;
     app->window = window_new();
+    app->renderer = renderer_new();
 
     event_subscribe(app_on_event, NULL);
 
@@ -30,6 +33,7 @@ App* app_new() {
 }
 
 void app_delete() {
+    renderer_delete(app->renderer);
     window_delete(app->window);
     free(app);
 }
@@ -48,6 +52,7 @@ void app_stop() {
 void app_run() {
     while (app_is_running()) {
         window_update(app_get()->window);
+        renderer_clear(app_get()->renderer, 0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     app_delete();
