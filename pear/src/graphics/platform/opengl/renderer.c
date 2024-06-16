@@ -15,8 +15,42 @@ typedef struct Renderer {
 
 static bool renderer_is_glew_init = false;
 
+void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
+    // ignore non-significant error/warning codes
+    if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+    
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            PEAR_ERROR("opengl (%d): %s", id, message);
+            break;
+        case GL_DEBUG_SEVERITY_LOW:
+            PEAR_WARN("opengl (%d): %s", id, message);
+            break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            PEAR_INFO("opengl (%d): %s", id, message);
+            break;
+    }
+}
+
 void renderer_set_uniforms(Renderer* renderer) {
     shader_set_u32(renderer->shader, 0, "u_platform");
+}
+
+void renderer_init_debug_output() {
+#ifdef PEAR_DEBUG
+    i32 flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (!(flags & GL_CONTEXT_FLAG_DEBUG_BIT)) {
+        PEAR_WARN("failed to initialize opengl debug output! good luck debugging the app >:)");
+        return;
+    }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(renderer_debug_output, NULL);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+#endif
 }
 
 void renderer_init_shaders(Renderer* renderer) {
@@ -61,6 +95,7 @@ Renderer* renderer_new() {
             return NULL;
         }
 
+        renderer_init_debug_output();
         renderer_is_glew_init = true;
     }
 
