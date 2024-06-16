@@ -1,4 +1,4 @@
-workspace "peer"
+workspace "pear"
     architecture "x64"
 
     configurations {
@@ -8,8 +8,8 @@ workspace "peer"
 
 outputDir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-project "peer"
-    location "peer"
+project "pear"
+    location "pear"
     kind "StaticLib"
     language "C"
 
@@ -20,35 +20,35 @@ project "peer"
 
     files
 	{
-		"peer/include/**.h",
-		"peer/src/**.c",
-		"peer/src/vendor/**.c",
+		"pear/include/**.h",
+		"pear/src/**.c",
+		"pear/src/vendor/**.c",
 	}
 
     includedirs
 	{
-		"peer/include",
-		"peer/include/vendor"
+		"pear/include",
+		"pear/include/vendor"
 	}
 
     filter "system:linux"
         defines {
-            "PEER_PLATFORM_LINUX",
-            "PEER_PLATFORM_OPENGL"
+            "PEAR_PLATFORM_LINUX",
+            "PEAR_PLATFORM_OPENGL"
         }
 
     filter "configurations:Debug"
 		defines
 		{
-			"PEER_DEBUG",
+			"PEAR_DEBUG",
 		}
 		symbols "On"
 
 	filter "configurations:Release"
 		optimize "On"
 
-project "peer-project"
-    location "peer-project"
+project "pear-project"
+    location "pear-project"
     kind "ConsoleApp"
     language "C"
 
@@ -65,18 +65,18 @@ project "peer-project"
 
     includedirs
     {
-        "peer-project/include",
-        "peer-project/include/vendor",
-        "peer/include/vendor",
-        "peer/include"
+        "pear-project/include",
+        "pear-project/include/vendor",
+        "pear/include/vendor",
+        "pear/include"
     }
     
-    links ("peer")
+    links ("pear")
 
     filter "system:linux"
         defines {
-            "PEER_PLATFORM_LINUX",
-            "PEER_PLATFORM_OPENGL"
+            "PEAR_PLATFORM_LINUX",
+            "PEAR_PLATFORM_OPENGL"
         }
         links {
             "glfw",
@@ -88,7 +88,7 @@ project "peer-project"
     filter "configurations:Debug"
         defines
         {
-            "PEER_DEBUG",
+            "PEAR_DEBUG",
         }
         symbols "On"
 
