@@ -1,7 +1,7 @@
-#ifdef PEER_PLATFORM_LINUX
+#ifdef PEER_PLATFORM_OPENGL
 
 #include <graphics/window.h>
-#include <graphics/platform/linux/window.h>
+#include <graphics/platform/opengl/window.h>
 #include <event/event_dispatcher.h>
 #include <core/log.h>
 #include <stdlib.h>
@@ -61,8 +61,8 @@ void window_delete(Window* window) {
 }
 
 void window_update(Window* window) {
-    glfwPollEvents();
     glfwSwapBuffers(window->window);
+    glfwPollEvents();
 }
 
 bool window_should_close(Window* window) {

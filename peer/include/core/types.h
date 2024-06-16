@@ -1,6 +1,7 @@
 #ifndef PEER_TYPES_H
 #define PEER_TYPES_H
 
+#include <cglm/cglm.h>
 #include <stdint.h>
 #include <stdbool.h>
 

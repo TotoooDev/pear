@@ -20,9 +20,9 @@ project "peer"
 
     files
 	{
-		"%{prj.name}/include/**.h",
-		"%{prj.name}/src/**.c",
-		"%{prj.name}/src/vendor/**.c",
+		"peer/include/**.h",
+		"peer/src/**.c",
+		"peer/src/vendor/**.c",
 	}
 
     includedirs
@@ -32,7 +32,10 @@ project "peer"
 	}
 
     filter "system:linux"
-        defines "PEER_PLATFORM_LINUX"
+        defines {
+            "PEER_PLATFORM_LINUX",
+            "PEER_PLATFORM_OPENGL"
+        }
 
     filter "configurations:Debug"
 		defines
@@ -71,7 +74,10 @@ project "peer-project"
     links ("peer")
 
     filter "system:linux"
-        defines "PEER_PLATFORM_LINUX"
+        defines {
+            "PEER_PLATFORM_LINUX",
+            "PEER_PLATFORM_OPENGL"
+        }
         links {
             "glfw",
             "GL",

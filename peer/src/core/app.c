@@ -50,11 +50,28 @@ void app_stop() {
 }
 
 void app_run() {
+    app_get();
+
+    f32 vertices[] = {
+         0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,
+         0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, 1.0f
+    };
+    u32 indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Mesh* mesh = mesh_new(vertices, indices, sizeof(vertices), sizeof(indices));
+
     while (app_is_running()) {
+        renderer_clear(app_get()->renderer, 0.3f, 0.3f, 0.3f, 0.0f);
+        renderer_draw_mesh(app_get()->renderer, mesh, NULL);
         window_update(app_get()->window);
-        renderer_clear(app_get()->renderer, 0.0f, 0.0f, 0.0f, 0.0f);
     }
 
+    mesh_delete(mesh);
     app_delete();
 }
 

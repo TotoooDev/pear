@@ -1,5 +1,5 @@
-#ifndef PEER_LINUX_WINDOW_H
-#define PEER_LINUX_WINDOW_H
+#ifndef PEER_OPENGL_WINDOW_H
+#define PEER_OPENGL_WINDOW_H
 
 #include <core/types.h>
 

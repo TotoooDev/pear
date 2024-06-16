@@ -5,10 +5,10 @@
 #include <stdlib.h>
 
 int main(int argc, char* argv[]) {
-    Node* node = node_new(NULL);
-    node_add_son(node, node_new(node));
-    node_add_son(node, node_new(node));
-    node_add_son(node, node_new(node));
+    Node* node = node_new(NODE_TYPE_CONTAINER, NULL, "father");
+    node_add_son(node, node_new(NODE_TYPE_CONTAINER, node, "son1"));
+    node_add_son(node, node_new(NODE_TYPE_CONTAINER, node, "son2"));
+    node_add_son(node, node_new(NODE_TYPE_CONTAINER, node, "son3"));
     node_recursive_delete(node);
 
     app_run();
