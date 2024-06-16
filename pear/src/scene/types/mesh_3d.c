@@ -8,13 +8,13 @@ typedef struct Mesh3D {
     vec3 scale;
 } Mesh3D;
 
-Mesh3D* mesh3d_new(Mesh* mesh, vec3 pos, vec3 rotation, vec3 scale) {
+Mesh3D* mesh3d_new(Mesh3DCreationInfo* creation_info) {
     Mesh3D* mesh3d = (Mesh3D*)malloc(sizeof(Mesh3D));
     
-    mesh3d->mesh = mesh;
-    glm_vec3_copy(pos, mesh3d->pos);
-    glm_vec3_copy(rotation, mesh3d->rotation);
-    glm_vec3_copy(scale, mesh3d->scale);
+    mesh3d->mesh = creation_info->mesh;
+    glm_vec3_copy(creation_info->pos, mesh3d->pos);
+    glm_vec3_copy(creation_info->rotation, mesh3d->rotation);
+    glm_vec3_copy(creation_info->scale, mesh3d->scale);
     
     return mesh3d;
 }

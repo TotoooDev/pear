@@ -6,13 +6,14 @@
 
 typedef struct Node Node;
 
-Node* node_new(NodeType type, Node* parent, const char* name);
+Node* node_new(NodeType type, Node* parent, const char* name, void* creation_info);
 void node_delete(Node* node);
 void node_recursive_delete(Node* node);
 
 void node_add_son(Node* node, Node* son);
 Node** node_get_sons(Node* node);
 u32 node_get_num_sons(Node* node);
+bool node_is_leaf(Node* node);
 Node* node_get_parent(Node* node);
 char* node_get_name(Node* node);
 

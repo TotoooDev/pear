@@ -113,7 +113,28 @@ void renderer_clear(Renderer* renderer, f32 r, f32 g, f32 b, f32 a) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void renderer_draw_mesh(Renderer* renderer, Mesh* mesh, Mesh3D* node) {
+void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
+    switch (node_get_type(node)) {
+    case NODE_TYPE_MESH_3D:
+        renderer_draw_mesh3d(renderer, node_get_data(node));
+        break;
+
+    case NODE_TYPE_CONTAINER:
+    default:
+        break;
+    }
+
+    if (!node_is_leaf(node)) {
+        Node** sons = node_get_sons(node);
+        for (u32 i = 0; i < node_get_num_sons(node); i++) {
+            renderer_draw_node_hierarchy(renderer, sons[i]);
+        }
+    }
+}
+
+void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node) {
+    Mesh* mesh = mesh3d_get_mesh(node);
+
     shader_use(renderer->shader);
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);

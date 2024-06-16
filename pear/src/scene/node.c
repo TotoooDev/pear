@@ -1,4 +1,5 @@
 #include <scene/node.h>
+#include <scene/types/mesh_3d.h>
 #include <core/types.h>
 #include <core/log.h>
 #include <stdlib.h>
@@ -15,17 +16,19 @@ typedef struct Node {
     NodeType type;
 } Node;
 
-void* node_get_data_from_type(NodeType type) {
+void* node_get_data_from_type(NodeType type, void* creation_info) {
     switch (type) {
     case NODE_TYPE_CONTAINER:
         return NULL;
+    case NODE_TYPE_MESH_3D:
+        return (void*)mesh3d_new((Mesh3DCreationInfo*)creation_info);
     default:
         PEAR_ERROR("unknown node type!");
         return NULL;
     }
 }
 
-Node* node_new(NodeType type, Node* parent, const char* name) {
+Node* node_new(NodeType type, Node* parent, const char* name, void* creation_info) {
     if (parent == NULL)
         PEAR_WARN("creating an orphan node!");
     if (name[0] == '\0')
@@ -33,10 +36,10 @@ Node* node_new(NodeType type, Node* parent, const char* name) {
     
     Node* node = (Node*)malloc(sizeof(Node));
 
-    node->name = (char*)malloc(sizeof(char) * strlen(name));
+    node->name = (char*)malloc(sizeof(char) * strlen(name) + 1);
     node->parent = parent;
     node->sons = NULL;
-    node->data = node_get_data_from_type(type);
+    node->data = node_get_data_from_type(type, creation_info);
     node->type = type;
 
     strcpy(node->name, name);
@@ -72,6 +75,10 @@ Node** node_get_sons(Node* node) {
 
 u32 node_get_num_sons(Node* node) {
     return node->num_sons;
+}
+
+bool node_is_leaf(Node* node) {
+    return node_get_num_sons(node) == 0;
 }
 
 Node* node_get_parent(Node* node) {
