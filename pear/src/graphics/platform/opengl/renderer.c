@@ -16,9 +16,6 @@ typedef struct Renderer {
 static bool renderer_is_glew_init = false;
 
 void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
-    // ignore non-significant error/warning codes
-    if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-    
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
         case GL_DEBUG_SEVERITY_MEDIUM:

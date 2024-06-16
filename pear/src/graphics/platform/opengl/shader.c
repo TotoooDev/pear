@@ -38,9 +38,9 @@ Shader* shader_new(const char* vertex_source, const char* fragment_source) {
     glAttachShader(shader->id, vertex_shader);
     glAttachShader(shader->id, fragment_shader);
     glLinkProgram(shader->id);
-    glGetProgramiv(fragment_shader, GL_LINK_STATUS, &success);
+    glGetProgramiv(shader->id, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(fragment_shader, SHADER_INFO_LOG_LENGTH, NULL, info_log);
+        glGetProgramInfoLog(shader->id, SHADER_INFO_LOG_LENGTH, NULL, info_log);
         PEAR_ERROR("failed to link shader! opengl error: %s", info_log);
     }
 
