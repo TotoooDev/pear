@@ -15,7 +15,7 @@ typedef struct Mesh {
     u32 num_indices;
 } Mesh;
 
-Mesh* mesh_new(f32* vertices, u32* indices, u32 num_vertices, u32 num_indices) {
+Mesh* mesh_new(MeshInfo* mesh_info, f32* vertices, u32* indices, u32 num_vertices, u32 num_indices) {
     Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
 
     mesh->num_vertices = num_vertices;
@@ -33,11 +33,47 @@ Mesh* mesh_new(f32* vertices, u32* indices, u32 num_vertices, u32 num_indices) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices, indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 6 * sizeof(f32), (void*)0);
-    glEnableVertexAttribArray(0);
+    MeshAttribute* attributes = meshinfo_get_attributes(mesh_info);
+    for (u32 i = 0; i < meshinfo_get_num_attributes(mesh_info); i++) {
+        MeshAttribute attribute = attributes[i];
+        u32 gl_type;
+        u32 num_components;
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * sizeof(f32), (void*)(3 * sizeof(f32)));
-    glEnableVertexAttribArray(1);
+        switch (attribute.type) {
+        case MESH_DATA_TYPE_INT:
+            gl_type = GL_INT;
+            num_components = 1;
+            break;
+
+        case MESH_DATA_TYPE_UINT:
+            gl_type = GL_UNSIGNED_INT;
+            num_components = 1;
+            break;
+
+        case MESH_DATA_TYPE_FLOAT:
+            gl_type = GL_FLOAT;
+            num_components = 1;
+            break;
+
+        case MESH_DATA_TYPE_FLOAT2:
+            gl_type = GL_FLOAT;
+            num_components = 2;
+            break;
+
+        case MESH_DATA_TYPE_FLOAT3:
+            gl_type = GL_FLOAT;
+            num_components = 3;
+            break;
+
+        case MESH_DATA_TYPE_FLOAT4:
+            gl_type = GL_FLOAT;
+            num_components = 4;
+            break;
+        }
+
+        glVertexAttribPointer(i, num_components, gl_type, attribute.is_normalized, meshinfo_get_stride(mesh_info), (void*)attribute.offset);
+        glEnableVertexAttribArray(i);
+    }
 
     return mesh;
 }

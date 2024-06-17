@@ -8,6 +8,10 @@
 int main(int argc, char* argv[]) {
     app_init();
 
+    MeshInfo* mesh_info = meshinfo_new();
+    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT3, false);
+    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT3, false);
+
     f32 vertices[] = {
          0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,
          0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
@@ -19,7 +23,9 @@ int main(int argc, char* argv[]) {
         1, 2, 3
     };
 
-    Mesh* mesh = mesh_new(vertices, indices, sizeof(vertices), sizeof(indices));
+    Mesh* mesh = mesh_new(mesh_info, vertices, indices, sizeof(vertices), sizeof(indices));
+
+    meshinfo_delete(mesh_info);
 
     Mesh3DCreationInfo info;
     info.mesh = mesh;
