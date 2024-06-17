@@ -39,6 +39,7 @@ Node* node_new(NodeType type, Node* parent, const char* name, void* creation_inf
     node->name = (char*)malloc(sizeof(char) * strlen(name) + 1);
     node->parent = parent;
     node->sons = NULL;
+    node->num_sons = 0;
     node->data = node_get_data_from_type(type, creation_info);
     node->type = type;
 
