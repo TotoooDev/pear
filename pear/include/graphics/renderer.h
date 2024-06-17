@@ -15,4 +15,6 @@ void renderer_clear(Renderer* renderer, f32 r, f32 g, f32 b, f32 a);
 void renderer_draw_node_hierarchy(Renderer* renderer, Node* node);
 void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node);
 
+void renderer_set_fov(Renderer* renderer, f32 fov);
+
 #endif

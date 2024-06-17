@@ -66,3 +66,7 @@ bool app_is_running() {
 void app_set_root_node(Node* node) {
     app->root_node = node;
 }
+
+Window* app_get_window() {
+    return app->window;
+}

@@ -3,6 +3,9 @@
 #include <graphics/renderer.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
+#include <scene/types/camera_3d.h>
+#include <event/event_dispatcher.h>
+#include <core/app.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <sys/types.h>
@@ -10,10 +13,33 @@
 #include <stdlib.h>
 
 typedef struct Renderer {
+    f32 fov;
+    f32 aspect_ratio;
+    f32 near;
+    f32 far;
+
     Shader* shader;
+    mat4 projection_matrix;
+    mat4 view_matrix;
 } Renderer;
 
 static bool renderer_is_glew_init = false;
+
+void renderer_calculate_projection(Renderer* renderer) {
+    glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection_matrix);
+}
+
+void renderer_on_event(EventType type, void* event, void* user_data) {
+    if (type != EVENT_TYPE_WINDOW_RESIZED)
+        return;
+
+    Renderer* renderer = (Renderer*)user_data;
+    WindowResizedEvent* resize_event = (WindowResizedEvent*)event;
+
+    renderer->aspect_ratio = resize_event->width / (f32)resize_event->height;
+    renderer_calculate_projection(renderer);
+    glViewport(0, 0, resize_event->width, resize_event->height);
+}
 
 void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
     switch (severity) {
@@ -32,6 +58,8 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
 
 void renderer_set_uniforms(Renderer* renderer) {
     shader_set_u32(renderer->shader, 0, "u_platform");
+    shader_set_mat4(renderer->shader, renderer->projection_matrix, "u_projection");
+    shader_set_mat4(renderer->shader, renderer->view_matrix, "u_view");
 }
 
 void renderer_init_debug_output() {
@@ -99,6 +127,15 @@ Renderer* renderer_new() {
     Renderer* renderer = (Renderer*)malloc(sizeof(Renderer));
 
     renderer_init_shaders(renderer);
+    renderer->aspect_ratio = window_get_width(app_get_window()) / (f32)window_get_height(app_get_window());
+    renderer->fov = glm_rad(45.0f);
+    renderer->near = 0.01f;
+    renderer->far = 100.0f;
+
+    renderer_calculate_projection(renderer);
+    glm_mat4_identity(renderer->view_matrix);
+
+    event_subscribe(renderer_on_event, renderer);
 
     return renderer;
 }
@@ -119,6 +156,11 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
         renderer_draw_mesh3d(renderer, node_get_data(node));
         break;
 
+    case NODE_TYPE_CAMERA_3D:
+        Camera3D* cam = (Camera3D*)node_get_data(node);
+        camera3d_get_view_matrix(cam, renderer->view_matrix);
+        break;
+
     case NODE_TYPE_CONTAINER:
     default:
         break;
@@ -136,6 +178,8 @@ void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node) {
     Mesh* mesh = mesh3d_get_mesh(node);
 
     shader_use(renderer->shader);
+    renderer_set_uniforms(renderer);
+
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
 }

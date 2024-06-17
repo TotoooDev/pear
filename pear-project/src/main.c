@@ -2,6 +2,7 @@
 #include <core/app.h>
 #include <scene/node.h>
 #include <scene/types/mesh_3d.h>
+#include <scene/types/camera_3d.h>
 #include <graphics/window.h>
 #include <stdlib.h>
 
@@ -13,10 +14,10 @@ int main(int argc, char* argv[]) {
     meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT3, false);
 
     f32 vertices[] = {
-         0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,
-         0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, 1.0f
+         0.5f,  0.5f, -2.0f,   1.0f, 1.0f, 0.0f,
+         0.5f, -0.5f, -2.0f,   1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -2.0f,   0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f, -2.0f,   0.0f, 1.0f, 1.0f
     };
     u32 indices[] = {
         0, 1, 3,
@@ -27,15 +28,28 @@ int main(int argc, char* argv[]) {
 
     meshinfo_delete(mesh_info);
 
-    Mesh3DCreationInfo info;
-    info.mesh = mesh;
+    Mesh3DCreationInfo mesh3d_info;
+    mesh3d_info.mesh = mesh;
 
-    Node* node = node_new(NODE_TYPE_MESH_3D, NULL, "father", &info);
+    Camera3DCreationInfo cam3d_info;
+    cam3d_info.pos[0] = 0.0f;
+    cam3d_info.pos[1] = 0.0f;
+    cam3d_info.pos[2] = 0.0f;
+    cam3d_info.yaw = -90.0f;
+    cam3d_info.pitch = 0.0f;
+    cam3d_info.roll = 0.0f;
 
-    app_set_root_node(node);
+    Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL);
+    Node* cam = node_new(NODE_TYPE_CAMERA_3D, parent, "cam", &cam3d_info);
+    Node* mesh_node = node_new(NODE_TYPE_MESH_3D, parent, "mesh", &mesh3d_info);
+
+    node_add_son(parent, cam);
+    node_add_son(parent, mesh_node);
+
+    app_set_root_node(parent);
     app_run();
 
-    node_recursive_delete(node);
+    node_recursive_delete(parent);
 
     PEAR_INFO("goodbye!");
 

@@ -79,6 +79,7 @@ project "pear-project"
             "PEAR_PLATFORM_OPENGL"
         }
         links {
+            "m",
             "glfw",
             "GL",
             "GLEW"

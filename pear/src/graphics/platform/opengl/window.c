@@ -20,6 +20,15 @@ void window_close_callback(GLFWwindow* window) {
     event_send(EVENT_TYPE_QUIT, NULL);
 }
 
+void window_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+    WindowResizedEvent event = {
+        .width = width,
+        .height = height
+    };
+
+    event_send(EVENT_TYPE_WINDOW_RESIZED, &event);
+}
+
 void APIENTRY window_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
     // ignore non-significant error/warning codes
     if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
@@ -75,6 +84,8 @@ Window* window_new() {
     glfwSetWindowCloseCallback(window->window, window_close_callback);
     glfwMakeContextCurrent(window->window);
 
+    glfwSetWindowSizeCallback(window->window, window_resize_callback);
+
     return window;
 }
 
@@ -93,6 +104,18 @@ void window_update(Window* window) {
 
 bool window_should_close(Window* window) {
     return window->should_close;
+}
+
+i32 window_get_width(Window* window) {
+    i32 width;
+    glfwGetWindowSize(window->window, &width, NULL);
+    return width;
+}
+
+i32 window_get_height(Window* window) {
+    i32 height;
+    glfwGetWindowSize(window->window, NULL, &height);
+    return height;
 }
 
 #endif

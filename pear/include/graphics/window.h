@@ -11,4 +11,7 @@ void window_delete(Window* window);
 void window_update(Window* window);
 bool window_should_close(Window* window);
 
+i32 window_get_width(Window* window);
+i32 window_get_height(Window* window);
+
 #endif
