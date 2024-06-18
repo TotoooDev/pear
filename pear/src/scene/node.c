@@ -13,6 +13,8 @@ typedef struct Node {
     Node** sons;
     u32 num_sons;
 
+    NodeUpdateFunction update_function;
+
     void* data;
     NodeType type;
 } Node;
@@ -31,7 +33,7 @@ void* node_get_data_from_type(NodeType type, void* creation_info) {
     }
 }
 
-Node* node_new(NodeType type, Node* parent, const char* name, void* creation_info) {
+Node* node_new(NodeType type, Node* parent, const char* name, void* creation_info, NodeUpdateFunction update_function) {
     if (parent == NULL)
         PEAR_WARN("creating an orphan node!");
     if (name[0] == '\0')
@@ -43,6 +45,7 @@ Node* node_new(NodeType type, Node* parent, const char* name, void* creation_inf
     node->parent = parent;
     node->sons = NULL;
     node->num_sons = 0;
+    node->update_function = update_function;
     node->data = node_get_data_from_type(type, creation_info);
     node->type = type;
 
@@ -91,6 +94,28 @@ Node* node_get_parent(Node* node) {
 
 char* node_get_name(Node* node) {
     return node->name;
+}
+
+void node_set_update_function(Node* node, NodeUpdateFunction update_function) {
+    node->update_function = update_function;
+}
+
+void node_update_recursive(Node* node, f32 timestep) {
+    node_update(node, timestep);
+
+    if (node_is_leaf(node))
+        return;
+
+    Node** sons = node_get_sons(node);
+    for (u32 i = 0; i < node_get_num_sons(node); i++) {
+        Node* son = sons[i];
+        node_update_recursive(son, timestep);
+    }
+}
+
+void node_update(Node* node, f32 timestep) {
+    if (node->update_function != NULL)
+        node->update_function(node, timestep);
 }
 
 NodeType node_get_type(Node* node) {

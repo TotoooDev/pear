@@ -18,6 +18,10 @@ void on_event(EventType type, void* e, void* user_data) {
     }
 }
 
+void cam_on_update(Node* node, f32 timestep) {
+    PEAR_INFO("update! timestep: %f", timestep);
+}
+
 int main(int argc, char* argv[]) {
     app_init();
 
@@ -53,9 +57,9 @@ int main(int argc, char* argv[]) {
     cam3d_info.pitch = 0.0f;
     cam3d_info.roll = 0.0f;
 
-    Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL);
-    Node* cam = node_new(NODE_TYPE_CAMERA_3D, parent, "cam", &cam3d_info);
-    Node* mesh_node = node_new(NODE_TYPE_MESH_3D, parent, "mesh", &mesh3d_info);
+    Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL, NULL);
+    Node* cam = node_new(NODE_TYPE_CAMERA_3D, parent, "cam", &cam3d_info, cam_on_update);
+    Node* mesh_node = node_new(NODE_TYPE_MESH_3D, parent, "mesh", &mesh3d_info, NULL);
 
     node_add_son(parent, cam);
     node_add_son(parent, mesh_node);
