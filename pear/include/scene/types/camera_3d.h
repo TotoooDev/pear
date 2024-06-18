@@ -19,6 +19,11 @@ void camera3d_set_pos(Camera3D* cam, vec3 pos);
 void camera3d_set_yaw(Camera3D* cam, f32 yaw);
 void camera3d_set_pitch(Camera3D* cam, f32 pitch);
 void camera3d_set_roll(Camera3D* cam, f32 roll);
+
+void camera3d_get_pos(Camera3D* cam, vec3 dest);
+f32 camera3d_get_yaw(Camera3D* cam);
+f32 camera3d_get_pitch(Camera3D* cam);
+f32 camera3d_get_roll(Camera3D* cam);
 void camera3d_get_view_matrix(Camera3D* cam, mat4 dest);
 
 #endif

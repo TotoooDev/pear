@@ -5,6 +5,7 @@
 #include <scene/types/camera_3d.h>
 #include <graphics/window.h>
 #include <event/event_dispatcher.h>
+#include <event/keyboard.h>
 #include <stdlib.h>
 
 void on_event(EventType type, void* e, void* user_data) {
@@ -20,6 +21,26 @@ void on_event(EventType type, void* e, void* user_data) {
 
 void cam_on_update(Node* node, f32 timestep) {
     PEAR_INFO("update! timestep: %f", timestep);
+}
+
+void cam_on_event(EventType type, void* e, void* user_data) {
+    Node* node = (Node*)user_data;
+    Camera3D* cam = (Camera3D*)node_get_data(node);
+
+    vec3 pos;
+    camera3d_get_pos(cam, pos);
+
+    if (type == EVENT_TYPE_KEY_DOWN) {
+        KeyDownEvent* event = (KeyDownEvent*)e;
+        if (event->key == PEAR_KEY_DOWN) {
+            pos[2]++;
+            camera3d_set_pos(cam, pos);
+        }
+        if (event->key == PEAR_KEY_UP) {
+            pos[2]--;
+            camera3d_set_pos(cam, pos);
+        }
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -59,6 +80,7 @@ int main(int argc, char* argv[]) {
 
     Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL, NULL);
     Node* cam = node_new(NODE_TYPE_CAMERA_3D, parent, "cam", &cam3d_info, cam_on_update);
+    event_subscribe(cam_on_event, cam);
     Node* mesh_node = node_new(NODE_TYPE_MESH_3D, parent, "mesh", &mesh3d_info, NULL);
 
     node_add_son(parent, cam);

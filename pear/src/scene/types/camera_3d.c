@@ -41,6 +41,22 @@ void camera3d_set_roll(Camera3D* cam, f32 roll) {
     cam->roll = roll;
 }
 
+void camera3d_get_pos(Camera3D* cam, vec3 dest) {
+    glm_vec3_copy(cam->pos, dest);
+}
+
+f32 camera3d_get_yaw(Camera3D* cam) {
+    return cam->yaw;
+}
+
+f32 camera3d_get_pitch(Camera3D* cam) {
+    return cam->pitch;
+}
+
+f32 camera3d_get_roll(Camera3D* cam) {
+    return cam->roll;
+}
+
 void camera3d_get_view_matrix(Camera3D* cam, mat4 dest) {
     camera_get_view_matrix(cam->pos, cam->yaw, cam->pitch, cam->roll, dest);
 }
