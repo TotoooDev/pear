@@ -29,6 +29,22 @@ void window_resize_callback(GLFWwindow* window, i32 width, i32 height) {
     event_send(EVENT_TYPE_WINDOW_RESIZED, &event);
 }
 
+void window_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods) {
+
+    if (action == GLFW_PRESS) {
+        KeyDownEvent event = {
+            .key = key
+        };
+        event_send(EVENT_TYPE_KEY_DOWN, &event);
+    }
+    else if (action == GLFW_RELEASE) {
+        KeyUpEvent event = {
+            .key = key
+        };
+        event_send(EVENT_TYPE_KEY_UP, &event);
+    }
+}
+
 void APIENTRY window_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
     // ignore non-significant error/warning codes
     if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
@@ -85,6 +101,7 @@ Window* window_new() {
     glfwMakeContextCurrent(window->window);
 
     glfwSetWindowSizeCallback(window->window, window_resize_callback);
+    glfwSetKeyCallback(window->window, window_key_callback);
 
     return window;
 }

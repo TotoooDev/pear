@@ -4,10 +4,24 @@
 #include <scene/types/mesh_3d.h>
 #include <scene/types/camera_3d.h>
 #include <graphics/window.h>
+#include <event/event_dispatcher.h>
 #include <stdlib.h>
+
+void on_event(EventType type, void* e, void* user_data) {
+    if (type == EVENT_TYPE_KEY_DOWN) {
+        KeyDownEvent* event = (KeyDownEvent*)e;
+        PEAR_INFO("key %d down!", event->key);
+    }
+    if (type == EVENT_TYPE_KEY_UP) {
+        KeyUpEvent* event = (KeyUpEvent*)e;
+        PEAR_INFO("key %d up!", event->key);
+    }
+}
 
 int main(int argc, char* argv[]) {
     app_init();
+
+    event_subscribe(on_event, NULL);
 
     MeshInfo* mesh_info = meshinfo_new();
     meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT3, false);
