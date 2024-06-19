@@ -4,6 +4,8 @@
 #include <scene/types/mesh_3d.h>
 #include <scene/types/camera_3d.h>
 #include <graphics/window.h>
+#include <graphics/image.h>
+#include <graphics/texture.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <stdlib.h>
@@ -20,7 +22,7 @@ void on_event(EventType type, void* e, void* user_data) {
 }
 
 void cam_on_update(Node* node, f32 timestep) {
-    PEAR_INFO("update! timestep: %f", timestep);
+    // PEAR_INFO("update! timestep: %f", timestep);
 }
 
 void cam_on_event(EventType type, void* e, void* user_data) {
