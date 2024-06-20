@@ -2,11 +2,14 @@
 
 #include <graphics/mesh.h>
 #include <graphics/platform/opengl/mesh.h> 
+#include <graphics/platform/opengl/texture.h> 
 #include <core/log.h>
 #include <GL/glew.h>
 #include <stdlib.h>
 
 typedef struct Mesh {
+    Material material;
+
     u32 vao;
     u32 vbo;
     u32 ebo;
@@ -15,9 +18,10 @@ typedef struct Mesh {
     u32 num_indices;
 } Mesh;
 
-Mesh* mesh_new(MeshInfo* mesh_info, f32* vertices, u32* indices, u32 num_vertices, u32 num_indices) {
+Mesh* mesh_new(MeshInfo* mesh_info, Material material, f32* vertices, u32* indices, u32 num_vertices, u32 num_indices) {
     Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
 
+    mesh->material = material;
     mesh->num_vertices = num_vertices;
     mesh->num_indices = num_indices;
 
@@ -86,6 +90,10 @@ void mesh_delete(Mesh* mesh) {
     free(mesh);
 }
 
+Material mesh_get_material(Mesh* mesh) {
+    return mesh->material;
+}
+
 u32 mesh_get_num_vertices(Mesh* mesh) {
     return mesh->num_vertices;
 }
@@ -97,6 +105,11 @@ u32 mesh_get_num_indices(Mesh* mesh) {
 void mesh_use(Mesh* mesh) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
     glBindVertexArray(mesh->vao);
+
+    if (mesh->material.albedo != NULL) {
+        glActiveTexture(GL_TEXTURE0);
+        texture_use(mesh->material.albedo);
+    }
 }
 
 #endif

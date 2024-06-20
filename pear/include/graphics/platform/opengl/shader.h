@@ -1,6 +1,7 @@
 #ifndef PEAR_OPENGL_SHADER_H
 #define PEAR_OPENGL_SHADER_H
 
+#include <graphics/texture.h>
 #include <core/types.h>
 
 typedef struct Shader Shader;

@@ -1,4 +1,5 @@
 #include <graphics/platform/opengl/shader.h>
+#include <graphics/platform/opengl/texture.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <stdlib.h>
@@ -83,3 +84,6 @@ void shader_set_mat4(Shader* shader, mat4 value, const char* name) {
     glUniformMatrix4fv(glGetUniformLocation(shader->id, name), 1, false, (f32*)value);
 }
 
+void shader_set_texture(Shader* shader, Texture* texture, const char* name) {
+    shader_set_i32(shader, texture_get_id(texture), name);
+}

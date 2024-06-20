@@ -82,6 +82,10 @@ void texture_delete(Texture* texture) {
     free(texture);
 }
 
+u32 texture_get_id(Texture* texture) {
+    return texture->id;
+}
+
 void texture_use(Texture* texture) {
     glBindTexture(GL_TEXTURE_2D, texture->id);
 }

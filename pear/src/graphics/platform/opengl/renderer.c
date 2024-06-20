@@ -3,6 +3,7 @@
 #include <graphics/renderer.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
+#include <graphics/platform/opengl/texture.h>
 #include <scene/types/camera_3d.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
@@ -56,10 +57,13 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
     }
 }
 
-void renderer_set_uniforms(Renderer* renderer) {
+void renderer_set_uniforms(Renderer* renderer, Material material) {
     shader_set_u32(renderer->shader, 0, "u_platform");
     shader_set_mat4(renderer->shader, renderer->projection_matrix, "u_projection");
     shader_set_mat4(renderer->shader, renderer->view_matrix, "u_view");
+
+    if (material.albedo != NULL)
+        shader_set_i32(renderer->shader, 0, "u_albedo");
 }
 
 void renderer_init_debug_output() {
@@ -178,7 +182,7 @@ void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node) {
     Mesh* mesh = mesh3d_get_mesh(node);
 
     shader_use(renderer->shader);
-    renderer_set_uniforms(renderer);
+    renderer_set_uniforms(renderer, mesh_get_material(mesh));
 
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);

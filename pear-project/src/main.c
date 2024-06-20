@@ -10,21 +10,6 @@
 #include <event/keyboard.h>
 #include <stdlib.h>
 
-void on_event(EventType type, void* e, void* user_data) {
-    if (type == EVENT_TYPE_KEY_DOWN) {
-        KeyDownEvent* event = (KeyDownEvent*)e;
-        PEAR_INFO("key %d down!", event->key);
-    }
-    if (type == EVENT_TYPE_KEY_UP) {
-        KeyUpEvent* event = (KeyUpEvent*)e;
-        PEAR_INFO("key %d up!", event->key);
-    }
-}
-
-void cam_on_update(Node* node, f32 timestep) {
-    // PEAR_INFO("update! timestep: %f", timestep);
-}
-
 void cam_on_event(EventType type, void* e, void* user_data) {
     Node* node = (Node*)user_data;
     Camera3D* cam = (Camera3D*)node_get_data(node);
@@ -48,24 +33,26 @@ void cam_on_event(EventType type, void* e, void* user_data) {
 int main(int argc, char* argv[]) {
     app_init();
 
-    event_subscribe(on_event, NULL);
-
     MeshInfo* mesh_info = meshinfo_new();
     meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT3, false);
-    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT3, false);
+    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT2, false);
 
     f32 vertices[] = {
-         0.5f,  0.5f, -2.0f,   1.0f, 1.0f, 0.0f,
-         0.5f, -0.5f, -2.0f,   1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -2.0f,   0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f, -2.0f,   0.0f, 1.0f, 1.0f
+         0.5f,  0.5f, -2.0f,   1.0f, 1.0f,
+         0.5f, -0.5f, -2.0f,   1.0f, 0.0f,
+        -0.5f, -0.5f, -2.0f,   0.0f, 0.0f,
+        -0.5f,  0.5f, -2.0f,   0.0f, 1.0f
     };
     u32 indices[] = {
         0, 1, 3,
         1, 2, 3
     };
 
-    Mesh* mesh = mesh_new(mesh_info, vertices, indices, sizeof(vertices), sizeof(indices));
+    Image* image = image_new_from_file("wall.jpg");
+    Texture* texture = texture_new(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
+    image_delete(image);
+
+    Mesh* mesh = mesh_new(mesh_info, (Material){ texture },  vertices, indices, sizeof(vertices), sizeof(indices));
 
     meshinfo_delete(mesh_info);
 
@@ -81,7 +68,7 @@ int main(int argc, char* argv[]) {
     cam3d_info.roll = 0.0f;
 
     Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL, NULL);
-    Node* cam = node_new(NODE_TYPE_CAMERA_3D, parent, "cam", &cam3d_info, cam_on_update);
+    Node* cam = node_new(NODE_TYPE_CAMERA_3D, parent, "cam", &cam3d_info, NULL);
     event_subscribe(cam_on_event, cam);
     Node* mesh_node = node_new(NODE_TYPE_MESH_3D, parent, "mesh", &mesh3d_info, NULL);
 
@@ -92,6 +79,7 @@ int main(int argc, char* argv[]) {
     app_run();
 
     node_recursive_delete(parent);
+    texture_delete(texture);
 
     PEAR_INFO("goodbye!");
 
