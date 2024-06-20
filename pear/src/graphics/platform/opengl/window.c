@@ -30,7 +30,6 @@ void window_resize_callback(GLFWwindow* window, i32 width, i32 height) {
 }
 
 void window_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods) {
-
     if (action == GLFW_PRESS) {
         KeyDownEvent event = {
             .key = key
@@ -42,6 +41,30 @@ void window_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, 
             .key = key
         };
         event_send(EVENT_TYPE_KEY_UP, &event);
+    }
+}
+
+void window_mouse_movement_callback(GLFWwindow* window, f64 x, f64 y) {
+    MouseMovedEvent event = {
+        .x = x,
+        .y = y
+    };
+
+    event_send(EVENT_TYPE_MOUSE_MOVED, &event);
+}
+
+void window_mouse_button_callback(GLFWwindow* window, i32 button, i32 action, i32 mods) {
+    if (action == GLFW_PRESS) {
+        MouseButtonDownEvent event = {
+            .button = button
+        };
+        event_send(EVENT_TYPE_MOUSE_BUTTON_DOWN, &event);
+    }
+    else if (action == GLFW_RELEASE) {
+        MouseButtonUpEvent event = {
+            .button = button
+        };
+        event_send(EVENT_TYPE_MOUSE_BUTTON_UP, &event);
     }
 }
 
@@ -97,11 +120,13 @@ Window* window_new() {
 
     if (window->window == NULL)
         PEAR_ERROR("failed to create window!");
-    glfwSetWindowCloseCallback(window->window, window_close_callback);
     glfwMakeContextCurrent(window->window);
 
+    glfwSetWindowCloseCallback(window->window, window_close_callback);
     glfwSetWindowSizeCallback(window->window, window_resize_callback);
     glfwSetKeyCallback(window->window, window_key_callback);
+    glfwSetCursorPosCallback(window->window, window_mouse_movement_callback);
+    glfwSetMouseButtonCallback(window->window, window_mouse_button_callback);
 
     return window;
 }

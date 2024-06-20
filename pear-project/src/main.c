@@ -28,6 +28,11 @@ void cam_on_event(EventType type, void* e, void* user_data) {
             camera3d_set_pos(cam, pos);
         }
     }
+
+    if (type == EVENT_TYPE_MOUSE_MOVED) {
+        MouseMovedEvent* event = (MouseMovedEvent*)e;
+        PEAR_INFO("mouse pos: %f, %f", event->x, event->y);
+    }
 }
 
 int main(int argc, char* argv[]) {

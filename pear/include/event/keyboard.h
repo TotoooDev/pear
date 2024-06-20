@@ -1,5 +1,5 @@
-#ifndef PEAR_LINUX_KEYBOARD_H
-#define PEAR_LINUX_KEYBOARD_H
+#ifndef PEAR_KEYBOARD_H
+#define PEAR_KEYBOARD_H
 
 #ifdef PEAR_PLATFORM_LINUX
     #include <event/platform/linux/keyboard.h>

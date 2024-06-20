@@ -1,4 +1,5 @@
-#ifdef PEAR_PLATFORM_LINUX
+#ifndef PEAR_LINUX_KEYBOARD_H
+#define PEAR_LINUX_KEYBOARD_H
 
 // from glfw source code
 
