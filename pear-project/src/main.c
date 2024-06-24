@@ -6,6 +6,7 @@
 #include <graphics/window.h>
 #include <graphics/image.h>
 #include <graphics/texture.h>
+#include <graphics/framebuffer.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <stdlib.h>
@@ -31,7 +32,7 @@ void cam_on_event(EventType type, void* e, void* user_data) {
 
     if (type == EVENT_TYPE_MOUSE_MOVED) {
         MouseMovedEvent* event = (MouseMovedEvent*)e;
-        PEAR_INFO("mouse pos: %f, %f", event->x, event->y);
+        // PEAR_INFO("mouse pos: %f, %f", event->x, event->y);
     }
 }
 
@@ -54,7 +55,7 @@ int main(int argc, char* argv[]) {
     };
 
     Image* image = image_new_from_file("wall.jpg");
-    Texture* texture = texture_new(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
+    Texture* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
     image_delete(image);
 
     Mesh* mesh = mesh_new(mesh_info, (Material){ texture },  vertices, indices, sizeof(vertices), sizeof(indices));

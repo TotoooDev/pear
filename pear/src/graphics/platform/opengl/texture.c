@@ -9,7 +9,7 @@ typedef struct Texture {
     u32 id;
 } Texture;
 
-Texture* texture_new(Image* image, TextureWrapping wrapping, TextureFiltering filtering) {
+Texture* texture_create(TextureWrapping wrapping, TextureFiltering filtering) {
     Texture* texture = (Texture*)malloc(sizeof(Texture));
 
     glGenTextures(1, &(texture->id));
@@ -50,6 +50,40 @@ Texture* texture_new(Image* image, TextureWrapping wrapping, TextureFiltering fi
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filtering);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filtering);
+
+    return texture;
+}
+
+Texture* texture_new(u32 width, u32 height, TextureWrapping wrapping, TextureFiltering filtering, TextureFormat format) {
+    Texture* texture = texture_create(wrapping, filtering);
+
+    GLenum gl_format;
+    switch (format) {
+    case TEXTURE_FORMAT_R:
+        gl_format = GL_RED;
+        break;
+
+    case TEXTURE_FORMAT_RG:
+        gl_format = GL_RG;
+        break;
+
+    case TEXTURE_FORMAT_RGB:
+        gl_format = GL_RGB;
+        break;
+
+    default:
+    case TEXTURE_FORMAT_RGBA:
+        gl_format = GL_RGBA;
+        break;
+    }
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, gl_format, width, height, 0, gl_format, GL_UNSIGNED_BYTE, NULL);
+
+    return texture;
+}
+
+Texture* texture_new_from_image(Image* image, TextureWrapping wrapping, TextureFiltering filtering) {
+    Texture* texture = texture_create(wrapping, filtering);
 
     GLenum gl_format;
     switch (image_get_num_channels(image)) {

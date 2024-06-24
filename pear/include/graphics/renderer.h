@@ -2,6 +2,7 @@
 #define PEAR_RENDERER_H
 
 #include <graphics/mesh.h>
+#include <graphics/framebuffer.h>
 #include <scene/node.h>
 #include <scene/types/mesh_3d.h>
 #include <core/types.h>
@@ -16,5 +17,7 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node);
 void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node);
 
 void renderer_set_fov(Renderer* renderer, f32 fov);
+void renderer_set_target(Renderer* renderer, Framebuffer* framebuffer);
+void renderer_set_target_window(Renderer* renderer);
 
 #endif

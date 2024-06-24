@@ -4,6 +4,7 @@
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/texture.h>
+#include <graphics/platform/opengl/framebuffer.h>
 #include <scene/types/camera_3d.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
@@ -19,9 +20,13 @@ typedef struct Renderer {
     f32 near;
     f32 far;
 
-    Shader* shader;
+    Shader* shader_mesh;
+    Shader* shader_screen;
     mat4 projection_matrix;
     mat4 view_matrix;
+
+    Framebuffer* screen_framebuffer;
+    Mesh* screen_mesh;
 } Renderer;
 
 static bool renderer_is_glew_init = false;
@@ -58,12 +63,12 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
 }
 
 void renderer_set_uniforms(Renderer* renderer, Material material) {
-    shader_set_u32(renderer->shader, 0, "u_platform");
-    shader_set_mat4(renderer->shader, renderer->projection_matrix, "u_projection");
-    shader_set_mat4(renderer->shader, renderer->view_matrix, "u_view");
+    shader_set_u32(renderer->shader_mesh, 0, "u_platform");
+    shader_set_mat4(renderer->shader_mesh, renderer->projection_matrix, "u_projection");
+    shader_set_mat4(renderer->shader_mesh, renderer->view_matrix, "u_view");
 
     if (material.albedo != NULL)
-        shader_set_i32(renderer->shader, 0, "u_albedo");
+        shader_set_i32(renderer->shader_mesh, 0, "u_albedo");
 }
 
 void renderer_init_debug_output() {
@@ -82,10 +87,10 @@ void renderer_init_debug_output() {
 #endif
 }
 
-void renderer_init_shaders(Renderer* renderer) {
-    FILE* vertex_file = fopen("default.vert", "r");
+void renderer_init_shader(Shader** shader, const char* vertex_path, const char* fragment_path) {
+    FILE* vertex_file = fopen(vertex_path, "r");
     if (vertex_file == NULL) {
-        PEAR_ERROR("failed to open file default.vert!");
+        PEAR_ERROR("failed to open file %s!", vertex_path);
         return;
     }
 
@@ -93,13 +98,13 @@ void renderer_init_shaders(Renderer* renderer) {
     size_t vertex_length;
     ssize_t vertex_bytes_read = getdelim(&vertex_buffer, &vertex_length, '\0', vertex_file);
     if (vertex_bytes_read == -1) {
-        PEAR_ERROR("failed to read file default.vert!");
+        PEAR_ERROR("failed to read file %s!", vertex_path);
         return;
     }
 
-    FILE* fragment_file = fopen("default.frag", "r");
+    FILE* fragment_file = fopen(fragment_path, "r");
     if (fragment_file == NULL) {
-        PEAR_ERROR("failed to open file default.frag!");
+        PEAR_ERROR("failed to open file %s!", fragment_path);
         return;
     }
 
@@ -107,14 +112,32 @@ void renderer_init_shaders(Renderer* renderer) {
     size_t fragment_length;
     ssize_t fragment_bytes_read = getdelim(&fragment_buffer, &fragment_length, '\0', fragment_file);
     if (fragment_bytes_read == -1) {
-        PEAR_ERROR("failed to read file default.frag!");
+        PEAR_ERROR("failed to read file %s!", fragment_path);
         return;
     }
 
-    renderer->shader = shader_new(vertex_buffer, fragment_buffer);
+    *shader = shader_new(vertex_buffer, fragment_buffer);
 
     fclose(vertex_file);
     fclose(fragment_file);
+}
+
+void renderer_init_shaders(Renderer* renderer) {
+    renderer_init_shader(&(renderer->shader_mesh), "default.vert", "default.frag");
+    renderer_init_shader(&(renderer->shader_screen), "framebuffer.vert", "framebuffer.frag");
+}
+
+void renderer_render_to_screen(Renderer* renderer) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    shader_use(renderer->shader_screen);
+    mesh_use(renderer->screen_mesh);
+    glDisable(GL_DEPTH_TEST);
+    texture_use(framebuffer_get_texture(renderer->screen_framebuffer, 0));
+    glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->screen_mesh), GL_UNSIGNED_INT, NULL);
+    glEnable(GL_DEPTH_TEST);
 }
 
 Renderer* renderer_new() {
@@ -136,6 +159,29 @@ Renderer* renderer_new() {
     renderer->near = 0.01f;
     renderer->far = 100.0f;
 
+    TextureFormat formats[] = { TEXTURE_FORMAT_RGBA };
+    renderer->screen_framebuffer = framebuffer_new_for_screen(formats, 1, true);
+
+    MeshInfo* mesh_info = meshinfo_new();
+    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT2, true);
+    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT2, true);
+
+    f32 vertices[] = {
+         1.0f,  1.0f,   1.0f, 1.0f,
+         1.0f, -1.0f,   1.0f, 0.0f,
+        -1.0f, -1.0f,   0.0f, 0.0f,
+        -1.0f,  1.0f,   0.0f, 1.0f
+    };
+    u32 indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
+    Material material = { .albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0) };
+    renderer->screen_mesh = mesh_new(mesh_info, material, vertices, indices, sizeof(vertices), sizeof(indices));
+
+    meshinfo_delete(mesh_info);
+
     renderer_calculate_projection(renderer);
     glm_mat4_identity(renderer->view_matrix);
 
@@ -145,16 +191,20 @@ Renderer* renderer_new() {
 }
 
 void renderer_delete(Renderer* renderer) {
-    shader_delete(renderer->shader);
+    framebuffer_delete(renderer->screen_framebuffer);
+    shader_delete(renderer->shader_mesh);
     free(renderer);
 }
 
 void renderer_clear(Renderer* renderer, f32 r, f32 g, f32 b, f32 a) {
+    renderer_set_target(renderer, renderer->screen_framebuffer);
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
+    renderer_set_target(renderer, renderer->screen_framebuffer);
+
     switch (node_get_type(node)) {
     case NODE_TYPE_MESH_3D:
         renderer_draw_mesh3d(renderer, node_get_data(node));
@@ -176,16 +226,31 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
             renderer_draw_node_hierarchy(renderer, sons[i]);
         }
     }
+
+    renderer_render_to_screen(renderer);
 }
 
 void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node) {
     Mesh* mesh = mesh3d_get_mesh(node);
 
-    shader_use(renderer->shader);
+    shader_use(renderer->shader_mesh);
     renderer_set_uniforms(renderer, mesh_get_material(mesh));
 
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
+}
+
+void renderer_set_fov(Renderer* renderer, f32 fov) {
+    renderer->fov = fov;
+    renderer_calculate_projection(renderer);
+}
+
+void renderer_set_target(Renderer* renderer, Framebuffer* framebuffer) {
+    framebuffer_use(framebuffer);
+}
+
+void renderer_set_target_window(Renderer* renderer) {
+    framebuffer_use(renderer->screen_framebuffer);
 }
 
 #endif
