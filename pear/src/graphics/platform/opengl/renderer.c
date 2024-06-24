@@ -20,6 +20,11 @@ typedef struct Renderer {
     f32 near;
     f32 far;
 
+    f32 viewport_width;
+    f32 viewport_height;
+    f32 viewport_width_scaled;
+    f32 viewport_height_scaled;
+
     Shader* shader_mesh;
     Shader* shader_screen;
     mat4 projection_matrix;
@@ -35,16 +40,30 @@ void renderer_calculate_projection(Renderer* renderer) {
     glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection_matrix);
 }
 
-void renderer_on_event(EventType type, void* event, void* user_data) {
-    if (type != EVENT_TYPE_WINDOW_RESIZED)
-        return;
+void renderer_set_viewport(Renderer* renderer) {
+    glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
+}
 
+void renderer_on_event(EventType type, void* e, void* user_data) {
     Renderer* renderer = (Renderer*)user_data;
-    WindowResizedEvent* resize_event = (WindowResizedEvent*)event;
 
-    renderer->aspect_ratio = resize_event->width / (f32)resize_event->height;
-    renderer_calculate_projection(renderer);
-    glViewport(0, 0, resize_event->width, resize_event->height);
+    if (type == EVENT_TYPE_WINDOW_RESIZED) {
+        WindowResizedEvent* event = (WindowResizedEvent*)e;
+        renderer->viewport_width = event->width;
+        renderer->viewport_height = event->height;
+        renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
+        
+        renderer_calculate_projection(renderer);
+        renderer_set_viewport(renderer);
+    }
+
+    if (type == EVENT_TYPE_WINDOW_SCALE_CHANGED) {
+        WindowScaleChanged* event = (WindowScaleChanged*)e;
+        renderer->viewport_width_scaled = renderer->viewport_width * event->scale_x;
+        renderer->viewport_height_scaled = renderer->viewport_height * event->scale_y;
+
+        renderer_set_viewport(renderer);
+    }
 }
 
 void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
@@ -158,9 +177,13 @@ Renderer* renderer_new() {
     renderer->fov = glm_rad(45.0f);
     renderer->near = 0.01f;
     renderer->far = 100.0f;
+    renderer->viewport_width = window_get_width(app_get_window());
+    renderer->viewport_height = window_get_height(app_get_window());
+    renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
+    renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
 
     TextureFormat formats[] = { TEXTURE_FORMAT_RGBA };
-    renderer->screen_framebuffer = framebuffer_new_for_screen(formats, 1, true);
+    renderer->screen_framebuffer = framebuffer_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, formats, 1, true);
 
     MeshInfo* mesh_info = meshinfo_new();
     meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT2, true);
@@ -182,6 +205,7 @@ Renderer* renderer_new() {
 
     meshinfo_delete(mesh_info);
 
+    renderer_set_viewport(renderer);
     renderer_calculate_projection(renderer);
     glm_mat4_identity(renderer->view_matrix);
 

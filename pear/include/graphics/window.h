@@ -13,5 +13,7 @@ bool window_should_close(Window* window);
 
 i32 window_get_width(Window* window);
 i32 window_get_height(Window* window);
+f32 window_get_scale_x(Window* window);
+f32 window_get_scale_y(Window* window);
 
 #endif

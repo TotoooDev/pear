@@ -68,22 +68,13 @@ void window_mouse_button_callback(GLFWwindow* window, i32 button, i32 action, i3
     }
 }
 
-void APIENTRY window_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
-    // ignore non-significant error/warning codes
-    if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-    
-    switch (severity) {
-        case GL_DEBUG_SEVERITY_HIGH:
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            PEAR_ERROR("opengl (%d): %s", id, message);
-            break;
-        case GL_DEBUG_SEVERITY_LOW:
-            PEAR_WARN("opengl (%d): %s", id, message);
-            break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            PEAR_INFO("opengl (%d): %s", id, message);
-            break;
-    }
+void window_scale_callback(GLFWwindow* window, f32 scale_x, f32 scale_y) {
+    WindowScaleChanged event = {
+        .scale_x = scale_x,
+        .scale_y = scale_y
+    };
+
+    event_send(EVENT_TYPE_WINDOW_SCALE_CHANGED, &event);
 }
 
 void window_init_opengl_debug_output() {
@@ -127,6 +118,7 @@ Window* window_new() {
     glfwSetKeyCallback(window->window, window_key_callback);
     glfwSetCursorPosCallback(window->window, window_mouse_movement_callback);
     glfwSetMouseButtonCallback(window->window, window_mouse_button_callback);
+    glfwSetWindowContentScaleCallback(window->window, window_scale_callback);
 
     return window;
 }
@@ -158,6 +150,18 @@ i32 window_get_height(Window* window) {
     i32 height;
     glfwGetWindowSize(window->window, NULL, &height);
     return height;
+}
+
+f32 window_get_scale_x(Window* window) {
+    f32 scale;
+    glfwGetWindowContentScale(window->window, &scale, NULL);
+    return scale;
+}
+
+f32 window_get_scale_y(Window* window) {
+    f32 scale;
+    glfwGetWindowContentScale(window->window, NULL, &scale);
+    return scale;
 }
 
 #endif

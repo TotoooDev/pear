@@ -56,10 +56,6 @@ Framebuffer* framebuffer_new(u32 width, u32 height, TextureFormat* formats, u32 
     return framebuffer;
 }
 
-Framebuffer* framebuffer_new_for_screen(TextureFormat* formats, u32 num_formats, bool has_depth) {
-    return framebuffer_new(window_get_width(app_get_window()), window_get_height(app_get_window()), formats, num_formats, has_depth);
-}
-
 void framebuffer_delete(Framebuffer* framebuffer) {
     for (u32 i = 0; i < framebuffer->num_textures; i++) {
         texture_delete(framebuffer->textures[i]);
