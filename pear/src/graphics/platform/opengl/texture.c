@@ -9,6 +9,44 @@ typedef struct Texture {
     u32 id;
 } Texture;
 
+TextureFormat texture_num_channels_to_format(u32 num_channels) {
+    switch (num_channels) {
+    case 1:
+        return TEXTURE_FORMAT_R;
+
+    case 2:
+        return TEXTURE_FORMAT_RG;
+
+    case 3:
+        return TEXTURE_FORMAT_RGB;
+
+    default:
+    case 4:
+        return TEXTURE_FORMAT_RGBA;
+    }
+}
+
+GLint texture_format_to_opengl(TextureFormat format) {
+    switch (format) {
+    case TEXTURE_FORMAT_R:
+        return GL_RED;
+
+    case TEXTURE_FORMAT_RG:
+        return GL_RG;
+
+    case TEXTURE_FORMAT_RGB:
+        return GL_RGB;
+
+    default:
+    case TEXTURE_FORMAT_RGBA:
+        return GL_RGBA;
+    }
+}
+
+GLint texture_num_channels_to_opengl(u32 num_channels) {
+    return texture_format_to_opengl(texture_num_channels_to_format(num_channels));
+}
+
 Texture* texture_create(TextureWrapping wrapping, TextureFiltering filtering) {
     Texture* texture = (Texture*)malloc(sizeof(Texture));
 
@@ -56,58 +94,22 @@ Texture* texture_create(TextureWrapping wrapping, TextureFiltering filtering) {
 
 Texture* texture_new(u32 width, u32 height, TextureWrapping wrapping, TextureFiltering filtering, TextureFormat format) {
     Texture* texture = texture_create(wrapping, filtering);
-
-    GLenum gl_format;
-    switch (format) {
-    case TEXTURE_FORMAT_R:
-        gl_format = GL_RED;
-        break;
-
-    case TEXTURE_FORMAT_RG:
-        gl_format = GL_RG;
-        break;
-
-    case TEXTURE_FORMAT_RGB:
-        gl_format = GL_RGB;
-        break;
-
-    default:
-    case TEXTURE_FORMAT_RGBA:
-        gl_format = GL_RGBA;
-        break;
-    }
-    
+    GLint gl_format = texture_format_to_opengl(format);
     glTexImage2D(GL_TEXTURE_2D, 0, gl_format, width, height, 0, gl_format, GL_UNSIGNED_BYTE, NULL);
+    return texture;
+}
 
+Texture* texture_new_depth(u32 width, u32 height, TextureWrapping wrapping, TextureFiltering filtering) {
+    Texture* texture = texture_create(wrapping, filtering);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     return texture;
 }
 
 Texture* texture_new_from_image(Image* image, TextureWrapping wrapping, TextureFiltering filtering) {
     Texture* texture = texture_create(wrapping, filtering);
-
-    GLenum gl_format;
-    switch (image_get_num_channels(image)) {
-    case 1:
-        gl_format = GL_RED;
-        break;
-
-    case 2:
-        gl_format = GL_RG;
-        break;
-
-    case 3:
-        gl_format = GL_RGB;
-        break;
-
-    default:
-    case 4:
-        gl_format = GL_RGBA;
-        break;
-    }
-
+    GLint gl_format = texture_num_channels_to_opengl(image_get_num_channels(image));
     glTexImage2D(GL_TEXTURE_2D, 0, gl_format, image_get_width(image), image_get_height(image), 0, gl_format, GL_UNSIGNED_BYTE, image_get_data(image));
     glGenerateMipmap(GL_TEXTURE_2D);
-
     return texture;
 }
 

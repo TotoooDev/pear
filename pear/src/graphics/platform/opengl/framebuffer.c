@@ -10,9 +10,9 @@
 
 typedef struct Framebuffer {
     u32 id;
-    i32 render_buffer;
 
     bool has_depth;
+    Texture* depth_texture;
     Texture** textures;
     u32 num_textures;
 } Framebuffer;
@@ -23,13 +23,10 @@ Framebuffer* framebuffer_new(u32 width, u32 height, TextureFormat* formats, u32 
         return NULL;
     }
 
-    if (num_formats >= GL_MAX_COLOR_ATTACHMENTS)
-        PEAR_WARN("to many framebuffer formats! %d formats, maximum is %d. disregarding the additionnal formats.", num_formats, GL_MAX_COLOR_ATTACHMENTS);
-
     Framebuffer* framebuffer = (Framebuffer*)malloc(sizeof(Framebuffer));
 
-    framebuffer->render_buffer = -1;
     framebuffer->has_depth = has_depth;
+    framebuffer->depth_texture = NULL;
     framebuffer->num_textures = num_formats;
     framebuffer->textures = (Texture**)malloc(sizeof(Texture*) * framebuffer->num_textures);
 
@@ -42,10 +39,8 @@ Framebuffer* framebuffer_new(u32 width, u32 height, TextureFormat* formats, u32 
     }
 
     if (framebuffer->has_depth) {
-        glGenRenderbuffers(1, &(framebuffer->render_buffer));
-        glBindRenderbuffer(GL_RENDERBUFFER, framebuffer->render_buffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, framebuffer->render_buffer);
+        framebuffer->depth_texture = texture_new_depth(width, height, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture_get_id(framebuffer->depth_texture), 0);
     }
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -61,6 +56,7 @@ void framebuffer_delete(Framebuffer* framebuffer) {
         texture_delete(framebuffer->textures[i]);
     }
     free(framebuffer->textures);
+    texture_delete(framebuffer->depth_texture);
 
     glDeleteFramebuffers(1, &(framebuffer->id));
     free(framebuffer);
@@ -81,7 +77,7 @@ Texture* framebuffer_get_depth_texture(Framebuffer* framebuffer) {
         return NULL;
     }
     
-    return NULL;
+    return framebuffer->depth_texture;
 }
 
 u32 framebuffer_get_id(Framebuffer* framebuffer) {

@@ -90,8 +90,8 @@ void mesh_delete(Mesh* mesh) {
     free(mesh);
 }
 
-Material mesh_get_material(Mesh* mesh) {
-    return mesh->material;
+Material* mesh_get_material(Mesh* mesh) {
+    return &(mesh->material);
 }
 
 u32 mesh_get_num_vertices(Mesh* mesh) {

@@ -22,6 +22,8 @@ typedef struct Renderer {
 
     f32 viewport_width;
     f32 viewport_height;
+    f32 viewport_scale_x;
+    f32 viewport_scale_y;
     f32 viewport_width_scaled;
     f32 viewport_height_scaled;
 
@@ -51,14 +53,23 @@ void renderer_on_event(EventType type, void* e, void* user_data) {
         WindowResizedEvent* event = (WindowResizedEvent*)e;
         renderer->viewport_width = event->width;
         renderer->viewport_height = event->height;
+        renderer->viewport_width_scaled = renderer->viewport_width * renderer->viewport_scale_x;
+        renderer->viewport_height_scaled = renderer->viewport_height * renderer->viewport_scale_y;
         renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
         
         renderer_calculate_projection(renderer);
         renderer_set_viewport(renderer);
+
+        framebuffer_delete(renderer->screen_framebuffer);
+        TextureFormat formats[] = { TEXTURE_FORMAT_RGBA };
+        renderer->screen_framebuffer = framebuffer_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, formats, 1, true);
+        mesh_get_material(renderer->screen_mesh)->albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0);
     }
 
     if (type == EVENT_TYPE_WINDOW_SCALE_CHANGED) {
         WindowScaleChanged* event = (WindowScaleChanged*)e;
+        renderer->viewport_scale_x = event->scale_x;
+        renderer->viewport_scale_y = event->scale_y;
         renderer->viewport_width_scaled = renderer->viewport_width * event->scale_x;
         renderer->viewport_height_scaled = renderer->viewport_height * event->scale_y;
 
@@ -81,12 +92,12 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
     }
 }
 
-void renderer_set_uniforms(Renderer* renderer, Material material) {
+void renderer_set_uniforms(Renderer* renderer, Material* material) {
     shader_set_u32(renderer->shader_mesh, 0, "u_platform");
     shader_set_mat4(renderer->shader_mesh, renderer->projection_matrix, "u_projection");
     shader_set_mat4(renderer->shader_mesh, renderer->view_matrix, "u_view");
 
-    if (material.albedo != NULL)
+    if (material->albedo != NULL)
         shader_set_i32(renderer->shader_mesh, 0, "u_albedo");
 }
 
@@ -179,6 +190,8 @@ Renderer* renderer_new() {
     renderer->far = 100.0f;
     renderer->viewport_width = window_get_width(app_get_window());
     renderer->viewport_height = window_get_height(app_get_window());
+    renderer->viewport_scale_x = window_get_scale_x(app_get_window());
+    renderer->viewport_scale_y = window_get_scale_y(app_get_window());
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
 
