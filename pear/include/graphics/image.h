@@ -5,7 +5,7 @@
 
 typedef struct Image Image;
 
-Image* image_new_from_file(const char* path);
+Image* image_new(u32 width, u32 height, u32 num_channels, void* data);
 void image_delete(Image* image);
 
 u32 image_get_width(Image* image);

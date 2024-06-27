@@ -2,9 +2,6 @@
 #include <core/log.h>
 #include <stdlib.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <graphics/vendor/stb_image.h>
-
 typedef struct Image {
     u32 width;
     u32 height;
@@ -12,12 +9,13 @@ typedef struct Image {
     void* data;
 } Image;
 
-Image* image_new_from_file(const char* path) {
+Image* image_new(u32 width, u32 height, u32 num_channels, void* data) {
     Image* image = (Image*)malloc(sizeof(Image));
 
-    image->data = stbi_load(path, &(image->width), &(image->height), &(image->num_channels), 0);
-    if (image->data == NULL)
-        PEAR_ERROR("failed to load image %s!", path);
+    image->width = width;
+    image->height = height;
+    image->num_channels = num_channels;
+    image->data = data;
 
     return image;
 }
@@ -43,4 +41,9 @@ u32 image_get_num_channels(Image* image) {
 
 void* image_get_data(Image* image) {
     return image->data;
+}
+
+void image_set_data(Image* image, void* data) {
+    free(image->data);
+    image->data = data;
 }

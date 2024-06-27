@@ -9,6 +9,7 @@
 #include <graphics/framebuffer.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
+#include <fs/loaders/image_loader.h>
 #include <stdlib.h>
 
 void cam_on_event(EventType type, void* e, void* user_data) {
@@ -54,7 +55,7 @@ int main(int argc, char* argv[]) {
         1, 2, 3
     };
 
-    Image* image = image_new_from_file("wall.jpg");
+    Image* image = imageloader_from_file("wall.jpg");
     Texture* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
     image_delete(image);
 
