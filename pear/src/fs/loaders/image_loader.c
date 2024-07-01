@@ -3,7 +3,7 @@
 #include <core/log.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <graphics/vendor/stb_image.h>
+#include <fs/loaders/vendor/stb_image.h>
 
 Image* imageloader_from_file(const char* filename) {
     char path[1024];
