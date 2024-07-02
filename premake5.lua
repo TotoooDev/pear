@@ -8,6 +8,43 @@ workspace "pear"
 
 outputDir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+project "pear-3d"
+    location "pear-3d"
+    kind "StaticLib"
+    language "C"
+
+    targetdir ("bin/" .. outputDir .. "/%{prj.name}")
+    objdir ("bin-intermediate/" .. outputDir .. "/%{prj.name}")
+
+    debugdir ("bin/" .. outputDir .. "/%{prj.name}")
+
+    files
+    {
+        "%{prj.name}/src/**.h",
+        "%{prj.name}/src/**.c",
+    }
+
+    includedirs
+    {
+        "pear-3d/include",
+        "pear-3d/include/vendor"
+    }
+    
+    filter "system:linux"
+        defines {
+            "PEAR_PLATFORM_LINUX"
+        }
+
+    filter "configurations:Debug"
+        defines
+        {
+            "PEAR_DEBUG",
+        }
+        symbols "On"
+
+    filter "configurations:Release"
+        optimize "On"
+
 project "pear"
     location "pear"
     kind "StaticLib"
@@ -28,7 +65,8 @@ project "pear"
     includedirs
 	{
 		"pear/include",
-		"pear/include/vendor"
+		"pear/include/vendor",
+		"pear-3d/include"
 	}
 
     filter "system:linux"
@@ -68,10 +106,14 @@ project "pear-project"
         "pear-project/include",
         "pear-project/include/vendor",
         "pear/include/vendor",
-        "pear/include"
+        "pear/include",
+        "pear-3d/include"
     }
     
-    links ("pear")
+    links {
+        "pear",
+        "pear-3d"
+    }
 
     filter "system:linux"
         defines {

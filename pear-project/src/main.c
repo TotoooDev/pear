@@ -10,6 +10,7 @@
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <fs/loaders/image_loader.h>
+#include <pear-3d.h>
 #include <stdlib.h>
 
 void cam_on_event(EventType type, void* e, void* user_data) {
@@ -39,6 +40,30 @@ void cam_on_event(EventType type, void* e, void* user_data) {
 
 int main(int argc, char* argv[]) {
     app_init();
+
+    vec3 a[] = {
+        {0.0f, 0.0f, 0.0f},
+        {1.0f, 1.0f, 1.0f}
+    };
+    u32 b[] = { 0, 1, 2 };
+    vec2 c[] = {
+        {1.0f, 2.0f},
+        {3.0f, 4.0f}
+    };
+    pear3d_save_model("model.pear3d", pear3d_new((f32**)a, b, (f32**)c, 2, 3, 2));
+
+    ModelData* data = pear3d_load_model("model.pear3d");
+    for (u32 i = 0; i < pear3d_get_num_vertices(data); i++) {
+        f32** vertices = pear3d_get_vertices(data);
+        PEAR_INFO("%f, %f, %f", vertices[i][0], vertices[i][1], vertices[i][2]);
+    }
+    for (u32 i = 0; i < pear3d_get_num_indices(data); i++) {
+        PEAR_INFO("%d", pear3d_get_indices(data)[i]);
+    }
+    for (u32 i = 0; i < pear3d_get_num_texture_coords(data); i++) {
+        f32** texture_coords = pear3d_get_texture_coords(data);
+        PEAR_INFO("%f, %f", texture_coords[i][0], texture_coords[i][1]);
+    }
 
     MeshInfo* mesh_info = meshinfo_new();
     meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT3, false);
