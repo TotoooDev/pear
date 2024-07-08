@@ -14,9 +14,9 @@ static const char pear3d_indices = PEAR3D_INDICES;
 static const char pear3d_texture_coords = PEAR3D_TEXTURE_COORDS;
 
 typedef struct ModelData {
-    float** vertices;
+    vec3* vertices;
     unsigned int* indices;
-    float** texture_coords;
+    vec2* texture_coords;
 
     unsigned int num_vertices;
     unsigned int num_indices;
@@ -51,9 +51,8 @@ ModelData* pear3d_load_model(const char* filename) {
     float* vertices = (float*)malloc(sizeof(float) * model_data->num_vertices * 3);
 
     fread(vertices, sizeof(float) * model_data->num_vertices * 3, 1, file);
-    model_data->vertices = (float**)malloc(sizeof(float*) * model_data->num_vertices);
+    model_data->vertices = (vec3*)malloc(sizeof(vec3) * model_data->num_vertices);
     for (unsigned int i = 0; i < model_data->num_vertices; i++) {
-        model_data->vertices[i] = (float*)malloc(sizeof(float) * 3);
         model_data->vertices[i][0] = vertices[3 * i];
         model_data->vertices[i][1] = vertices[3 * i + 1];
         model_data->vertices[i][2] = vertices[3 * i + 2];
@@ -83,9 +82,8 @@ ModelData* pear3d_load_model(const char* filename) {
     float* texture_coords = (float*)malloc(sizeof(float) * model_data->num_texture_coords * 2);
 
     fread(texture_coords, sizeof(float) * model_data->num_texture_coords * 2, 1, file);
-    model_data->texture_coords = (float**)malloc(sizeof(float*) * model_data->num_texture_coords);
+    model_data->texture_coords = (vec2*)malloc(sizeof(vec2) * model_data->num_texture_coords);
     for (unsigned int i = 0; i < model_data->num_texture_coords; i++) {
-        model_data->texture_coords[i] = (float*)malloc(sizeof(float) * 2);
         model_data->texture_coords[i][0] = texture_coords[2 * i];
         model_data->texture_coords[i][1] = texture_coords[2 * i + 1];
     }
@@ -119,7 +117,7 @@ void pear3d_save_model(const char* filename, ModelData* model_data) {
     fclose(file);
 }
 
-ModelData* pear3d_new(float** vertices, unsigned int* indices, float** texture_coords, unsigned int num_vertices, unsigned int num_indices, unsigned int num_texture_coords) {
+ModelData* pear3d_new(vec3* vertices, unsigned int* indices, vec2* texture_coords, unsigned int num_vertices, unsigned int num_indices, unsigned int num_texture_coords) {
     ModelData* model_data = (ModelData*)malloc(sizeof(ModelData));
     
     model_data->num_vertices = num_vertices;
@@ -133,22 +131,13 @@ ModelData* pear3d_new(float** vertices, unsigned int* indices, float** texture_c
 }
 
 void pear3d_delete(ModelData* model_data) {
-    for (unsigned int i = 0; i < model_data->num_vertices; i++) {
-        free(model_data->vertices[i]);
-    }
     free(model_data->vertices);
-
-
-    for (unsigned int i = 0; i < model_data->num_texture_coords; i++) {
-        free(model_data->texture_coords[i]);
-    }
     free(model_data->texture_coords);
-
     free(model_data->indices);
     free(model_data);
 }
 
-float** pear3d_get_vertices(ModelData* model_data) {
+vec3* pear3d_get_vertices(ModelData* model_data) {
     return model_data->vertices;
 }
 
@@ -156,7 +145,7 @@ unsigned int* pear3d_get_indices(ModelData* model_data) {
     return model_data->indices;
 }
 
-float** pear3d_get_texture_coords(ModelData* model_data) {
+vec2* pear3d_get_texture_coords(ModelData* model_data) {
     return model_data->texture_coords;
 }
 

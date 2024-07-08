@@ -40,60 +40,21 @@ void cam_on_event(EventType type, void* e, void* user_data) {
 
 int main(int argc, char* argv[]) {
     app_init();
-
-    // vec3 a[] = {
-    //     {0.0f, 0.0f, 0.0f},
-    //     {1.0f, 1.0f, 1.0f}
-    // };
-    // u32 b[] = { 0, 1, 2 };
-    // vec2 c[] = {
-    //     {1.0f, 2.0f},
-    //     {3.0f, 4.0f}
-    // };
-    // pear3d_save_model("model.pear3d", pear3d_new((f32**)a, b, (f32**)c, 2, 3, 2));
-// 
-    // ModelData* data = pear3d_load_model("model.pear3d");
-    // for (u32 i = 0; i < pear3d_get_num_vertices(data); i++) {
-    //     f32** vertices = pear3d_get_vertices(data);
-    //     PEAR_INFO("%f, %f, %f", vertices[i][0], vertices[i][1], vertices[i][2]);
-    // }
-    // for (u32 i = 0; i < pear3d_get_num_indices(data); i++) {
-    //     PEAR_INFO("%d", pear3d_get_indices(data)[i]);
-    // }
-    // for (u32 i = 0; i < pear3d_get_num_texture_coords(data); i++) {
-    //     f32** texture_coords = pear3d_get_texture_coords(data);
-    //     PEAR_INFO("%f, %f", texture_coords[i][0], texture_coords[i][1]);
-    // }
-
-    vec3 positions[] = {
-        {  0.5f,  0.5f, -2.0f },
-        {  0.5f, -0.5f, -2.0f },
-        { -0.5f, -0.5f, -2.0f },
-        { -0.5f,  0.5f, -2.0f }
-    };
-    vec2 texture_coords[] = {
-        { 1.0f, 1.0f },
-        { 1.0f, 0.0f },
-        { 0.0f, 0.0f },
-        { 0.0f, 1.0f }
-    };
+    
+    ModelData* model_data = pear3d_load_model("model.pear3d");
 
     MeshInfo* mesh_info = meshinfo_new();
-    meshinfo_add_attribute_vec3(mesh_info, false, positions, 4);
-    meshinfo_add_attribute_vec2(mesh_info, false, texture_coords, 4);
-
-    u32 indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
+    meshinfo_add_attribute_vec3(mesh_info, false, pear3d_get_vertices(model_data), pear3d_get_num_vertices(model_data));
+    meshinfo_add_attribute_vec2(mesh_info, false, pear3d_get_texture_coords(model_data), pear3d_get_num_texture_coords(model_data));
 
     Image* image = imageloader_from_file("wall.jpg");
     Texture* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
     image_delete(image);
 
-    Mesh* mesh = mesh_new(mesh_info, (Material){ texture }, indices, sizeof(indices));
+    Mesh* mesh = mesh_new(mesh_info, (Material){ texture }, pear3d_get_indices(model_data), pear3d_get_num_indices(model_data));
 
     meshinfo_delete(mesh_info);
+    pear3d_delete(model_data);
 
     Mesh3DCreationInfo mesh3d_info;
     mesh3d_info.mesh = mesh;
