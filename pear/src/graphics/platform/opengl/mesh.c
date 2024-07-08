@@ -18,11 +18,10 @@ typedef struct Mesh {
     u32 num_indices;
 } Mesh;
 
-Mesh* mesh_new(MeshInfo* mesh_info, Material material, f32* vertices, u32* indices, u32 num_vertices, u32 num_indices) {
+Mesh* mesh_new(MeshInfo* mesh_info, Material material, u32* indices, u32 num_indices) {
     Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
 
     mesh->material = material;
-    mesh->num_vertices = num_vertices;
     mesh->num_indices = num_indices;
 
     glGenVertexArrays(1, &(mesh->vao));
@@ -31,52 +30,24 @@ Mesh* mesh_new(MeshInfo* mesh_info, Material material, f32* vertices, u32* indic
 
     glBindVertexArray(mesh->vao);
 
+    f32* vertices = (f32*)malloc(sizeof(f32) * meshinfo_get_num_vertices(mesh_info));
+    meshinfo_get_vertices(mesh_info, vertices);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBufferData(GL_ARRAY_BUFFER, num_vertices, vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, meshinfo_get_num_vertices(mesh_info) * sizeof(f32), vertices, GL_STATIC_DRAW);
+    free(vertices);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices, indices, GL_STATIC_DRAW);
 
+    u32 total_offset = 0;
     MeshAttribute* attributes = meshinfo_get_attributes(mesh_info);
     for (u32 i = 0; i < meshinfo_get_num_attributes(mesh_info); i++) {
         MeshAttribute attribute = attributes[i];
-        u32 gl_type;
-        u32 num_components;
 
-        switch (attribute.type) {
-        case MESH_DATA_TYPE_INT:
-            gl_type = GL_INT;
-            num_components = 1;
-            break;
-
-        case MESH_DATA_TYPE_UINT:
-            gl_type = GL_UNSIGNED_INT;
-            num_components = 1;
-            break;
-
-        case MESH_DATA_TYPE_FLOAT:
-            gl_type = GL_FLOAT;
-            num_components = 1;
-            break;
-
-        case MESH_DATA_TYPE_FLOAT2:
-            gl_type = GL_FLOAT;
-            num_components = 2;
-            break;
-
-        case MESH_DATA_TYPE_FLOAT3:
-            gl_type = GL_FLOAT;
-            num_components = 3;
-            break;
-
-        case MESH_DATA_TYPE_FLOAT4:
-            gl_type = GL_FLOAT;
-            num_components = 4;
-            break;
-        }
-
-        glVertexAttribPointer(i, num_components, gl_type, attribute.is_normalized, meshinfo_get_stride(mesh_info), (void*)attribute.offset);
+        glVertexAttribPointer(i, attribute.num_components, GL_FLOAT, attribute.is_normalized, 0, (void*)(sizeof(f32) * total_offset));
         glEnableVertexAttribArray(i);
+
+        total_offset += attribute.num_data;
     }
 
     return mesh;

@@ -198,23 +198,30 @@ Renderer* renderer_new() {
     TextureFormat formats[] = { TEXTURE_FORMAT_RGBA };
     renderer->screen_framebuffer = framebuffer_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, formats, 1, true);
 
-    MeshInfo* mesh_info = meshinfo_new();
-    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT2, true);
-    meshinfo_add_attribute(mesh_info, MESH_DATA_TYPE_FLOAT2, true);
-
-    f32 vertices[] = {
-         1.0f,  1.0f,   1.0f, 1.0f,
-         1.0f, -1.0f,   1.0f, 0.0f,
-        -1.0f, -1.0f,   0.0f, 0.0f,
-        -1.0f,  1.0f,   0.0f, 1.0f
+    vec2 positions[] = {
+        {  1.0f,  1.0f },
+        {  1.0f, -1.0f }, 
+        { -1.0f, -1.0f }, 
+        { -1.0f,  1.0f }
     };
+    vec2 texture_coords[] = {
+        { 1.0f, 1.0f },
+        { 1.0f, 0.0f },
+        { 0.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    
+    MeshInfo* mesh_info = meshinfo_new();
+    meshinfo_add_attribute_vec2(mesh_info, true, positions, 4);
+    meshinfo_add_attribute_vec2(mesh_info, true, texture_coords, 4);
+
     u32 indices[] = {
         0, 1, 3,
         1, 2, 3
     };
 
     Material material = { .albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0) };
-    renderer->screen_mesh = mesh_new(mesh_info, material, vertices, indices, sizeof(vertices), sizeof(indices));
+    renderer->screen_mesh = mesh_new(mesh_info, material, indices, sizeof(indices));
 
     meshinfo_delete(mesh_info);
 
