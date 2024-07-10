@@ -137,3 +137,50 @@ project "pear-project"
 
     filter "configurations:Release"
         optimize "On"
+
+project "pear-3d-converter"
+    location "pear-3d-converter"
+    kind "ConsoleApp"
+    language "C++"
+
+    targetdir ("bin/" .. outputDir .. "/%{prj.name}")
+    objdir ("bin-intermediate/" .. outputDir .. "/%{prj.name}")
+
+    debugdir ("bin/" .. outputDir .. "/%{prj.name}")
+
+    files
+    {
+        "%{prj.name}/src/**.h",
+        "%{prj.name}/src/**.cpp",
+    }
+
+    includedirs
+    {
+        "pear-3d-converter/include",
+        "pear-3d-converter/include/vendor",
+        "pear-3d/include"
+    }
+    
+    links {
+        "pear-3d"
+    }
+
+    filter "system:linux"
+        defines {
+            "PEAR_PLATFORM_LINUX",
+            "PEAR_PLATFORM_OPENGL"
+        }
+        links {
+            "assimp"
+        }
+        postbuildcommands ("cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/")
+
+    filter "configurations:Debug"
+        defines
+        {
+            "PEAR_DEBUG",
+        }
+        symbols "On"
+
+    filter "configurations:Release"
+        optimize "On"
