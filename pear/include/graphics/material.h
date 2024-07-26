@@ -5,6 +5,7 @@
 
 typedef struct Material {
     Texture* albedo;
+    vec4 color;
 } Material;
 
 #endif

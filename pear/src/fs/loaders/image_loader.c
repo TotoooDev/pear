@@ -6,6 +6,8 @@
 #include <fs/loaders/vendor/stb_image.h>
 
 Image* imageloader_from_file(const char* filename) {
+    stbi_set_flip_vertically_on_load(true);
+
     char path[1024];
     fs_get_path(filename, path);
 

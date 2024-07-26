@@ -14,7 +14,6 @@ typedef struct Mesh {
     u32 vbo;
     u32 ebo;
 
-    u32 num_vertices;
     u32 num_indices;
 } Mesh;
 
@@ -37,7 +36,7 @@ Mesh* mesh_new(MeshInfo* mesh_info, Material material, u32* indices, u32 num_ind
     free(vertices);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices * sizeof(u32), indices, GL_STATIC_DRAW);
 
     u32 total_offset = 0;
     MeshAttribute* attributes = meshinfo_get_attributes(mesh_info);
@@ -65,17 +64,13 @@ Material* mesh_get_material(Mesh* mesh) {
     return &(mesh->material);
 }
 
-u32 mesh_get_num_vertices(Mesh* mesh) {
-    return mesh->num_vertices;
-}
-
 u32 mesh_get_num_indices(Mesh* mesh) {
     return mesh->num_indices;
 }
 
 void mesh_use(Mesh* mesh) {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
     glBindVertexArray(mesh->vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
     if (mesh->material.albedo != NULL) {
         glActiveTexture(GL_TEXTURE0);

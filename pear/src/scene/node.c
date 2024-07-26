@@ -23,8 +23,8 @@ void* node_get_data_from_type(NodeType type, void* creation_info) {
     switch (type) {
     case NODE_TYPE_CONTAINER:
         return NULL;
-    case NODE_TYPE_MESH_3D:
-        return (void*)mesh3d_new((Mesh3DCreationInfo*)creation_info);
+    case NODE_TYPE_MODEL_3D:
+        return (void*)model3d_new((Model3DCreationInfo*)creation_info);
     case NODE_TYPE_CAMERA_3D:
         return (void*)camera3d_new((Camera3DCreationInfo*)creation_info);
     default:

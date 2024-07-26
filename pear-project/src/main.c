@@ -10,7 +10,7 @@
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <fs/loaders/image_loader.h>
-// #include <pear-3d.h>
+#include <pear-3d.h>
 #include <stdlib.h>
 
 void cam_on_event(EventType type, void* e, void* user_data) {
@@ -40,29 +40,23 @@ void cam_on_event(EventType type, void* e, void* user_data) {
 
 int main(int argc, char* argv[]) {
     app_init();
-    
-    // ModelData* model_data = pear3d_load_model("model.pear3d");
- 
-    // MeshInfo* mesh_info = meshinfo_new();
-    // meshinfo_add_attribute_vec3(mesh_info, false, pear3d_get_vertices(model_data), pear3d_get_num_vertices(model_data));
-    // meshinfo_add_attribute_vec2(mesh_info, false, pear3d_get_texture_coords(model_data), pear3d_get_num_texture_coords(model_data));
- 
-    // Image* image = imageloader_from_file("wall.jpg");
-    // Texture* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
-    // image_delete(image);
- 
-    // Mesh* mesh = mesh_new(mesh_info, (Material){ texture }, pear3d_get_indices(model_data), pear3d_get_num_indices(model_data));
 
-    // meshinfo_delete(mesh_info);
-    // pear3d_delete(model_data);
+    bool success;
+    Pear3D pear3d = pear3d_load("backpack.pear3d", &success);
+    if (!success) {
+        PEAR_ERROR("failed to load model!");
+        return 1;
+    }
 
-    // Mesh3DCreationInfo mesh3d_info;
-    // mesh3d_info.mesh = mesh;
+    Model* model = model_new_from_pear3d(pear3d);
+
+    Model3DCreationInfo model3d_info;
+    model3d_info.model = model;
 
     Camera3DCreationInfo cam3d_info;
     cam3d_info.pos[0] = 0.0f;
     cam3d_info.pos[1] = 0.0f;
-    cam3d_info.pos[2] = 0.0f;
+    cam3d_info.pos[2] = 4.0f;
     cam3d_info.yaw = -90.0f;
     cam3d_info.pitch = 0.0f;
     cam3d_info.roll = 0.0f;
@@ -70,16 +64,15 @@ int main(int argc, char* argv[]) {
     Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL, NULL);
     Node* cam = node_new(NODE_TYPE_CAMERA_3D, parent, "cam", &cam3d_info, NULL);
     event_subscribe(cam_on_event, cam);
-    // Node* mesh_node = node_new(NODE_TYPE_MESH_3D, parent, "mesh", &mesh3d_info, NULL);
+    Node* model_node = node_new(NODE_TYPE_MODEL_3D, parent, "model", &model3d_info, NULL);
 
     node_add_son(parent, cam);
-    // node_add_son(parent, mesh_node);
+    node_add_son(parent, model_node);
 
     app_set_root_node(parent);
     app_run();
 
     node_recursive_delete(parent);
-    // texture_delete(texture);
 
     PEAR_INFO("goodbye!");
 

@@ -27,7 +27,8 @@ typedef struct Renderer {
     f32 viewport_width_scaled;
     f32 viewport_height_scaled;
 
-    Shader* shader_mesh;
+    Shader* shader_texture;
+    Shader* shader_color;
     Shader* shader_screen;
     mat4 projection_matrix;
     mat4 view_matrix;
@@ -92,13 +93,16 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
     }
 }
 
-void renderer_set_uniforms(Renderer* renderer, Material* material) {
-    shader_set_u32(renderer->shader_mesh, 0, "u_platform");
-    shader_set_mat4(renderer->shader_mesh, renderer->projection_matrix, "u_projection");
-    shader_set_mat4(renderer->shader_mesh, renderer->view_matrix, "u_view");
+void renderer_set_uniforms(Renderer* renderer, Shader* shader, Material* material) {
+    shader_use(shader);
+    shader_set_u32(shader, 0, "u_platform");
+    shader_set_mat4(shader, renderer->projection_matrix, "u_projection");
+    shader_set_mat4(shader, renderer->view_matrix, "u_view");
+
+    shader_set_vec4(shader, material->color, "u_color");
 
     if (material->albedo != NULL)
-        shader_set_i32(renderer->shader_mesh, 0, "u_albedo");
+        shader_set_i32(renderer->shader_texture, 0, "u_albedo");
 }
 
 void renderer_init_debug_output() {
@@ -153,8 +157,9 @@ void renderer_init_shader(Shader** shader, const char* vertex_path, const char* 
 }
 
 void renderer_init_shaders(Renderer* renderer) {
-    renderer_init_shader(&(renderer->shader_mesh), "default.vert", "default.frag");
-    renderer_init_shader(&(renderer->shader_screen), "framebuffer.vert", "framebuffer.frag");
+    renderer_init_shader(&(renderer->shader_texture), "shaders/texture.vert", "shaders/texture.frag");
+    renderer_init_shader(&(renderer->shader_color), "shaders/color.vert", "shaders/color.frag");
+    renderer_init_shader(&(renderer->shader_screen), "shaders/framebuffer.vert", "shaders/framebuffer.frag");
 }
 
 void renderer_render_to_screen(Renderer* renderer) {
@@ -168,6 +173,19 @@ void renderer_render_to_screen(Renderer* renderer) {
     texture_use(framebuffer_get_texture(renderer->screen_framebuffer, 0));
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->screen_mesh), GL_UNSIGNED_INT, NULL);
     glEnable(GL_DEPTH_TEST);
+}
+
+void renderer_draw_mesh(Renderer* renderer, Mesh* mesh) {
+    Shader* shader_used;
+    if (mesh_get_material(mesh)->albedo == NULL)
+        shader_used = renderer->shader_color;
+    else
+        shader_used = renderer->shader_texture;
+
+    renderer_set_uniforms(renderer, shader_used, mesh_get_material(mesh));
+
+    mesh_use(mesh);
+    glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
 }
 
 Renderer* renderer_new() {
@@ -212,8 +230,8 @@ Renderer* renderer_new() {
     };
     
     MeshInfo* mesh_info = meshinfo_new();
-    meshinfo_add_attribute_vec2(mesh_info, true, positions, 4);
-    meshinfo_add_attribute_vec2(mesh_info, true, texture_coords, 4);
+    meshinfo_add_attribute_vec2(mesh_info, false, positions, 4);
+    meshinfo_add_attribute_vec2(mesh_info, false, texture_coords, 4);
 
     u32 indices[] = {
         0, 1, 3,
@@ -221,7 +239,7 @@ Renderer* renderer_new() {
     };
 
     Material material = { .albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0) };
-    renderer->screen_mesh = mesh_new(mesh_info, material, indices, sizeof(indices));
+    renderer->screen_mesh = mesh_new(mesh_info, material, indices, 6);
 
     meshinfo_delete(mesh_info);
 
@@ -236,7 +254,7 @@ Renderer* renderer_new() {
 
 void renderer_delete(Renderer* renderer) {
     framebuffer_delete(renderer->screen_framebuffer);
-    shader_delete(renderer->shader_mesh);
+    shader_delete(renderer->shader_texture);
     free(renderer);
 }
 
@@ -250,8 +268,8 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
     renderer_set_target(renderer, renderer->screen_framebuffer);
 
     switch (node_get_type(node)) {
-    case NODE_TYPE_MESH_3D:
-        renderer_draw_mesh3d(renderer, node_get_data(node));
+    case NODE_TYPE_MODEL_3D:
+        renderer_draw_model3d(renderer, node_get_data(node));
         break;
 
     case NODE_TYPE_CAMERA_3D:
@@ -274,14 +292,11 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
     renderer_render_to_screen(renderer);
 }
 
-void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node) {
-    Mesh* mesh = mesh3d_get_mesh(node);
-
-    shader_use(renderer->shader_mesh);
-    renderer_set_uniforms(renderer, mesh_get_material(mesh));
-
-    mesh_use(mesh);
-    glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
+void renderer_draw_model3d(Renderer* renderer, Model3D* node) {
+    Model* model = model3d_get_model(node);
+    for (u32 i = 0; i < model_get_num_meshes(model); i++) {
+        renderer_draw_mesh(renderer, model_get_meshes(model)[i]);
+    }
 }
 
 void renderer_set_fov(Renderer* renderer, f32 fov) {

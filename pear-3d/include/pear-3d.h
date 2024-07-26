@@ -14,32 +14,29 @@ typedef struct Vertex {
     vec3 normal;
 } Vertex;
 
-typedef struct Material {
-    char* texture_diffuse;
-    char* texture_specular;
-    char* texture_normal;
+typedef struct Pear3D_Material {
+    const char* texture_diffuse;
+    const char* texture_specular;
+    const char* texture_normal;
 
     vec4 color;
-} Material;
+} Pear3D_Material;
 
-typedef struct Face {
-    unsigned int vertex_indices[3];
-} Face;
+typedef struct Pear3D_Mesh {
+    Vertex* vertices;
+    uint32_t* indices;
+    uint32_t material_index;
 
-typedef struct Mesh {
-    Face* faces;
-    unsigned int num_faces;
-    unsigned int material_index;
-} Mesh;
+    uint32_t num_vertices;
+    uint32_t num_indices;
+} Pear3D_Mesh;
 
 typedef struct Pear3D {
-    Vertex* vertices;
-    Material* materials;
-    Mesh* meshes;
+    Pear3D_Material* materials;
+    Pear3D_Mesh* meshes;
 
-    unsigned int num_vertices;
-    unsigned int num_materials;
-    unsigned int num_meshes;
+    uint32_t num_materials;
+    uint32_t num_meshes;
 } Pear3D;
 
 void pear3d_save(const char* filename, Pear3D model);

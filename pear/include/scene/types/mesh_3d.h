@@ -1,28 +1,28 @@
 #ifndef PEAR_NODE_MESH3D_H
 #define PEAR_NODE_MESH3D_H
 
-#include <graphics/mesh.h>
+#include <graphics/model.h>
 #include <cglm/cglm.h>
 
-typedef struct Mesh3DCreationInfo {
-    Mesh* mesh;
+typedef struct Model3DCreationInfo {
+    Model* model;
     vec3 pos;
     vec3 rotation;
     vec3 scale;
-} Mesh3DCreationInfo;
+} Model3DCreationInfo;
 
-typedef struct Mesh3D Mesh3D;
+typedef struct Model3D Model3D;
 
-Mesh3D* mesh3d_new(Mesh3DCreationInfo* creation_info);
-void mesh3d_delete(Mesh3D* mesh);
+Model3D* model3d_new(Model3DCreationInfo* creation_info);
+void model3d_delete(Model3D* mesh);
 
-void mesh3d_set_position(Mesh3D* mesh, vec3 pos);
-void mesh3d_set_rotation(Mesh3D* mesh, vec3 rotation);
-void mesh3d_set_scale(Mesh3D* mesh, vec3 scale);
+void model3d_set_position(Model3D* mesh, vec3 pos);
+void model3d_set_rotation(Model3D* mesh, vec3 rotation);
+void model3d_set_scale(Model3D* mesh, vec3 scale);
 
-void mesh3d_get_position(Mesh3D* mesh, vec3 dest);
-void mesh3d_get_rotation(Mesh3D* mesh, vec3 dest);
-void mesh3d_get_scale(Mesh3D* mesh, vec3 dest);
-Mesh* mesh3d_get_mesh(Mesh3D* mesh);
+void model3d_get_position(Model3D* mesh, vec3 dest);
+void model3d_get_rotation(Model3D* mesh, vec3 dest);
+void model3d_get_scale(Model3D* mesh, vec3 dest);
+Model* model3d_get_model(Model3D* mesh);
 
 #endif
