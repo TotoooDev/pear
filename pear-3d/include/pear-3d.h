@@ -8,11 +8,11 @@ extern "C" {
 #include <cglm/cglm.h>
 #include <stdbool.h>
 
-typedef struct Vertex {
+typedef struct Pear3D_Vertex {
     vec3 position;
     vec2 texture_coords;
     vec3 normal;
-} Vertex;
+} Pear3D_Vertex;
 
 typedef struct Pear3D_Material {
     const char* texture_diffuse;
@@ -23,7 +23,7 @@ typedef struct Pear3D_Material {
 } Pear3D_Material;
 
 typedef struct Pear3D_Mesh {
-    Vertex* vertices;
+    Pear3D_Vertex* vertices;
     uint32_t* indices;
     uint32_t material_index;
 

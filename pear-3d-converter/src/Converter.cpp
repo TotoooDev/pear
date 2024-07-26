@@ -37,9 +37,9 @@ void Converter::processNode(aiNode* node) {
 }
 
 void Converter::processMesh(aiMesh* mesh) {
-    std::vector<Vertex> vertices;
+    std::vector<Pear3D_Vertex> vertices;
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex vertex;
+        Pear3D_Vertex vertex;
 
         vertex.position[0] = mesh->mVertices[i].x;
         vertex.position[1] = mesh->mVertices[i].y;
@@ -104,7 +104,7 @@ void Converter::processMesh(aiMesh* mesh) {
 
     Pear3D_Mesh pearMesh;
 
-    pearMesh.vertices = (Vertex*)malloc(sizeof(Vertex) * vertices.size());
+    pearMesh.vertices = (Pear3D_Vertex*)malloc(sizeof(Pear3D_Vertex) * vertices.size());
     for (unsigned int i = 0; i < vertices.size(); i++) {
         pearMesh.vertices[i] = vertices[i];
     }

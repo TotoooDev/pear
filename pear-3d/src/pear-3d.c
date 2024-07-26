@@ -149,7 +149,7 @@ Pear3D pear3d_load(const char* filename, bool* success)  {
         fread(&(model.meshes[i].material_index), sizeof(uint32_t), 1, file);
 
         fread(&(model.meshes[i].num_vertices), sizeof(uint32_t), 1, file);
-        model.meshes[i].vertices = (Vertex*)malloc(sizeof(Vertex) * model.meshes[i].num_vertices);
+        model.meshes[i].vertices = (Pear3D_Vertex*)malloc(sizeof(Pear3D_Vertex) * model.meshes[i].num_vertices);
         for (uint32_t j = 0; j < model.meshes[i].num_vertices; j++) {
             fread(model.meshes[i].vertices[j].position, sizeof(float), 3, file);
             fread(model.meshes[i].vertices[j].texture_coords, sizeof(float), 2, file);
