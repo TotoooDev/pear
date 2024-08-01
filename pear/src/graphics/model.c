@@ -29,11 +29,21 @@ Model* model_new_from_pear3d(Pear3D pear3d) {
 
     Material* materials = (Material*)malloc(sizeof(Material) * pear3d.num_materials);
     for (u32 i = 0; i < pear3d.num_materials; i++) {
-        Image* texture = imageloader_from_file(pear3d.materials[i].texture_diffuse);
+        bool success;
+        Pear3D_Image pear_image = pear3d_load_image(pear3d.materials[i].texture_diffuse, &success);
+        if (!success) {
+            PEAR_ERROR("failed to load pear3d image %s!", pear3d.materials[i].texture_diffuse);
+            pear3d_delete_image(pear_image);
+            materials[i].albedo = NULL;
+            continue;
+        }
+
+        Image* texture = image_new_from_pear3d(pear_image);
         
         materials[i].albedo = texture_new_from_image(texture, TEXTURE_WRAPPING_REPEAT, TEXTURE_FILTERING_NEAREST);
 
         image_delete(texture);
+        pear3d_delete_image(pear_image);
     }
 
     // then the meshes

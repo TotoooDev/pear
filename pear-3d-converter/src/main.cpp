@@ -1,5 +1,6 @@
-#include <Converter.h>
+#include <ModelConverter.h>
 #include <pear-3d.h>
+#include <image.h>
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -12,7 +13,7 @@ int main(int argc, char* argv[]) {
     std::string input = argv[1];
     std::string output = hasOutputParameter ? argv[2] : input + ".pear3d";
 
-    Converter converter(input);
+    ModelConverter converter(input);
     pear3d_save(output.c_str(), converter.getPear3D());
 
     return 0;

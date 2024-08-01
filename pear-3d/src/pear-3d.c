@@ -36,7 +36,6 @@ void pear3d_save(const char* filename, Pear3D model) {
         const char* specular = model.materials[i].texture_specular;
         const char* normal = model.materials[i].texture_normal;
 
-        // add one to the strlen to account for the null-terminating character
         uint32_t diffuse_length = strlen(diffuse);
         uint32_t specular_length = strlen(specular);
         uint32_t normal_length = strlen(normal);

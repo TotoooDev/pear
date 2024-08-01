@@ -7,6 +7,8 @@ typedef struct Image {
     u32 height;
     u32 num_channels;
     void* data;
+
+    bool free_data;
 } Image;
 
 Image* image_new(u32 width, u32 height, u32 num_channels, void* data) {
@@ -16,12 +18,19 @@ Image* image_new(u32 width, u32 height, u32 num_channels, void* data) {
     image->height = height;
     image->num_channels = num_channels;
     image->data = data;
+    image->free_data = true;
 
     return image;
 }
 
+Image* image_new_from_pear3d(Pear3D_Image pear_image) {
+    Image* image = image_new(pear_image.width, pear_image.height, pear_image.num_channels, pear_image.data);
+    image->free_data = false;
+    return image;
+}
+
 void image_delete(Image* image) {
-    if (image->data != NULL)
+    if (image->data != NULL && image->free_data)
         free(image->data);
 
     free(image);
