@@ -95,6 +95,10 @@ void window_set_title(const char* title) {
     window_title = title;
 }
 
+GLFWwindow* window_get_glfw(Window* window) {
+    return window->window;
+}
+
 Window* window_new() {
     if (glfwInit() != GLFW_TRUE)
         PEAR_ERROR("failed to initialize glfw!");

@@ -13,6 +13,26 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <graphics/platform/opengl/window.h>
+
+#ifdef PEAR_DEBUG
+    #define MAX_VERTEX_BUFFER 512 * 1024
+    #define MAX_ELEMENT_BUFFER 128 * 1024
+
+    #define PEAR_NUKLEAR
+    #define NK_PRIVATE
+    #define NK_INCLUDE_FIXED_TYPES
+    #define NK_INCLUDE_STANDARD_IO
+    #define NK_INCLUDE_DEFAULT_ALLOCATOR
+    #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+    #define NK_INCLUDE_FONT_BAKING
+    #define NK_INCLUDE_DEFAULT_FONT
+    #define NK_IMPLEMENTATION
+    #include <graphics/vendor/nuklear.h>
+    
+    #define NK_GLFW_GL3_IMPLEMENTATION
+    #include <graphics/vendor/nuklear_glfw3.h>
+#endif
 
 typedef struct Renderer {
     f32 fov;
@@ -34,9 +54,36 @@ typedef struct Renderer {
 
     Framebuffer* screen_framebuffer;
     Mesh* screen_mesh;
+
+    #ifdef PEAR_NUKLEAR
+        struct nk_glfw glfw;
+        struct nk_context* context;
+        struct nk_font_atlas* atlas;
+    #endif
 } Renderer;
 
 static bool renderer_is_glew_init = false;
+
+#ifdef PEAR_NUKLEAR
+void renderer_nuklear_init(Renderer* renderer) {
+    renderer->context = nk_glfw3_init(&(renderer->glfw), window_get_glfw(app_get_window()), NK_GLFW3_INSTALL_CALLBACKS);
+    nk_glfw3_font_stash_begin(&(renderer->glfw), &(renderer->atlas));
+    nk_glfw3_font_stash_end(&(renderer->glfw));
+}
+
+void renderer_nuklear_free(Renderer* renderer) {
+    nk_font_atlas_clear(renderer->atlas);
+    nk_free(renderer->context);
+}
+
+void renderer_nuklear_render(Renderer* renderer) {
+    nk_glfw3_render(&(renderer->glfw), NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+}
+
+void renderer_nuklear_clear(Renderer* renderer) {
+    nk_glfw3_new_frame(&(renderer->glfw));
+}
+#endif
 
 void renderer_calculate_projection(Renderer* renderer) {
     glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection_matrix);
@@ -86,9 +133,9 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
         case GL_DEBUG_SEVERITY_LOW:
             PEAR_WARN("opengl (%d): %s", id, message);
             break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            PEAR_INFO("opengl (%d): %s", id, message);
-            break;
+        // case GL_DEBUG_SEVERITY_NOTIFICATION:
+            // PEAR_INFO("opengl (%d): %s", id, message);
+            // break;
     }
 }
 
@@ -231,19 +278,76 @@ Renderer* renderer_new() {
 
     event_subscribe(renderer_on_event, renderer);
 
+    #ifdef PEAR_NUKLEAR
+        renderer_nuklear_init(renderer);
+    #endif
+
     return renderer;
 }
 
 void renderer_delete(Renderer* renderer) {
+    #ifdef PEAR_NUKLEAR
+        renderer_nuklear_free(renderer);
+    #endif
     framebuffer_delete(renderer->screen_framebuffer);
     shader_delete(renderer->shader_mesh);
     free(renderer);
 }
 
 void renderer_clear(Renderer* renderer, f32 r, f32 g, f32 b, f32 a) {
+    #ifdef PEAR_NUKLEAR
+        renderer_nuklear_clear(renderer);
+    #endif
+
     renderer_set_target(renderer, renderer->screen_framebuffer);
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    #ifdef PEAR_NUKLEAR
+        if (nk_begin(renderer->context, "Demo", nk_rect(50, 50, 230, 250),
+            NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
+            NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
+        {
+            enum {EASY, HARD};
+            static int op = EASY;
+            static int property = 20;
+            nk_layout_row_static(renderer->context, 30, 80, 1);
+            if (nk_button_label(renderer->context, "button"))
+                fprintf(stdout, "button pressed\n");
+
+            nk_layout_row_dynamic(renderer->context, 30, 2);
+            if (nk_option_label(renderer->context, "easy", op == EASY)) op = EASY;
+            if (nk_option_label(renderer->context, "hard", op == HARD)) op = HARD;
+
+            nk_layout_row_dynamic(renderer->context, 25, 1);
+            nk_property_int(renderer->context, "Compression:", 0, &property, 100, 10, 1);
+
+            nk_layout_row_dynamic(renderer->context, 20, 1);
+            nk_label(renderer->context, "background:", NK_TEXT_LEFT);
+            nk_layout_row_dynamic(renderer->context, 25, 1);
+            struct nk_colorf bg;
+            bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
+            if (nk_combo_begin_color(renderer->context, nk_rgb_cf(bg), nk_vec2(nk_widget_width(renderer->context),400))) {
+                nk_layout_row_dynamic(renderer->context, 120, 1);
+                bg = nk_color_picker(renderer->context, bg, NK_RGBA);
+                nk_layout_row_dynamic(renderer->context, 25, 1);
+                bg.r = nk_propertyf(renderer->context, "#R:", 0, bg.r, 1.0f, 0.01f,0.005f);
+                bg.g = nk_propertyf(renderer->context, "#G:", 0, bg.g, 1.0f, 0.01f,0.005f);
+                bg.b = nk_propertyf(renderer->context, "#B:", 0, bg.b, 1.0f, 0.01f,0.005f);
+                bg.a = nk_propertyf(renderer->context, "#A:", 0, bg.a, 1.0f, 0.01f,0.005f);
+                nk_combo_end(renderer->context);
+            }
+        }
+        nk_end(renderer->context);
+
+        if (nk_begin(renderer->context, "cool window", nk_rect(50, 50, 250, 250), NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
+            nk_layout_row_dynamic(renderer->context, 0, 1);
+            nk_label(renderer->context, "coucou", NK_TEXT_ALIGN_LEFT);
+        }
+        nk_end(renderer->context);
+
+        renderer_nuklear_render(renderer);
+    #endif
 }
 
 void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
