@@ -1,6 +1,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/renderer.h>
+#include <graphics/platform/opengl/renderer.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/texture.h>
@@ -13,6 +14,8 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+static bool renderer_print_notifications = false;
 
 typedef struct Renderer {
     f32 fov;
@@ -88,7 +91,9 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
             PEAR_WARN("opengl (%d): %s", id, message);
             break;
         case GL_DEBUG_SEVERITY_NOTIFICATION:
-            PEAR_INFO("opengl (%d): %s", id, message);
+            if (renderer_print_notifications) {
+                PEAR_INFO("opengl (%d): %s", id, message);
+            }
             break;
     }
 }
@@ -310,6 +315,10 @@ void renderer_set_target(Renderer* renderer, Framebuffer* framebuffer) {
 
 void renderer_set_target_window(Renderer* renderer) {
     framebuffer_use(renderer->screen_framebuffer);
+}
+
+void renderer_toggle_opengl_notifications(Renderer* renderer) {
+    renderer_print_notifications = !renderer_print_notifications;
 }
 
 #endif
