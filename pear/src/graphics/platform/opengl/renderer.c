@@ -15,10 +15,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static bool renderer_print_notifications = false;
-
 // i need to include this after glew because it includes glfw
 #include <graphics/platform/opengl/window.h>
+
+static bool renderer_print_notifications = false;
 
 #ifdef PEAR_NUKLEAR
     #define NK_MAX_VERTEX_BUFFER 512 * 1024
