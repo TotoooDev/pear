@@ -1,22 +1,14 @@
 #include <core/log.h>
 #include <core/app.h>
+#include <core/gui.h>
 #include <scene/node.h>
 #include <scene/types/mesh_3d.h>
 #include <scene/types/camera_3d.h>
-#include <graphics/window.h>
-#include <graphics/image.h>
-#include <graphics/texture.h>
-#include <graphics/framebuffer.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
-#include <fs/loaders/image_loader.h>
 #include <pear-3d.h>
 #include <stdlib.h>
 
-#define NK_NO_STB_RECT_PACK_IMPLEMENTATION
-#define NK_NO_STB_TRUETYPE_IMPLEMENTATION
-#define NK_IMPLEMENTATION
-#include <graphics/renderer.h>
 
 void cam_on_event(EventType type, void* e, void* user_data) {
     Node* node = (Node*)user_data;
@@ -43,12 +35,10 @@ void cam_on_event(EventType type, void* e, void* user_data) {
     }
 }
 
-void nk(Renderer* renderer, struct nk_context* nk_context, void* user_data) {
-    if (nk_begin(nk_context, "coucou", nk_rect(50, 50, 250, 250), renderer_nk_default_window_flags)) {
+void general_info_gui(struct nk_context* nk_context, void* user_data) {
+    if (nk_begin(nk_context, "general info", nk_rect(100, 50, 250, 250), gui_default_window_flags)) {
         nk_layout_row_dynamic(nk_context, 0, 1);
-        if (nk_button_label(nk_context, "click me")) {
-            PEAR_INFO("coucou!");
-        }
+        nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "timestep: %f", app_get_timestep());
     }
     nk_end(nk_context);
 }
@@ -68,7 +58,7 @@ int main(int argc, char* argv[]) {
     Model3DCreationInfo model3d_info;
     model3d_info.model = model;
 
-    renderer_nk_add_gui(nk, NULL);
+    gui_add(general_info_gui, NULL);
 
     Camera3DCreationInfo cam3d_info;
     cam3d_info.pos[0] = 0.0f;

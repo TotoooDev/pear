@@ -1,4 +1,5 @@
 #include <core/app.h>
+#include <core/gui.h>
 #include <core/timer.h>
 #include <graphics/window.h>
 #include <graphics/renderer.h>
@@ -42,10 +43,13 @@ App* app_new() {
 
     event_subscribe(app_on_event, NULL);
 
+    gui_init();
+
     return app;
 }
 
 void app_delete() {
+    gui_free();
     renderer_delete(app->renderer);
     window_delete(app->window);
     free(app);
@@ -64,8 +68,13 @@ void app_stop() {
 void app_run() {
     while (app_is_running()) {
         node_update_recursive(app->root_node, app->timestep);
+        
         renderer_clear(app->renderer, 0.3f, 0.3f, 0.3f, 0.0f);
         renderer_draw_node_hierarchy(app->renderer, app->root_node);
+
+        gui_clear();
+        gui_render();
+
         window_update(app->window);
         app_update_timestep();
     }
@@ -79,6 +88,10 @@ bool app_is_running() {
 
 void app_set_root_node(Node* node) {
     app->root_node = node;
+}
+
+f32 app_get_timestep() {
+    return app->timestep;
 }
 
 Window* app_get_window() {

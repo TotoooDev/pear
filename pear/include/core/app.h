@@ -11,6 +11,7 @@ void app_run();
 bool app_is_running();
 void app_set_root_node(Node* node);
 
+f32 app_get_timestep();
 Window* app_get_window();
 
 #endif
