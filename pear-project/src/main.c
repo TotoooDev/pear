@@ -13,6 +13,11 @@
 // #include <pear-3d.h>
 #include <stdlib.h>
 
+#define NK_NO_STB_RECT_PACK_IMPLEMENTATION
+#define NK_NO_STB_TRUETYPE_IMPLEMENTATION
+#define NK_IMPLEMENTATION
+#include <graphics/renderer.h>
+
 void cam_on_event(EventType type, void* e, void* user_data) {
     Node* node = (Node*)user_data;
     Camera3D* cam = (Camera3D*)node_get_data(node);
@@ -38,6 +43,16 @@ void cam_on_event(EventType type, void* e, void* user_data) {
     }
 }
 
+void nk(Renderer* renderer, struct nk_context* nk_context, void* user_data) {
+    if (nk_begin(nk_context, "coucou", nk_rect(50, 50, 250, 250), renderer_nk_default_window_flags)) {
+        nk_layout_row_dynamic(nk_context, 0, 1);
+        if (nk_button_label(nk_context, "click me")) {
+            PEAR_INFO("coucou!");
+        }
+    }
+    nk_end(nk_context);
+}
+
 int main(int argc, char* argv[]) {
     app_init();
     
@@ -58,6 +73,8 @@ int main(int argc, char* argv[]) {
 
     // Mesh3DCreationInfo mesh3d_info;
     // mesh3d_info.mesh = mesh;
+
+    renderer_nk_add_gui(nk, NULL);
 
     Camera3DCreationInfo cam3d_info;
     cam3d_info.pos[0] = 0.0f;
