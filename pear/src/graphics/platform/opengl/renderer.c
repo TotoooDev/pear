@@ -17,6 +17,26 @@
 
 static bool renderer_print_notifications = false;
 
+// i need to include this after glew because it includes glfw
+#include <graphics/platform/opengl/window.h>
+
+#ifdef PEAR_NUKLEAR
+    #define NK_MAX_VERTEX_BUFFER 512 * 1024
+    #define NK_MAX_ELEMENT_BUFFER 128 * 1024
+
+    #define NK_PRIVATE
+    #define NK_INCLUDE_STANDARD_IO
+    #define NK_INCLUDE_DEFAULT_ALLOCATOR
+    #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+    #define NK_INCLUDE_FONT_BAKING
+    #define NK_INCLUDE_DEFAULT_FONT
+    #define NK_IMPLEMENTATION
+    #include <graphics/vendor/nuklear.h>
+    
+    #define NK_GLFW_GL3_IMPLEMENTATION
+    #include <graphics/vendor/nuklear_glfw3.h>
+#endif
+
 typedef struct Renderer {
     f32 fov;
     f32 aspect_ratio;
@@ -38,9 +58,23 @@ typedef struct Renderer {
 
     Framebuffer* screen_framebuffer;
     Mesh* screen_mesh;
+
+#ifdef PEAR_NUKLEAR
+    struct nk_glfw nk_glfw;
+    struct nk_context* nk_context;
+    struct nk_font_atlas* nk_atlas;
+#endif
 } Renderer;
 
 static bool renderer_is_glew_init = false;
+
+#ifdef PEAR_NUKLEAR
+void renderer_nk_init(Renderer* renderer);
+void renderer_nk_free(Renderer* renderer);
+void renderer_nk_render(Renderer* renderer);
+void renderer_nk_clear(Renderer* renderer);
+void renderer_nk_render_guis(Renderer* renderer);
+#endif
 
 void renderer_calculate_projection(Renderer* renderer) {
     glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection_matrix);
@@ -254,16 +288,28 @@ Renderer* renderer_new() {
 
     event_subscribe(renderer_on_event, renderer);
 
+    #ifdef PEAR_NUKLEAR
+        renderer_nk_init(renderer);
+    #endif
+
     return renderer;
 }
 
 void renderer_delete(Renderer* renderer) {
+    #ifdef PEAR_NUKLEAR
+        renderer_nk_free(renderer);
+    #endif
+    
     framebuffer_delete(renderer->screen_framebuffer);
     shader_delete(renderer->shader_texture);
     free(renderer);
 }
 
 void renderer_clear(Renderer* renderer, f32 r, f32 g, f32 b, f32 a) {
+    #ifdef PEAR_NUKLEAR
+        renderer_nk_clear(renderer);
+    #endif
+
     renderer_set_target(renderer, renderer->screen_framebuffer);
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -294,6 +340,11 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
         }
     }
 
+    #ifdef PEAR_NUKLEAR
+        renderer_nk_render_guis(renderer);
+        renderer_nk_render(renderer);
+    #endif
+
     renderer_render_to_screen(renderer);
 }
 
@@ -320,5 +371,57 @@ void renderer_set_target_window(Renderer* renderer) {
 void renderer_toggle_opengl_notifications(Renderer* renderer) {
     renderer_print_notifications = !renderer_print_notifications;
 }
+
+// nuklear stuff
+
+#ifdef PEAR_NUKLEAR
+#define RENDERER_NK_NUM_MAX_FUNCTIONS 256
+
+static NuklearFunction renderer_nk_functions[RENDERER_NK_NUM_MAX_FUNCTIONS];
+static void* renderer_nk_user_datas[RENDERER_NK_NUM_MAX_FUNCTIONS];
+static u32 renderer_nk_num_functions = 0;
+
+void renderer_nk_init(Renderer* renderer) {
+    renderer->nk_context = nk_glfw3_init(&(renderer->nk_glfw), window_get_glfw(app_get_window()), NK_GLFW3_INSTALL_CALLBACKS);
+    nk_glfw3_font_stash_begin(&(renderer->nk_glfw), &(renderer->nk_atlas));
+    nk_glfw3_font_stash_end(&(renderer->nk_glfw));
+}
+
+void renderer_nk_free(Renderer* renderer) {
+    nk_font_atlas_clear(renderer->nk_atlas);
+    nk_free(renderer->nk_context);
+}
+
+void renderer_nk_render(Renderer* renderer) {
+    nk_glfw3_render(&(renderer->nk_glfw), NK_ANTI_ALIASING_ON, NK_MAX_VERTEX_BUFFER, NK_MAX_ELEMENT_BUFFER);
+}
+
+void renderer_nk_clear(Renderer* renderer) {
+    nk_glfw3_new_frame(&(renderer->nk_glfw));
+}
+
+void renderer_nk_render_guis(Renderer* renderer) {
+    for (u32 i = 0; i < renderer_nk_num_functions; i++) {
+        NuklearFunction function = renderer_nk_functions[i];
+        void* user_data = renderer_nk_user_datas[i];
+        function(renderer, renderer->nk_context, user_data);
+    }
+}
+
+void renderer_nk_add_gui(NuklearFunction function, void* user_data) {
+    if (renderer_nk_num_functions >= RENDERER_NK_NUM_MAX_FUNCTIONS) {
+        PEAR_ERROR("unable to subscribe to event! the event arrays are full (%d functions max).", RENDERER_NK_NUM_MAX_FUNCTIONS);
+        return;
+    }
+
+    if (function == NULL)
+        PEAR_WARN("subscribing with a null function pointer!");
+
+    renderer_nk_functions[renderer_nk_num_functions] = function;
+    renderer_nk_user_datas[renderer_nk_num_functions] = user_data;
+
+    renderer_nk_num_functions++;
+}
+#endif
 
 #endif
