@@ -22,12 +22,6 @@ void gui_general_info(struct nk_context* nk_context, void* user_data) {
             nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "fps: %f", 1.0f / app_get_timestep() * 1000.0f);
             nk_layout_row_dynamic(nk_context, 64, 1);
 
-            // nk_context->style.chart.show_markers = false;
-            // if (nk_chart_begin(nk_context, NK_CHART_LINES, 64, 0.0f, 2.0f)) {
-            //     nk_chart_push(nk_context, 1.0f);
-            // }
-            // nk_chart_end(nk_context);
-
             nk_tree_pop(nk_context);
         }
     }

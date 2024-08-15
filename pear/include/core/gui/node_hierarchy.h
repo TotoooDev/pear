@@ -7,4 +7,6 @@
 void gui_node_properties(Node* node, void* user_data);
 void gui_node_hierarchy(struct nk_context* nk_context, void* user_data);
 
+void gui_node_hierarchy_set_root_node(Node* root);
+
 #endif
