@@ -2,6 +2,7 @@
 #include <scene/types/container.h>
 #include <scene/types/camera_3d.h>
 #include <scene/types/model_3d.h>
+#include <limits.h>
 
 static Node* gui_root = NULL;
 
@@ -11,21 +12,44 @@ void gui_model_3d(struct nk_context* nk_context, Model3D* data) {
     model3d_get_rotation(data, rotation);
     model3d_get_scale(data, scale);
 
-    nk_layout_row_dynamic(nk_context, 16, 1);
-    nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "position: %f, %f, %f", pos[0], pos[1], pos[2]);
-    nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "rotation: %f, %f, %f", rotation[0], rotation[1], rotation[2]);
-    nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "scale: %f, %f, %f", scale[0], scale[1], scale[2]);
+    nk_layout_row_dynamic(nk_context, 16, 4);
+
+    nk_label(nk_context, "position:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(pos[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(pos[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(pos[2]), FLT_MAX, 1.0f, 0.01f);
+
+    nk_label(nk_context, "rotation:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(rotation[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(rotation[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(rotation[2]), FLT_MAX, 1.0f, 0.01f);
+
+    nk_label(nk_context, "scale:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(scale[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(scale[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(scale[2]), FLT_MAX, 1.0f, 0.01f);
+
+    model3d_set_position(data, pos);
+    model3d_set_rotation(data, rotation);
+    model3d_set_scale(data, scale);
 }
 
 void gui_camera_3d(struct nk_context* nk_context, Camera3D* data) {
     vec3 pos;
     camera3d_get_pos(data, pos);
 
+    nk_layout_row_dynamic(nk_context, 16, 4);
+    nk_label(nk_context, "position:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "x", -FLT_MAX, &(pos[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "y", -FLT_MAX, &(pos[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "z", -FLT_MAX, &(pos[2]), FLT_MAX, 1.0f, 0.01f);
+
     nk_layout_row_dynamic(nk_context, 16, 1);
-    nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "pos: %f, %f, %f", pos[0], pos[1], pos[2]);
-    nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "yaw: %f", camera3d_get_yaw(data));
-    nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "pitch: %f", camera3d_get_pitch(data));
-    nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "roll: %f", camera3d_get_roll(data));
+    camera3d_set_yaw(data, nk_propertyf(nk_context, "yaw", -FLT_MAX, camera3d_get_yaw(data), FLT_MAX, 1.0f, 0.01f));
+    camera3d_set_pitch(data, nk_propertyf(nk_context, "pitch", -FLT_MAX, camera3d_get_pitch(data), FLT_MAX, 1.0f, 0.01f));
+    camera3d_set_roll(data, nk_propertyf(nk_context, "roll", -FLT_MAX, camera3d_get_roll(data), FLT_MAX, 1.0f, 0.01f));
+
+    camera3d_set_pos(data, pos);
 }
 
 void gui_node_properties(Node* node, void* user_data) {
@@ -72,7 +96,7 @@ void gui_node_properties(Node* node, void* user_data) {
 void gui_node_hierarchy(struct nk_context* nk_context, void* user_data) {
     Node* root = gui_root == NULL ? (Node*)user_data : gui_root;
 
-    if (nk_begin(nk_context, "node hierarchy", nk_rect(200, 50, 250, 250), gui_default_window_flags)) {
+    if (nk_begin(nk_context, "node hierarchy", nk_rect(10, 230, 300, 300), gui_default_window_flags)) {
         gui_node_properties(root, nk_context);
     }
     nk_end(nk_context);
