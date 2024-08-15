@@ -1,7 +1,7 @@
 #include <core/gui/node_hierarchy.h>
 #include <scene/types/container.h>
 #include <scene/types/camera_3d.h>
-#include <scene/types/mesh_3d.h>
+#include <scene/types/model_3d.h>
 
 static Node* gui_root = NULL;
 

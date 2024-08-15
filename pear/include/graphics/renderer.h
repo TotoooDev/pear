@@ -4,7 +4,7 @@
 #include <graphics/mesh.h>
 #include <graphics/framebuffer.h>
 #include <scene/node.h>
-#include <scene/types/mesh_3d.h>
+#include <scene/types/model_3d.h>
 #include <core/types.h>
 
 typedef struct Renderer Renderer;

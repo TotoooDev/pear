@@ -5,7 +5,7 @@
 #include <core/gui/general_info.h>
 #include <core/config.h>
 #include <scene/node.h>
-#include <scene/types/mesh_3d.h>
+#include <scene/types/model_3d.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <pear-3d.h>

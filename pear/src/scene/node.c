@@ -1,5 +1,5 @@
 #include <scene/node.h>
-#include <scene/types/mesh_3d.h>
+#include <scene/types/model_3d.h>
 #include <scene/types/camera_3d.h>
 #include <core/types.h>
 #include <core/log.h>

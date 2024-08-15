@@ -101,11 +101,12 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
     }
 }
 
-void renderer_set_uniforms(Renderer* renderer, Shader* shader, Material* material) {
+void renderer_set_uniforms(Renderer* renderer, Shader* shader, mat4 model, Material* material) {
     shader_use(shader);
     shader_set_u32(shader, 0, "u_platform");
     shader_set_mat4(shader, renderer->projection_matrix, "u_projection");
     shader_set_mat4(shader, renderer->view_matrix, "u_view");
+    shader_set_mat4(shader, model, "u_model");
 
     shader_set_vec4(shader, material->color, "u_color");
 
@@ -183,14 +184,14 @@ void renderer_render_to_screen(Renderer* renderer) {
     glEnable(GL_DEPTH_TEST);
 }
 
-void renderer_draw_mesh(Renderer* renderer, Mesh* mesh) {
+void renderer_draw_mesh(Renderer* renderer, Mesh* mesh, mat4 model) {
     Shader* shader_used;
     if (mesh_get_material(mesh)->albedo == NULL)
         shader_used = renderer->shader_color;
     else
         shader_used = renderer->shader_texture;
 
-    renderer_set_uniforms(renderer, shader_used, mesh_get_material(mesh));
+    renderer_set_uniforms(renderer, shader_used, model, mesh_get_material(mesh));
 
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
@@ -309,18 +310,16 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
         }
     }
 
-    #ifdef PEAR_NUKLEAR
-        renderer_nk_render_guis(renderer);
-        renderer_nk_render(renderer);
-    #endif
-
     renderer_render_to_screen(renderer);
 }
 
 void renderer_draw_model3d(Renderer* renderer, Model3D* node) {
     Model* model = model3d_get_model(node);
+    mat4 model_matrix;
+    model3d_get_model_matrix(node, model_matrix);
+    
     for (u32 i = 0; i < model_get_num_meshes(model); i++) {
-        renderer_draw_mesh(renderer, model_get_meshes(model)[i]);
+        renderer_draw_mesh(renderer, model_get_meshes(model)[i], model_matrix);
     }
 }
 
