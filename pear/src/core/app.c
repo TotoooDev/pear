@@ -1,5 +1,5 @@
 #include <core/app.h>
-#include <core/gui.h>
+#include <core/gui/gui.h>
 #include <core/timer.h>
 #include <graphics/window.h>
 #include <graphics/renderer.h>

@@ -7,6 +7,7 @@
 typedef struct Node Node;
 
 typedef void(*NodeUpdateFunction)(Node*, f32);
+typedef void(*NodeMapFunction)(Node*, void*);
 
 Node* node_new(NodeType type, Node* parent, const char* name, void* creation_info, NodeUpdateFunction update_function);
 void node_delete(Node* node);
@@ -22,6 +23,7 @@ char* node_get_name(Node* node);
 void node_set_update_function(Node* node, NodeUpdateFunction update_function);
 void node_update_recursive(Node* node, f32 timestep);
 void node_update(Node* node, f32 timestep);
+void node_map_recursive(Node* node, NodeMapFunction function, void* user_data);
 
 NodeType node_get_type(Node* node);
 void* node_get_data(Node* node);

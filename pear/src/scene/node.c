@@ -118,6 +118,19 @@ void node_update(Node* node, f32 timestep) {
         node->update_function(node, timestep);
 }
 
+void node_map_recursive(Node* node, NodeMapFunction function, void* user_data) {
+    function(node, user_data);
+
+    if (node_is_leaf(node))
+        return;
+
+    Node** sons = node_get_sons(node);
+    for (u32 i = 0; i < node_get_num_sons(node); i++) {
+        Node* son = sons[i];
+        function(son, user_data);
+    }
+}
+
 NodeType node_get_type(Node* node) {
     return node->type;
 }
