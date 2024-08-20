@@ -258,28 +258,16 @@ Renderer* renderer_new() {
 
     event_subscribe(renderer_on_event, renderer);
 
-    #ifdef PEAR_NUKLEAR
-        renderer_nk_init(renderer);
-    #endif
-
     return renderer;
 }
 
 void renderer_delete(Renderer* renderer) {
-    #ifdef PEAR_NUKLEAR
-        renderer_nk_free(renderer);
-    #endif
-    
     framebuffer_delete(renderer->screen_framebuffer);
     shader_delete(renderer->shader_texture);
     free(renderer);
 }
 
 void renderer_clear(Renderer* renderer, f32 r, f32 g, f32 b, f32 a) {
-    #ifdef PEAR_NUKLEAR
-        renderer_nk_clear(renderer);
-    #endif
-
     renderer_set_target(renderer, renderer->screen_framebuffer);
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
