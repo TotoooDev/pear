@@ -3,6 +3,7 @@
 #include <core/gui/gui.h>
 #include <core/gui/node_hierarchy.h>
 #include <core/gui/general_info.h>
+#include <core/gui/material_inspector.h>
 #include <core/config.h>
 #include <scene/node.h>
 #include <scene/types/model_3d.h>
@@ -47,6 +48,7 @@ int main(int argc, char* argv[]) {
 
     gui_add(gui_general_info, NULL);
     gui_add(gui_node_hierarchy, (void*)parent);
+    gui_add(gui_material_inspector, NULL);
 
     app_set_root_node(parent);
     app_run();
