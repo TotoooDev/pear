@@ -1,5 +1,6 @@
 #include <graphics/model.h>
-#include <fs/loaders/image_loader.h>
+#include <graphics/material.h>
+// #include <fs/loaders/image_loader.h>
 #include <stdlib.h>
 #include <core/log.h>
 
@@ -21,26 +22,30 @@ Model* model_new_from_pear3d(Pear3D pear3d) {
     Mesh** meshes = (Mesh**)malloc(sizeof(Mesh*) * pear3d.num_meshes);
 
     // process the materials first
-    Material default_material = { .albedo = NULL, .color = { 1.0f, 0.0f, 1.0f, 0.0f } };
+    Material default_material = material_get_default();
     bool use_default_material = false;
     if (pear3d.num_materials == 0) {
         use_default_material = true;
     }
 
-    Material* materials = (Material*)malloc(sizeof(Material) * pear3d.num_materials);
+    u32* material_indices = (u32*)malloc(sizeof(u32) * pear3d.num_materials);
+
     for (u32 i = 0; i < pear3d.num_materials; i++) {
         bool success;
         Pear3D_Image pear_image = pear3d_load_image(pear3d.materials[i].texture_diffuse, &success);
         if (!success) {
             PEAR_ERROR("failed to load pear3d image %s!", pear3d.materials[i].texture_diffuse);
             pear3d_delete_image(pear_image);
-            materials[i].albedo = NULL;
+            material_indices[i] = material_add(material_get_default());
             continue;
         }
 
         Image* texture = image_new_from_pear3d(pear_image);
         
-        materials[i].albedo = texture_new_from_image(texture, TEXTURE_WRAPPING_REPEAT, TEXTURE_FILTERING_NEAREST);
+        Material material = {
+            .texture_albedo = texture_new_from_image(texture, TEXTURE_WRAPPING_REPEAT, TEXTURE_FILTERING_NEAREST)
+        };
+        material_indices[i] = material_add(material);
 
         image_delete(texture);
         pear3d_delete_image(pear_image);
@@ -64,10 +69,7 @@ Model* model_new_from_pear3d(Pear3D pear3d) {
         meshinfo_add_attribute_vec2(mesh_info, false, texture_coords, pear3d.meshes[i].num_vertices);
         meshinfo_add_attribute_vec3(mesh_info, false, normals, pear3d.meshes[i].num_vertices);
 
-        if (use_default_material)
-            meshes[i] = mesh_new(mesh_info, default_material, pear3d.meshes[i].indices, pear3d.meshes[i].num_indices);
-        else
-            meshes[i] = mesh_new(mesh_info, materials[pear3d.meshes[i].material_index], pear3d.meshes[i].indices, pear3d.meshes[i].num_indices);
+        meshes[i] = mesh_new(mesh_info, material_indices[pear3d.meshes[i].material_index], pear3d.meshes[i].indices, pear3d.meshes[i].num_indices);
 
         meshinfo_delete(mesh_info);
         free(positions);
@@ -75,7 +77,7 @@ Model* model_new_from_pear3d(Pear3D pear3d) {
         free(normals);
     }
 
-    free(materials);
+    free(material_indices);
 
     return model_new(meshes, pear3d.num_meshes);
 }

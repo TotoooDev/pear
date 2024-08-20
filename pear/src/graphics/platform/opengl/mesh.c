@@ -1,6 +1,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/mesh.h>
+#include <graphics/material.h>
 #include <graphics/platform/opengl/mesh.h> 
 #include <graphics/platform/opengl/texture.h> 
 #include <core/log.h>
@@ -8,7 +9,7 @@
 #include <stdlib.h>
 
 typedef struct Mesh {
-    Material material;
+    u32 material_index;
 
     u32 vao;
     u32 vbo;
@@ -17,10 +18,10 @@ typedef struct Mesh {
     u32 num_indices;
 } Mesh;
 
-Mesh* mesh_new(MeshInfo* mesh_info, Material material, u32* indices, u32 num_indices) {
+Mesh* mesh_new(MeshInfo* mesh_info, u32 material_index, u32* indices, u32 num_indices) {
     Mesh* mesh = (Mesh*)malloc(sizeof(Mesh));
 
-    mesh->material = material;
+    mesh->material_index = material_index;
     mesh->num_indices = num_indices;
 
     glGenVertexArrays(1, &(mesh->vao));
@@ -60,8 +61,8 @@ void mesh_delete(Mesh* mesh) {
     free(mesh);
 }
 
-Material* mesh_get_material(Mesh* mesh) {
-    return &(mesh->material);
+u32 mesh_get_material_index(Mesh* mesh) {
+    return mesh->material_index;
 }
 
 u32 mesh_get_num_indices(Mesh* mesh) {
@@ -72,9 +73,11 @@ void mesh_use(Mesh* mesh) {
     glBindVertexArray(mesh->vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
-    if (mesh->material.albedo != NULL) {
+    Material* material = material_get(mesh->material_index);
+
+    if (material->texture_albedo != NULL) {
         glActiveTexture(GL_TEXTURE0);
-        texture_use(mesh->material.albedo);
+        texture_use(material->texture_albedo);
     }
 }
 

@@ -1,6 +1,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/renderer.h>
+#include <graphics/material.h>
 #include <graphics/platform/opengl/renderer.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
@@ -70,7 +71,7 @@ void renderer_on_event(EventType type, void* e, void* user_data) {
         framebuffer_delete(renderer->screen_framebuffer);
         TextureFormat formats[] = { TEXTURE_FORMAT_RGBA };
         renderer->screen_framebuffer = framebuffer_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, formats, 1, true);
-        mesh_get_material(renderer->screen_mesh)->albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0);
+        material_get(mesh_get_material_index(renderer->screen_mesh))->texture_albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0);
     }
 
     if (type == EVENT_TYPE_WINDOW_SCALE_CHANGED) {
@@ -108,9 +109,9 @@ void renderer_set_uniforms(Renderer* renderer, Shader* shader, mat4 model, Mater
     shader_set_mat4(shader, renderer->view_matrix, "u_view");
     shader_set_mat4(shader, model, "u_model");
 
-    shader_set_vec4(shader, material->color, "u_color");
+    shader_set_vec4(shader, material->color_diffuse, "u_color");
 
-    if (material->albedo != NULL)
+    if (material->texture_albedo != NULL)
         shader_set_i32(renderer->shader_texture, 0, "u_albedo");
 }
 
@@ -186,12 +187,14 @@ void renderer_render_to_screen(Renderer* renderer) {
 
 void renderer_draw_mesh(Renderer* renderer, Mesh* mesh, mat4 model) {
     Shader* shader_used;
-    if (mesh_get_material(mesh)->albedo == NULL)
+
+    Material* material = material_get(mesh_get_material_index(mesh));
+    if (material->texture_albedo == NULL)
         shader_used = renderer->shader_color;
     else
         shader_used = renderer->shader_texture;
 
-    renderer_set_uniforms(renderer, shader_used, model, mesh_get_material(mesh));
+    renderer_set_uniforms(renderer, shader_used, model, material);
 
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
@@ -247,8 +250,9 @@ Renderer* renderer_new() {
         1, 2, 3
     };
 
-    Material material = { .albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0) };
-    renderer->screen_mesh = mesh_new(mesh_info, material, indices, 6);
+    Material material = { .texture_albedo = framebuffer_get_texture(renderer->screen_framebuffer, 0) };
+    u32 material_index = material_add(material);
+    renderer->screen_mesh = mesh_new(mesh_info, material_index, indices, 6);
 
     meshinfo_delete(mesh_info);
 
