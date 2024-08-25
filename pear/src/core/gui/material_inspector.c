@@ -26,7 +26,7 @@ void gui_material_inspector(struct nk_context* nk_context, void* user_data) {
             char tree_name[64];
             sprintf(tree_name, "material %d (0x%x)", i, material);
 
-            if (nk_tree_push(nk_context, NK_TREE_TAB, tree_name, NK_MINIMIZED)) {
+            if (nk_tree_push_id(nk_context, NK_TREE_TAB, tree_name, NK_MINIMIZED, i)) {
                 nk_layout_row_dynamic(nk_context, 16, 1);
                 nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "albedo texture: 0x%x", material->texture_albedo);
                 nk_labelf(nk_context, NK_TEXT_ALIGN_LEFT, "specular texture: 0x%x", material->texture_specular);
