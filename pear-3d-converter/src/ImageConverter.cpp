@@ -2,7 +2,7 @@
 #include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <vendor/stb_image.h>
 
 ImageConverter::ImageConverter(const std::string& filename) {
     stbi_set_flip_vertically_on_load(true);
