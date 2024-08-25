@@ -11,6 +11,8 @@
 #define NK_KEYSTATE_BASED_INPUT
 #include <graphics/vendor/nuklear.h>
 
+#include <graphics/texture.h>
+
 typedef void(*GUIFunction)(struct nk_context* nk_context, void* user_data);
 
 static const nk_flags gui_default_window_flags = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE;
@@ -21,5 +23,7 @@ void gui_free();
 void gui_add(GUIFunction function, void* user_data);
 void gui_clear();
 void gui_render();
+
+struct nk_image gui_image_from_texture(Texture* texture);
 
 #endif

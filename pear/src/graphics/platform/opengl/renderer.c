@@ -111,7 +111,7 @@ void renderer_set_uniforms(Renderer* renderer, Shader* shader, mat4 model, Mater
 
     shader_set_vec4(shader, material->color_diffuse, "u_color");
 
-    if (material->texture_albedo != NULL)
+    if (material->texture_albedo != NULL && !material->use_color)
         shader_set_i32(renderer->shader_texture, 0, "u_albedo");
 }
 
@@ -189,7 +189,7 @@ void renderer_draw_mesh(Renderer* renderer, Mesh* mesh, mat4 model) {
     Shader* shader_used;
 
     Material* material = material_get(mesh_get_material_index(mesh));
-    if (material->texture_albedo == NULL)
+    if (material->texture_albedo == NULL || material->use_color)
         shader_used = renderer->shader_color;
     else
         shader_used = renderer->shader_texture;

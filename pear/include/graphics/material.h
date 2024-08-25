@@ -12,6 +12,8 @@ typedef struct Material {
     vec4 color_specular;
 
     f32 roughness;
+
+    bool use_color;
 } Material;
 
 u32 material_add(Material material);

@@ -28,4 +28,7 @@ Texture* texture_new(u32 width, u32 height, TextureWrapping wrapping, TextureFil
 Texture* texture_new_from_image(Image* image, TextureWrapping wrapping, TextureFiltering filtering);
 void texture_delete(Texture* texture);
 
+u32 texture_get_width(Texture* texture);
+u32 texture_get_height(Texture* texture);
+
 #endif

@@ -3,6 +3,7 @@
 #include <core/app.h>
 
 #include <GL/glew.h>
+#include <graphics/platform/opengl/texture.h>
 #include <graphics/platform/opengl/window.h>
 
 #define NK_INCLUDE_FIXED_TYPES
@@ -41,6 +42,10 @@ void gui_platform_clear() {
 
 void gui_platform_render() {
     nk_glfw3_render(&gui_glfw, NK_ANTI_ALIASING_ON, NK_MAX_VERTEX_BUFFER, NK_MAX_ELEMENT_BUFFER);
+}
+
+struct nk_image gui_image_from_texture(Texture* texture) {
+    return nk_image_id(texture_get_id(texture));
 }
 
 #endif

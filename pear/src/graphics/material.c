@@ -14,7 +14,9 @@ static Material material_default = {
     .color_diffuse = { 1.0f, 0.0f, 1.0f, 1.0f },
     .color_specular = { 1.0f, 0.0f, 1.0f, 1.0f },
 
-    .roughness = 128.0f
+    .roughness = 128.0f,
+
+    .use_color = true
 };
 
 u32 material_add(Material material) {

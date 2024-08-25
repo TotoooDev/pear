@@ -42,8 +42,10 @@ Model* model_new_from_pear3d(Pear3D pear3d) {
 
         Image* texture = image_new_from_pear3d(pear_image);
         
+        Texture* texture_albedo = texture_new_from_image(texture, TEXTURE_WRAPPING_REPEAT, TEXTURE_FILTERING_NEAREST);
         Material material = {
-            .texture_albedo = texture_new_from_image(texture, TEXTURE_WRAPPING_REPEAT, TEXTURE_FILTERING_NEAREST)
+            .texture_albedo = texture_albedo,
+            .use_color = texture_albedo == NULL
         };
         material_indices[i] = material_add(material);
 

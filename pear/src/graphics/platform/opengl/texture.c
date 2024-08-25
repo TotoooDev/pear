@@ -6,6 +6,8 @@
 #include <stdlib.h>
 
 typedef struct Texture {
+    u32 width;
+    u32 height;
     u32 id;
 } Texture;
 
@@ -94,6 +96,8 @@ Texture* texture_create(TextureWrapping wrapping, TextureFiltering filtering) {
 
 Texture* texture_new(u32 width, u32 height, TextureWrapping wrapping, TextureFiltering filtering, TextureFormat format) {
     Texture* texture = texture_create(wrapping, filtering);
+    texture->width = width;
+    texture->height = height;
     GLint gl_format = texture_format_to_opengl(format);
     glTexImage2D(GL_TEXTURE_2D, 0, gl_format, width, height, 0, gl_format, GL_UNSIGNED_BYTE, NULL);
     return texture;
@@ -101,6 +105,8 @@ Texture* texture_new(u32 width, u32 height, TextureWrapping wrapping, TextureFil
 
 Texture* texture_new_depth(u32 width, u32 height, TextureWrapping wrapping, TextureFiltering filtering) {
     Texture* texture = texture_create(wrapping, filtering);
+    texture->width = width;
+    texture->height = height;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     return texture;
 }
@@ -116,6 +122,14 @@ Texture* texture_new_from_image(Image* image, TextureWrapping wrapping, TextureF
 void texture_delete(Texture* texture) {
     glDeleteTextures(1, &(texture->id));
     free(texture);
+}
+
+u32 texture_get_width(Texture* texture) {
+    return texture->width;
+}
+
+u32 texture_get_height(Texture* texture) {
+    return texture->height;
 }
 
 u32 texture_get_id(Texture* texture) {
