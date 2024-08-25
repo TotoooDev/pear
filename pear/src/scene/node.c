@@ -1,5 +1,6 @@
 #include <scene/node.h>
 #include <scene/types/model_3d.h>
+#include <scene/types/mesh_3d.h>
 #include <scene/types/camera_3d.h>
 #include <core/types.h>
 #include <core/log.h>
@@ -19,12 +20,14 @@ typedef struct Node {
     NodeType type;
 } Node;
 
-void* node_get_data_from_type(NodeType type, void* creation_info) {
+void* node_get_data_from_type(Node* node, NodeType type, void* creation_info) {
     switch (type) {
     case NODE_TYPE_CONTAINER:
         return NULL;
     case NODE_TYPE_MODEL_3D:
-        return (void*)model3d_new((Model3DCreationInfo*)creation_info);
+        return (void*)model3d_new((Model3DCreationInfo*)creation_info, node);
+    case NODE_TYPE_MESH_3D:
+        return (void*)mesh3d_new((Mesh3DCreationInfo*)creation_info);
     case NODE_TYPE_CAMERA_3D:
         return (void*)camera3d_new((Camera3DCreationInfo*)creation_info);
     default:
@@ -46,7 +49,7 @@ Node* node_new(NodeType type, Node* parent, const char* name, void* creation_inf
     node->sons = NULL;
     node->num_sons = 0;
     node->update_function = update_function;
-    node->data = node_get_data_from_type(type, creation_info);
+    node->data = node_get_data_from_type(node, type, creation_info);
     node->type = type;
 
     strcpy(node->name, name);
@@ -71,7 +74,7 @@ void node_recursive_delete(Node* node) {
 }
 
 void node_add_son(Node* node, Node* son) {
-    node->sons = (Node**)realloc(node->sons, node->num_sons + 1);
+    node->sons = (Node**)realloc(node->sons, sizeof(Node*) * node->num_sons + 1);
     node->sons[node->num_sons] = son;
     node->num_sons++;
 }

@@ -1,19 +1,17 @@
-#ifndef PEAR_NODE_MODEl3D_H
-#define PEAR_NODE_MODEl3D_H
+#ifndef PEAR_NODE_MODEL_3D_H
+#define PEAR_NODE_MODEL_3D_H
 
 #include <graphics/model.h>
-#include <cglm/cglm.h>
+#include <scene/node.h>
 
 typedef struct Model3DCreationInfo {
     Model* model;
-    vec3 pos;
-    vec3 rotation;
-    vec3 scale;
+    Transform transform;
 } Model3DCreationInfo;
 
 typedef struct Model3D Model3D;
 
-Model3D* model3d_new(Model3DCreationInfo* creation_info);
+Model3D* model3d_new(Model3DCreationInfo* creation_info, Node* node);
 void model3d_delete(Model3D* model);
 
 void model3d_set_position(Model3D* model, vec3 pos);

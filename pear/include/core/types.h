@@ -18,4 +18,10 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 
+typedef struct Transform {
+    vec3 pos;
+    vec3 rotation;
+    vec3 scale;
+} Transform;
+
 #endif

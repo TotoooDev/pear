@@ -61,6 +61,10 @@ void mesh_delete(Mesh* mesh) {
     free(mesh);
 }
 
+void mesh_set_material_index(Mesh* mesh, u32 material_index) {
+    mesh->material_index = material_index;
+}
+
 u32 mesh_get_material_index(Mesh* mesh) {
     return mesh->material_index;
 }

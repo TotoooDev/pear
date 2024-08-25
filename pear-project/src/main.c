@@ -25,20 +25,14 @@ int main(int argc, char* argv[]) {
 
     Model* model = model_new_from_pear3d(pear3d);
 
-    Model3DCreationInfo model3d_info;
-    model3d_info.model = model;
-
-    model3d_info.pos[0] = 0.0f;
-    model3d_info.pos[1] = 0.0f;
-    model3d_info.pos[2] = 0.0f;
-
-    model3d_info.rotation[0] = 0.0f;
-    model3d_info.rotation[1] = 0.0f;
-    model3d_info.rotation[2] = 0.0f;
-
-    model3d_info.scale[0] = 1.0f;
-    model3d_info.scale[1] = 1.0f;
-    model3d_info.scale[2] = 1.0f;
+    Model3DCreationInfo model3d_info = {
+        .model = model,
+        .transform = {
+            .pos = { 0.0f, 0.0f, 0.0f },
+            .rotation = { 0.0f, 0.0f, 0.0f },
+            .scale = { 1.0f, 1.0f, 1.0f }
+        }
+    };
 
     Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL, NULL);
     Node* model_node = node_new(NODE_TYPE_MODEL_3D, parent, "model", &model3d_info, NULL);

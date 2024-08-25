@@ -8,6 +8,7 @@
 #include <graphics/platform/opengl/texture.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <scene/types/camera_3d.h>
+#include <scene/types/model_3d.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
 #include <core/log.h>
@@ -185,6 +186,26 @@ void renderer_render_to_screen(Renderer* renderer) {
     glEnable(GL_DEPTH_TEST);
 }
 
+void renderer_draw_model3d(Renderer* renderer, Node* node) {
+    Model3D* model3d = (Model3D*)node_get_data(node);
+    mat4 model_transform;
+    model3d_get_model_matrix(model3d, model_transform);
+
+    for (u32 i = 0; i < node_get_num_sons(node); i++) {
+        Node* son = node_get_sons(node)[i];
+        if (node_get_type(son) != NODE_TYPE_MESH_3D)
+            continue;
+        
+        Mesh3D* mesh3d = (Mesh3D*)node_get_data(son);
+        mat4 mesh_transform;
+        mesh3d_get_mesh_matrix(mesh3d, mesh_transform);
+
+        mat4 final_transform;
+        glm_mat4_mul(model_transform, mesh_transform, final_transform);
+        renderer_draw_mesh3d(renderer, mesh3d, final_transform);
+    }
+}
+
 void renderer_draw_mesh(Renderer* renderer, Mesh* mesh, mat4 model) {
     Shader* shader_used;
 
@@ -282,7 +303,7 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
 
     switch (node_get_type(node)) {
     case NODE_TYPE_MODEL_3D:
-        renderer_draw_model3d(renderer, node_get_data(node));
+        renderer_draw_model3d(renderer, node);
         break;
 
     case NODE_TYPE_CAMERA_3D:
@@ -291,6 +312,7 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
         break;
 
     case NODE_TYPE_CONTAINER:
+    case NODE_TYPE_MESH_3D: // the drawing of the mesh should be done here, but we do it in renderer_draw_model3d. it's kind of a problem because i wanted to make every api draw call here.
     default:
         break;
     }
@@ -305,14 +327,9 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
     renderer_render_to_screen(renderer);
 }
 
-void renderer_draw_model3d(Renderer* renderer, Model3D* node) {
-    Model* model = model3d_get_model(node);
-    mat4 model_matrix;
-    model3d_get_model_matrix(node, model_matrix);
-    
-    for (u32 i = 0; i < model_get_num_meshes(model); i++) {
-        renderer_draw_mesh(renderer, model_get_meshes(model)[i], model_matrix);
-    }
+void renderer_draw_mesh3d(Renderer* renderer, Mesh3D* node, mat4 transform) {
+    Mesh* mesh = mesh3d_get_mesh(node);
+    renderer_draw_mesh(renderer, mesh, transform);
 }
 
 void renderer_set_fov(Renderer* renderer, f32 fov) {

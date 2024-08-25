@@ -2,6 +2,8 @@
 #include <scene/types/container.h>
 #include <scene/types/camera_3d.h>
 #include <scene/types/model_3d.h>
+#include <scene/types/mesh_3d.h>
+#include <graphics/material.h>
 #include <limits.h>
 
 static Node* gui_root = NULL;
@@ -34,6 +36,40 @@ void gui_model_3d(struct nk_context* nk_context, Model3D* data) {
     model3d_set_scale(data, scale);
 }
 
+void gui_mesh_3d(struct nk_context* nk_context, Mesh3D* data) {
+    Mesh* mesh = mesh3d_get_mesh(data);
+    u32 material_index = mesh_get_material_index(mesh);
+
+    vec3 pos, rotation, scale;
+    mesh3d_get_position(data, pos);
+    mesh3d_get_rotation(data, rotation);
+    mesh3d_get_scale(data, scale);
+
+    nk_layout_row_dynamic(nk_context, 16, 4);
+
+    nk_label(nk_context, "position:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(pos[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(pos[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(pos[2]), FLT_MAX, 1.0f, 0.01f);
+
+    nk_label(nk_context, "rotation:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(rotation[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(rotation[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(rotation[2]), FLT_MAX, 1.0f, 0.01f);
+
+    nk_label(nk_context, "scale:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(scale[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(scale[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(scale[2]), FLT_MAX, 1.0f, 0.01f);
+
+    nk_layout_row_dynamic(nk_context, 16, 1);
+    mesh_set_material_index(mesh, nk_propertyi(nk_context, "#material_index", 0, material_index, material_get_num_materials() - 1, 1, 0.1f));
+
+    mesh3d_set_position(data, pos);
+    mesh3d_set_rotation(data, rotation);
+    mesh3d_set_scale(data, scale);
+}
+
 void gui_camera_3d(struct nk_context* nk_context, Camera3D* data) {
     vec3 pos;
     camera3d_get_pos(data, pos);
@@ -52,10 +88,14 @@ void gui_camera_3d(struct nk_context* nk_context, Camera3D* data) {
     camera3d_set_pos(data, pos);
 }
 
-void gui_node_properties(Node* node, void* user_data) {
+void gui_node_properties(Node* node, void* user_data, u32 counter) {
     struct nk_context* nk_context = (struct nk_context*) user_data;
 
-    if (nk_tree_push(nk_context, NK_TREE_TAB, node_get_name(node), NK_MAXIMIZED)) {
+    enum nk_collapse_states tree_state = NK_MAXIMIZED;
+    if (node_get_type(node) == NODE_TYPE_MESH_3D)
+        tree_state = NK_MINIMIZED;
+
+    if (nk_tree_push_id(nk_context, NK_TREE_TAB, node_get_name(node), tree_state, counter)) {
         nk_layout_row_dynamic(nk_context, 16, 2);
 
         if (node_get_num_sons(node) > 0)
@@ -73,6 +113,12 @@ void gui_node_properties(Node* node, void* user_data) {
             Model3D* model_data = (Model3D*)node_get_data(node);
             gui_model_3d(nk_context, model_data);
             break;
+
+        case NODE_TYPE_MESH_3D:
+            nk_label(nk_context, "type: mesh_3d", NK_TEXT_ALIGN_LEFT);
+            Mesh3D* mesh_data = (Mesh3D*)node_get_data(node);
+            gui_mesh_3d(nk_context, mesh_data);
+            break;
         
         case NODE_TYPE_CAMERA_3D:
             nk_label(nk_context, "type: camera_3d", NK_TEXT_ALIGN_LEFT);
@@ -86,7 +132,7 @@ void gui_node_properties(Node* node, void* user_data) {
         }
 
         for (u32 i = 0; i < node_get_num_sons(node); i++) {
-            gui_node_properties(node_get_sons(node)[i], user_data);
+            gui_node_properties(node_get_sons(node)[i], user_data, counter + i + 1);
         }
 
         nk_tree_pop(nk_context);
@@ -97,7 +143,7 @@ void gui_node_hierarchy(struct nk_context* nk_context, void* user_data) {
     Node* root = gui_root == NULL ? (Node*)user_data : gui_root;
 
     if (nk_begin(nk_context, "node hierarchy", nk_rect(10, 230, 300, 300), gui_default_window_flags)) {
-        gui_node_properties(root, nk_context);
+        gui_node_properties(root, nk_context, 0);
     }
     nk_end(nk_context);
 }
