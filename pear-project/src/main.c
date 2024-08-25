@@ -11,6 +11,8 @@
 #include <event/keyboard.h>
 #include <pear-3d.h>
 
+#include <graphics/material.h>
+
 #include <cam.h>
 
 int main(int argc, char* argv[]) {
@@ -43,6 +45,8 @@ int main(int argc, char* argv[]) {
     gui_add(gui_general_info, NULL);
     gui_add(gui_node_hierarchy, (void*)parent);
     gui_add(gui_material_inspector, NULL);
+
+    material_add(material_get_default());
 
     app_set_root_node(parent);
     app_run();
