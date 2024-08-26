@@ -76,13 +76,6 @@ u32 mesh_get_num_indices(Mesh* mesh) {
 void mesh_use(Mesh* mesh) {
     glBindVertexArray(mesh->vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-
-    Material* material = material_get(mesh->material_index);
-
-    if (material->texture_albedo != NULL) {
-        glActiveTexture(GL_TEXTURE0);
-        texture_use(material->texture_albedo);
-    }
 }
 
 #endif

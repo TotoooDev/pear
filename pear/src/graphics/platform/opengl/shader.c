@@ -83,7 +83,3 @@ void shader_set_vec4(Shader* shader, vec4 value, const char* name) {
 void shader_set_mat4(Shader* shader, mat4 value, const char* name) {
     glUniformMatrix4fv(glGetUniformLocation(shader->id, name), 1, false, (f32*)value);
 }
-
-void shader_set_texture(Shader* shader, Texture* texture, const char* name) {
-    shader_set_i32(shader, texture_get_id(texture), name);
-}

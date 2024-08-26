@@ -43,6 +43,8 @@ typedef struct Renderer {
 
     Framebuffer* screen_framebuffer;
     Mesh* screen_mesh;
+
+    Camera3D* current_camera;
 } Renderer;
 
 static bool renderer_is_glew_init = false;
@@ -103,6 +105,24 @@ void renderer_debug_output(GLenum source, GLenum type, u32 id, GLenum severity, 
     }
 }
 
+void renderer_set_material_uniform(Shader* shader, Material* material) {
+    shader_set_i32(shader, SHADER_TEXTURE_ID_ALBEDO, "u_material.texture_albedo");
+    shader_set_i32(shader, SHADER_TEXTURE_ID_SPECULAR, "u_material.texture_specular");
+    shader_set_i32(shader, SHADER_TEXTURE_ID_NORMAL, "u_material.texture_normal");
+
+    shader_set_vec4(shader, material->color_diffuse, "u_material.color_diffuse");
+    shader_set_vec4(shader, material->color_specular, "u_material.color_specular");
+
+    shader_set_f32(shader, material->roughness, "u_material.roughness");
+
+    if (material->texture_albedo != NULL)
+        texture_use(material->texture_albedo, SHADER_TEXTURE_ID_ALBEDO);
+    if (material->texture_specular != NULL)
+        texture_use(material->texture_specular, SHADER_TEXTURE_ID_SPECULAR);
+    if (material->texture_normal != NULL)
+        texture_use(material->texture_normal, SHADER_TEXTURE_ID_NORMAL);
+}
+
 void renderer_set_uniforms(Renderer* renderer, Shader* shader, mat4 model, Material* material) {
     shader_use(shader);
     shader_set_u32(shader, 0, "u_platform");
@@ -110,10 +130,17 @@ void renderer_set_uniforms(Renderer* renderer, Shader* shader, mat4 model, Mater
     shader_set_mat4(shader, renderer->view_matrix, "u_view");
     shader_set_mat4(shader, model, "u_model");
 
+    mat4 model_transpose_inverse;
+    glm_mat4_inv(model, model_transpose_inverse);
+    glm_mat4_transpose(model_transpose_inverse);
+    shader_set_mat4(shader, model_transpose_inverse, "u_model_transpose_inverse");
+
+    vec3 camera_pos;
+    camera3d_get_pos(renderer->current_camera, camera_pos);
+    shader_set_vec3(shader, camera_pos, "u_cam_pos");
     shader_set_vec4(shader, material->color_diffuse, "u_color");
 
-    if (material->texture_albedo != NULL && !material->use_color)
-        shader_set_i32(renderer->shader_texture, 0, "u_albedo");
+    renderer_set_material_uniform(shader, material);
 }
 
 void renderer_init_debug_output() {
@@ -181,7 +208,7 @@ void renderer_render_to_screen(Renderer* renderer) {
     shader_use(renderer->shader_screen);
     mesh_use(renderer->screen_mesh);
     glDisable(GL_DEPTH_TEST);
-    texture_use(framebuffer_get_texture(renderer->screen_framebuffer, 0));
+    texture_use(framebuffer_get_texture(renderer->screen_framebuffer, 0), 0);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->screen_mesh), GL_UNSIGNED_INT, NULL);
     glEnable(GL_DEPTH_TEST);
 }
@@ -245,6 +272,7 @@ Renderer* renderer_new() {
     renderer->viewport_scale_y = window_get_scale_y(app_get_window());
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
+    renderer->current_camera = NULL;
 
     TextureFormat formats[] = { TEXTURE_FORMAT_RGBA };
     renderer->screen_framebuffer = framebuffer_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, formats, 1, true);
@@ -309,6 +337,7 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
     case NODE_TYPE_CAMERA_3D:
         Camera3D* cam = (Camera3D*)node_get_data(node);
         camera3d_get_view_matrix(cam, renderer->view_matrix);
+        renderer->current_camera = cam;
         break;
 
     case NODE_TYPE_CONTAINER:

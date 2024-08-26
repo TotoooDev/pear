@@ -136,7 +136,8 @@ u32 texture_get_id(Texture* texture) {
     return texture->id;
 }
 
-void texture_use(Texture* texture) {
+void texture_use(Texture* texture, u32 texture_id) {
+    glActiveTexture(GL_TEXTURE0 + texture_id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
 }
 

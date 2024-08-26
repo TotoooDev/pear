@@ -2,10 +2,6 @@
 #include <core/app.h>
 #include <core/config.h>
 
-#define GUI_NUM_FPS_STORED 64
-
-static f32 gui_fps[GUI_NUM_FPS_STORED];
-
 void gui_general_info(struct nk_context* nk_context, void* user_data) {
     if (nk_begin(nk_context, "general info", nk_rect(10, 10, 200, 200), gui_default_window_flags)) {
         if (nk_tree_push(nk_context, NK_TREE_TAB, "general info", NK_MAXIMIZED)) {
