@@ -157,6 +157,80 @@ void renderer_set_directional_light_uniform(Shader* shader, Light3D* light_3d, u
     shader_set_vec3(shader, light.specular, uniform_specular);
 }
 
+void renderer_set_point_light_uniform(Shader* shader, Light3D* light_3d, u32 index) {
+    char uniform_base[64];
+    char uniform_position[64];
+    char uniform_ambient[64];
+    char uniform_diffuse[64];
+    char uniform_specular[64];
+    char uniform_constant[64];
+    char uniform_linear[64];
+    char uniform_quadratic[64];
+
+    sprintf(uniform_base, "u_point_lights[%d]", index);
+    sprintf(uniform_position, "%s.pos", uniform_base);
+    sprintf(uniform_ambient, "%s.ambient", uniform_base);
+    sprintf(uniform_diffuse, "%s.diffuse", uniform_base);
+    sprintf(uniform_specular, "%s.specular", uniform_base);
+    sprintf(uniform_constant, "%s.constant", uniform_base);
+    sprintf(uniform_linear, "%s.linear", uniform_base);
+    sprintf(uniform_quadratic, "%s.quadratic", uniform_base);
+
+    Light light = light3d_get_light(light_3d);
+    vec3 pos;
+    light3d_get_pos(light_3d, pos);
+
+    shader_set_vec3(shader, pos, uniform_position);
+    shader_set_vec3(shader, light.ambient, uniform_ambient);
+    shader_set_vec3(shader, light.diffuse, uniform_diffuse);
+    shader_set_vec3(shader, light.specular, uniform_specular);
+    shader_set_f32(shader, light.constant, uniform_constant);
+    shader_set_f32(shader, light.linear, uniform_linear);
+    shader_set_f32(shader, light.quadratic, uniform_quadratic);
+}
+
+void renderer_set_spot_light_uniform(Shader* shader, Light3D* light_3d, u32 index) {
+    char uniform_base[64];
+    char uniform_position[64];
+    char uniform_direction[64];
+    char uniform_ambient[64];
+    char uniform_diffuse[64];
+    char uniform_specular[64];
+    char uniform_constant[64];
+    char uniform_linear[64];
+    char uniform_quadratic[64];
+    char uniform_cut_off[64];
+    char uniform_outer_cut_off[64];
+
+    sprintf(uniform_base, "u_point_lights[%d]", index);
+    sprintf(uniform_position, "%s.pos", uniform_base);
+    sprintf(uniform_direction, "%s.direction", uniform_base);
+    sprintf(uniform_ambient, "%s.ambient", uniform_base);
+    sprintf(uniform_diffuse, "%s.diffuse", uniform_base);
+    sprintf(uniform_specular, "%s.specular", uniform_base);
+    sprintf(uniform_constant, "%s.constant", uniform_base);
+    sprintf(uniform_linear, "%s.linear", uniform_base);
+    sprintf(uniform_quadratic, "%s.quadratic", uniform_base);
+    sprintf(uniform_cut_off, "%s.cut_off", uniform_base);
+    sprintf(uniform_outer_cut_off, "%s.outer_cut_off", uniform_base);
+
+    Light light = light3d_get_light(light_3d);
+    vec3 pos, direction;
+    light3d_get_pos(light_3d, pos);
+    light3d_get_direction(light_3d, direction);
+
+    shader_set_vec3(shader, pos, uniform_position);
+    shader_set_vec3(shader, direction, uniform_direction);
+    shader_set_vec3(shader, light.ambient, uniform_ambient);
+    shader_set_vec3(shader, light.diffuse, uniform_diffuse);
+    shader_set_vec3(shader, light.specular, uniform_specular);
+    shader_set_f32(shader, light.constant, uniform_constant);
+    shader_set_f32(shader, light.linear, uniform_linear);
+    shader_set_f32(shader, light.quadratic, uniform_quadratic);
+    shader_set_f32(shader, light.cut_off, uniform_cut_off);
+    shader_set_f32(shader, light.outer_cut_off, uniform_outer_cut_off);
+}
+
 void renderer_set_light_uniforms(Renderer* renderer, Shader* shader) {
     u32 num_directional_lights = 0;
     u32 num_point_lights = 0;
@@ -171,10 +245,12 @@ void renderer_set_light_uniforms(Renderer* renderer, Shader* shader) {
             break;
 
         case LIGHT_TYPE_POINT:
+            renderer_set_point_light_uniform(shader, light, num_point_lights);
             num_point_lights++;
             break;
 
         case LIGHT_TYPE_SPOT:
+            renderer_set_spot_light_uniform(shader, light, num_spot_lights);
             num_spot_lights++;
             break;
         }
