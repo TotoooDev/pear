@@ -24,6 +24,11 @@ void gui_add(GUIFunction function, void* user_data);
 void gui_clear();
 void gui_render();
 
+struct nk_colorf gui_vec4_to_nk_color(vec4 color);
+void gui_nk_color_to_vec4(struct nk_colorf nk_color, vec4 color);
+struct nk_colorf gui_vec3_to_nk_color(vec3 color);
+void gui_nk_color_to_vec3(struct nk_colorf nk_color, vec3 color);
+
 struct nk_image gui_image_from_texture(Texture* texture);
 
 #endif

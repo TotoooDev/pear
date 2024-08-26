@@ -62,3 +62,36 @@ void gui_render() {
 
     gui_platform_render();
 }
+
+struct nk_colorf gui_vec4_to_nk_color(vec4 color) {
+    struct nk_colorf nk_color = {
+        .r = color[0],
+        .g = color[1],
+        .b = color[2],
+        .a = color[3]
+    };
+    return nk_color;
+}
+
+void gui_nk_color_to_vec4(struct nk_colorf nk_color, vec4 color) {
+    color[0] = nk_color.r;
+    color[1] = nk_color.g;
+    color[2] = nk_color.b;
+    color[3] = nk_color.a;
+}
+
+struct nk_colorf gui_vec3_to_nk_color(vec3 color) {
+    struct nk_colorf nk_color = {
+        .r = color[0],
+        .g = color[1],
+        .b = color[2],
+        .a = 1.0f
+    };
+    return nk_color;
+}
+
+void gui_nk_color_to_vec3(struct nk_colorf nk_color, vec3 color) {
+    color[0] = nk_color.r;
+    color[1] = nk_color.g;
+    color[2] = nk_color.b;
+}

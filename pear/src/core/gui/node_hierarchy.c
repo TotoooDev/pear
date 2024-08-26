@@ -3,6 +3,7 @@
 #include <scene/types/camera_3d.h>
 #include <scene/types/model_3d.h>
 #include <scene/types/mesh_3d.h>
+#include <scene/types/light_3d.h>
 #include <graphics/material.h>
 #include <limits.h>
 
@@ -88,6 +89,66 @@ void gui_camera_3d(struct nk_context* nk_context, Camera3D* data) {
     camera3d_set_pos(data, pos);
 }
 
+void gui_light_3d(struct nk_context* nk_context, Light3D* data) {
+    vec3 pos, direction;
+    light3d_get_pos(data, pos);
+    light3d_get_direction(data, direction);
+
+    Light light = light3d_get_light(data);
+    struct nk_colorf color;
+
+    nk_layout_row_dynamic(nk_context, 16, 4);
+    nk_label(nk_context, "position:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(pos[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(pos[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(pos[2]), FLT_MAX, 1.0f, 0.01f);
+    nk_label(nk_context, "direction:", NK_TEXT_ALIGN_LEFT);
+    nk_property_float(nk_context, "#x", -FLT_MAX, &(direction[0]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#y", -FLT_MAX, &(direction[1]), FLT_MAX, 1.0f, 0.01f);
+    nk_property_float(nk_context, "#z", -FLT_MAX, &(direction[2]), FLT_MAX, 1.0f, 0.01f);
+
+    if (nk_tree_push(nk_context, NK_TREE_NODE, "colors", NK_MINIMIZED)) {
+        nk_layout_row_dynamic(nk_context, 16, 1);
+        nk_label(nk_context, "ambient color:", NK_TEXT_ALIGN_LEFT);
+        nk_layout_row_dynamic(nk_context, 128, 1);
+        color = gui_vec3_to_nk_color(light.ambient);
+        gui_nk_color_to_vec3(nk_color_picker(nk_context, color, NK_RGBA), light.ambient);
+
+        nk_layout_row_dynamic(nk_context, 16, 1);
+        nk_label(nk_context, "diffuse color:", NK_TEXT_ALIGN_LEFT);
+        nk_layout_row_dynamic(nk_context, 128, 1);
+        color = gui_vec3_to_nk_color(light.diffuse);
+        gui_nk_color_to_vec3(nk_color_picker(nk_context, color, NK_RGBA), light.diffuse);
+
+        nk_layout_row_dynamic(nk_context, 16, 1);
+        nk_label(nk_context, "specular color:", NK_TEXT_ALIGN_LEFT);
+        nk_layout_row_dynamic(nk_context, 128, 1);
+        color = gui_vec3_to_nk_color(light.specular);
+        gui_nk_color_to_vec3(nk_color_picker(nk_context, color, NK_RGBA), light.specular);
+
+        nk_tree_pop(nk_context);
+    }
+
+    if (nk_tree_push(nk_context, NK_TREE_NODE, "attenuation", NK_MINIMIZED)) {
+        nk_layout_row_dynamic(nk_context, 16, 1);
+        nk_property_float(nk_context, "constant", 0.0f, &(light.constant), FLT_MAX, 1.0f, 0.01f);
+        nk_property_float(nk_context, "lienar", 0.0f, &(light.linear), FLT_MAX, 1.0f, 0.01f);
+        nk_property_float(nk_context, "quadratic", 0.0f, &(light.quadratic), FLT_MAX, 1.0f, 0.01f);
+        nk_tree_pop(nk_context);
+    }
+
+    if (nk_tree_push(nk_context, NK_TREE_NODE, "spot light", NK_MINIMIZED)) {
+        nk_layout_row_dynamic(nk_context, 16, 1);
+        nk_property_float(nk_context, "cut off", 0.0f, &(light.cut_off), FLT_MAX, 1.0f, 0.01f);
+        nk_property_float(nk_context, "outer cut off", 0.0f, &(light.outer_cut_off), FLT_MAX, 1.0f, 0.01f);
+        nk_tree_pop(nk_context);
+    }
+
+    light3d_set_pos(data, pos);
+    light3d_set_direction(data, direction);
+    light3d_set_light(data, light);
+}
+
 void gui_node_properties(Node* node, void* user_data, u32 counter) {
     struct nk_context* nk_context = (struct nk_context*) user_data;
 
@@ -124,6 +185,12 @@ void gui_node_properties(Node* node, void* user_data, u32 counter) {
             nk_label(nk_context, "type: camera_3d", NK_TEXT_ALIGN_LEFT);
             Camera3D* cam_data = (Camera3D*)node_get_data(node);
             gui_camera_3d(nk_context, cam_data);
+            break;
+
+        case NODE_TYPE_LIGHT_3D:
+            nk_label(nk_context, "type: light_3d", NK_TEXT_ALIGN_LEFT);
+            Light3D* light_data = (Light3D*)node_get_data(node);
+            gui_light_3d(nk_context, light_data);
             break;
 
         default:
