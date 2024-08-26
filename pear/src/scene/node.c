@@ -2,6 +2,7 @@
 #include <scene/types/model_3d.h>
 #include <scene/types/mesh_3d.h>
 #include <scene/types/camera_3d.h>
+#include <scene/types/light_3d.h>
 #include <core/types.h>
 #include <core/log.h>
 #include <stdlib.h>
@@ -30,6 +31,8 @@ void* node_get_data_from_type(Node* node, NodeType type, void* creation_info) {
         return (void*)mesh3d_new((Mesh3DCreationInfo*)creation_info);
     case NODE_TYPE_CAMERA_3D:
         return (void*)camera3d_new((Camera3DCreationInfo*)creation_info);
+    case NODE_TYPE_LIGHT_3D:
+        return (void*)light3d_new((Light3DCreationInfo*)creation_info);
     default:
         PEAR_ERROR("unknown node type!");
         return NULL;

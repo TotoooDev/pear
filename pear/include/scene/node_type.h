@@ -5,7 +5,8 @@ typedef enum NodeType {
     NODE_TYPE_CONTAINER,
     NODE_TYPE_MODEL_3D,
     NODE_TYPE_MESH_3D,
-    NODE_TYPE_CAMERA_3D
+    NODE_TYPE_CAMERA_3D,
+    NODE_TYPE_LIGHT_3D
 } NodeType;
 
 #endif
