@@ -14,9 +14,11 @@ typedef struct Light3D Light3D;
 Light3D* light3d_new(Light3DCreationInfo* creation_info);
 void light3d_delete(Light3D* light);
 
+void light3d_set_light(Light3D* light_3d, Light light);
 void light3d_set_pos(Light3D* light, vec3 pos);
 void light3d_set_direction(Light3D* light, vec3 direction);
 
+Light light3d_get_light(Light3D* light);
 void light3d_get_pos(Light3D* light, vec3 dest);
 void light3d_get_direction(Light3D* light, vec3 dest);
 

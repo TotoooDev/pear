@@ -7,6 +7,7 @@
 #include <core/config.h>
 #include <scene/node.h>
 #include <scene/types/model_3d.h>
+#include <scene/types/light_3d.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <pear-3d.h>
@@ -36,10 +37,23 @@ int main(int argc, char* argv[]) {
         }
     };
 
+    Light light = {
+        .type = LIGHT_TYPE_DIRECTIONAL,
+        .ambient = { 0.1f, 0.1f, 0.1f },
+        .diffuse = { 0.5f, 0.5f, 0.5f },
+        .specular = { 1.0f, 1.0f, 1.0f }
+    };
+    Light3DCreationInfo light_info = {
+        .light = light,
+        .direction = { 0.0f, -1.0f, 0.0f }
+    };
+
     Node* parent = node_new(NODE_TYPE_CONTAINER, NULL, "parent", NULL, NULL);
     Node* model_node = node_new(NODE_TYPE_MODEL_3D, parent, "model", &model3d_info, NULL);
+    Node* light_node = node_new(NODE_TYPE_LIGHT_3D, parent, "light", &light_info, NULL);
 
     node_add_son(parent, cam_new(parent));
+    node_add_son(parent, light_node);
     node_add_son(parent, model_node);
 
     gui_add(gui_general_info, NULL);

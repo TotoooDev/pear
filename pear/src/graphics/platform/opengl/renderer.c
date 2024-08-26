@@ -2,6 +2,7 @@
 
 #include <graphics/renderer.h>
 #include <graphics/material.h>
+#include <graphics/light.h>
 #include <graphics/platform/opengl/renderer.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
@@ -9,6 +10,7 @@
 #include <graphics/platform/opengl/framebuffer.h>
 #include <scene/types/camera_3d.h>
 #include <scene/types/model_3d.h>
+#include <scene/types/light_3d.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
 #include <core/log.h>
@@ -16,11 +18,15 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // i need to include this after glew because it includes glfw
 #include <graphics/platform/opengl/window.h>
 
-static bool renderer_print_notifications = false;
+// we love magic numbers
+// in the shader we can have a maximum of 128 light for each type
+// so at most we can have 128 * 3 lights in a scene (which is not a lot i know)
+#define RENDERER_NUM_MAX_LIGHTS 128 * 3
 
 typedef struct Renderer {
     f32 fov;
@@ -45,8 +51,12 @@ typedef struct Renderer {
     Mesh* screen_mesh;
 
     Camera3D* current_camera;
+
+    Light3D* lights[RENDERER_NUM_MAX_LIGHTS];
+    u32 num_lights;
 } Renderer;
 
+static bool renderer_print_notifications = false;
 static bool renderer_is_glew_init = false;
 
 void renderer_calculate_projection(Renderer* renderer) {
@@ -123,6 +133,58 @@ void renderer_set_material_uniform(Shader* shader, Material* material) {
         texture_use(material->texture_normal, SHADER_TEXTURE_ID_NORMAL);
 }
 
+void renderer_set_directional_light_uniform(Shader* shader, Light3D* light_3d, u32 index) {
+    // i kinda miss c++ strings right now
+    char uniform_base[64];
+    char uniform_direction[64];
+    char uniform_ambient[64];
+    char uniform_diffuse[64];
+    char uniform_specular[64];
+
+    sprintf(uniform_base, "u_directional_lights[%d]", index);
+    sprintf(uniform_direction, "%s.direction", uniform_base);
+    sprintf(uniform_ambient, "%s.ambient", uniform_base);
+    sprintf(uniform_diffuse, "%s.diffuse", uniform_base);
+    sprintf(uniform_specular, "%s.specular", uniform_base);
+
+    Light light = light3d_get_light(light_3d);
+    vec3 direction;
+    light3d_get_direction(light_3d, direction);
+
+    shader_set_vec3(shader, direction, uniform_direction);
+    shader_set_vec3(shader, light.ambient, uniform_ambient);
+    shader_set_vec3(shader, light.diffuse, uniform_diffuse);
+    shader_set_vec3(shader, light.specular, uniform_specular);
+}
+
+void renderer_set_light_uniforms(Renderer* renderer, Shader* shader) {
+    u32 num_directional_lights = 0;
+    u32 num_point_lights = 0;
+    u32 num_spot_lights = 0;
+
+    for (u32 i = 0; i < renderer->num_lights; i++) {
+        Light3D* light = renderer->lights[i];
+        switch (light3d_get_light(light).type) {
+        case LIGHT_TYPE_DIRECTIONAL:
+            renderer_set_directional_light_uniform(shader, light, num_directional_lights);
+            num_directional_lights++;
+            break;
+
+        case LIGHT_TYPE_POINT:
+            num_point_lights++;
+            break;
+
+        case LIGHT_TYPE_SPOT:
+            num_spot_lights++;
+            break;
+        }
+    }
+
+    shader_set_i32(shader, num_directional_lights, "u_num_directional_lights");
+    shader_set_i32(shader, num_point_lights, "u_num_point_lights");
+    shader_set_i32(shader, num_spot_lights, "u_num_spot_lights");
+}
+
 void renderer_set_uniforms(Renderer* renderer, Shader* shader, mat4 model, Material* material) {
     shader_use(shader);
     shader_set_u32(shader, 0, "u_platform");
@@ -141,6 +203,7 @@ void renderer_set_uniforms(Renderer* renderer, Shader* shader, mat4 model, Mater
     shader_set_vec4(shader, material->color_diffuse, "u_color");
 
     renderer_set_material_uniform(shader, material);
+    renderer_set_light_uniforms(renderer, shader);
 }
 
 void renderer_init_debug_output() {
@@ -273,6 +336,7 @@ Renderer* renderer_new() {
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->current_camera = NULL;
+    renderer->num_lights = 0;
 
     TextureFormat formats[] = { TEXTURE_FORMAT_RGBA };
     renderer->screen_framebuffer = framebuffer_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, formats, 1, true);
@@ -324,6 +388,8 @@ void renderer_clear(Renderer* renderer, f32 r, f32 g, f32 b, f32 a) {
     renderer_set_target(renderer, renderer->screen_framebuffer);
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    renderer->num_lights = 0;
 }
 
 void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
@@ -338,6 +404,16 @@ void renderer_draw_node_hierarchy(Renderer* renderer, Node* node) {
         Camera3D* cam = (Camera3D*)node_get_data(node);
         camera3d_get_view_matrix(cam, renderer->view_matrix);
         renderer->current_camera = cam;
+        break;
+
+    case NODE_TYPE_LIGHT_3D:
+        if (renderer->num_lights >= RENDERER_NUM_MAX_LIGHTS) {
+            PEAR_WARN("too many lights in the scene!");
+            break;
+        }
+
+        renderer->lights[renderer->num_lights] = (Light3D*)node_get_data(node);
+        renderer->num_lights++;
         break;
 
     case NODE_TYPE_CONTAINER:

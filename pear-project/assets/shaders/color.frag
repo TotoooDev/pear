@@ -63,6 +63,19 @@ uniform int u_num_point_lights;
 uniform int u_num_spot_lights;
 
 void main() {
-    // do light calculations
-    frag_color = vec4(1.0, 0.0, 1.0, 1.0);
+    DirectionalLight light = u_directional_lights[0];
+    vec3 ambient = light.ambient * u_material.color_diffuse.rgb;
+
+    vec3 norm = normalize(normal);
+    vec3 light_dir = normalize(-light.direction);
+    float diff = max(dot(norm, light_dir), 0.0);
+    vec3 diffuse = light.diffuse * diff * u_material.color_diffuse.rgb;
+
+    vec3 view_dir = normalize(u_cam_pos - frag_pos);
+    vec3 reflect_dir = reflect(-light_dir, norm);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.roughness);
+    vec3 specular = light.specular * spec * u_material.color_diffuse.rgb;
+
+    vec3 result = ambient + diffuse + specular;
+    frag_color = vec4(result, 1.0);
 }
