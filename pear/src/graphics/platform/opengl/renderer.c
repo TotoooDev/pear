@@ -125,6 +125,8 @@ void renderer_set_material_uniform(Shader* shader, Material* material) {
 
     shader_set_f32(shader, material->roughness, "u_material.roughness");
 
+    shader_set_i32(shader, material->texture_specular != NULL, "u_material.has_texture_specular");
+
     if (material->texture_albedo != NULL)
         texture_use(material->texture_albedo, SHADER_TEXTURE_ID_ALBEDO);
     if (material->texture_specular != NULL)
