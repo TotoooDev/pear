@@ -26,7 +26,7 @@
 // we love magic numbers
 // in the shader we can have a maximum of 128 light for each type
 // so at most we can have 128 * 3 lights in a scene (which is not a lot i know)
-#define RENDERER_NUM_MAX_LIGHTS 128 * 3
+#define RENDERER_NUM_MAX_LIGHTS 48 * 3
 
 typedef struct Renderer {
     f32 fov;
@@ -124,8 +124,6 @@ void renderer_set_material_uniform(Shader* shader, Material* material) {
     shader_set_vec4(shader, material->color_specular, "u_material.color_specular");
 
     shader_set_f32(shader, material->roughness, "u_material.roughness");
-
-    shader_set_i32(shader, material->texture_specular != NULL, "u_material.has_texture_specular");
 
     if (material->texture_albedo != NULL)
         texture_use(material->texture_albedo, SHADER_TEXTURE_ID_ALBEDO);

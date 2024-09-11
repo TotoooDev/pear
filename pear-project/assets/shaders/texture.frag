@@ -14,9 +14,6 @@ struct Material {
     vec4 color_specular;
 
     float roughness;
-
-    // FIXME: ugly fucking code
-    bool has_texture_specular;
 };
 
 struct DirectionalLight {
@@ -77,12 +74,8 @@ vec3 calculate_directional_light(DirectionalLight light, vec3 norm, vec3 view_di
 
     vec3 reflect_dir = reflect(-light_dir, norm);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.roughness);
-    // ewwwww
-    vec3 specular;
-    if (u_material.has_texture_specular)
-        specular = light.specular * spec * texture(u_material.texture_specular, texture_coords).rgb;
-    else
-        specular = light.specular * spec * u_material.color_specular.rgb;
+
+    vec3 specular = light.specular * spec * texture(u_material.texture_specular, texture_coords).rgb;
 
     vec3 result = ambient + diffuse + specular;
     return result;
@@ -100,11 +93,8 @@ vec3 calculate_point_light(PointLight light, vec3 norm, vec3 view_dir) {
 
     vec3 reflect_dir = reflect(-light_dir, norm);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.roughness);
-    vec3 specular;
-    if (u_material.has_texture_specular)
-        specular = light.specular * spec * texture(u_material.texture_specular, texture_coords).rgb * attenuation;
-    else
-        specular = light.specular * spec * u_material.color_specular.rgb * attenuation;
+    
+    vec3 specular = light.specular * spec * texture(u_material.texture_specular, texture_coords).rgb * attenuation;
 
     vec3 result = ambient + diffuse + specular;
     return result;
@@ -126,11 +116,8 @@ vec3 calculate_spot_light(SpotLight light, vec3 norm, vec3 view_dir) {
 
     vec3 reflect_dir = reflect(-light_dir, norm);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.roughness);
-    vec3 specular;
-    if (u_material.has_texture_specular)
-        specular = light.specular * spec * texture(u_material.texture_specular, texture_coords).rgb * attenuation * intensity;
-    else
-        specular = light.specular * spec * u_material.color_specular.rgb * attenuation * intensity;
+    
+    vec3 specular = light.specular * spec * texture(u_material.texture_specular, texture_coords).rgb * attenuation * intensity;
 
     vec3 result = ambient + diffuse + specular;
     return result;
