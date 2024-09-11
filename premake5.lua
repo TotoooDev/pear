@@ -126,7 +126,10 @@ project "pear-project"
             "GL",
             "GLEW"
         }
-        postbuildcommands ("cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/")
+        postbuildcommands {
+            "cp -R ../pear/assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
+            "cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/"
+        }
 
     filter "configurations:Debug"
         defines
