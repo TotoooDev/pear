@@ -15,6 +15,7 @@ out vec3 frag_pos;
 void main() {
     gl_Position = u_projection * u_view * u_model * vec4(a_pos, 1.0);
 
+    texture_coords = a_texture_coords;
     frag_pos = vec3(u_model * vec4(a_pos, 1.0));
     normal = mat3(u_model_transpose_inverse) * a_normals;
 }
