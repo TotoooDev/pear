@@ -1,5 +1,5 @@
-#ifndef PEAR_TYPES_H
-#define PEAR_TYPES_H
+#ifndef PEAR_TYPES_H_
+#define PEAR_TYPES_H_
 
 #include <cglm/cglm.h>
 #include <stdint.h>
