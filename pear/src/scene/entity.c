@@ -3,11 +3,12 @@
 #include <stdlib.h>
 
 typedef struct entity_t {
-    u32 foo;
+    entity_type_t type;
 } entity_t;
 
-entity_t* entity_new() {
+entity_t* entity_new(entity_type_t type) {
     entity_t* entity = (entity_t*)malloc(sizeof(entity_t));
+    entity->type = type;
     return entity;
 }
 
