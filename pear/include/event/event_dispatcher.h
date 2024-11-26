@@ -1,0 +1,10 @@
+#ifndef PEAR_EVENT_DISPATCHER_H_
+#define PEAR_EVENT_DISPATCHER_H_
+
+#include <event/event.h>
+
+typedef void(*event_function_t)(event_type_t, void*, void*);
+
+void event_send(event_type_t type, void* event);
+
+#endif
