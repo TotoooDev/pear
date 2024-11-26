@@ -15,3 +15,7 @@ entity_t* entity_new(entity_type_t type) {
 void entity_delete(entity_t* entity) {
     free(entity);
 }
+
+entity_type_t entity_get_type(entity_t* entity) {
+    return entity->type;
+}

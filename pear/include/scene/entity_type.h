@@ -3,7 +3,7 @@
 
 typedef enum entity_type_t {
     ENTITY_TYPE_FOO,
-    ENTITY_TYPE_FOO
+    ENTITY_TYPE_BAR
 } entity_type_t;
 
 #endif
