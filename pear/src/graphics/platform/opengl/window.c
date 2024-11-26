@@ -1,6 +1,7 @@
-#ifndef PEAR_OPENGL
+#ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/window.h>
+#include <event/event_dispatcher.h>
 #include <core/log.h>
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
@@ -8,6 +9,68 @@
 typedef struct window_t {
     GLFWwindow* window;
 } window_t;
+
+void window_close_callback(GLFWwindow* window) {
+    event_send(EVENT_TYPE_QUIT, NULL);
+}
+
+void window_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+    window_resized_event_t event = {
+        .width = width,
+        .height = height
+    };
+
+    event_send(EVENT_TYPE_WINDOW_RESIZED, &event);
+}
+
+void window_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods) {
+    if (action == GLFW_PRESS) {
+        key_down_event_t event = {
+            .key = key
+        };
+        event_send(EVENT_TYPE_KEY_DOWN, &event);
+    }
+    else if (action == GLFW_RELEASE) {
+        key_up_event_t event = {
+            .key = key
+        };
+        event_send(EVENT_TYPE_KEY_UP, &event);
+    }
+}
+
+void window_mouse_movement_callback(GLFWwindow* window, f64 x, f64 y) {
+    mouse_moved_event_t event = {
+        .x = x,
+        .y = y
+    };
+
+    event_send(EVENT_TYPE_MOUSE_MOVED, &event);
+}
+
+void window_mouse_button_callback(GLFWwindow* window, i32 button, i32 action, i32 mods) {
+    if (action == GLFW_PRESS) {
+        button_down_event_t event = {
+            .button = button
+        };
+        event_send(EVENT_TYPE_BUTTON_DOWN, &event);
+    }
+    else if (action == GLFW_RELEASE) {
+        button_up_event_t event = {
+            .button = button
+        };
+        event_send(EVENT_TYPE_BUTTON_UP, &event);
+    }
+}
+
+void window_scale_callback(GLFWwindow* window, f32 scale_x, f32 scale_y) {
+    window_scale_changed_event_t event = {
+        .scale_x = scale_x,
+        .scale_y = scale_y
+    };
+
+    event_send(EVENT_TYPE_WINDOW_SCALE_CHANGED, &event);
+}
+
 
 window_t* window_new(const char* title, u32 width, u32 height) {
     if (glfwInit() != GLFW_TRUE) {

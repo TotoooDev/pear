@@ -2,7 +2,45 @@
 #define PEAR_EVENT_H_
 
 typedef enum event_type_t {
-    EVENT_TYPE_QUIT
+    EVENT_TYPE_QUIT,
+    EVENT_TYPE_WINDOW_RESIZED,
+    EVENT_TYPE_WINDOW_SCALE_CHANGED,
+    EVENT_TYPE_KEY_DOWN,
+    EVENT_TYPE_KEY_UP,
+    EVENT_TYPE_BUTTON_DOWN,
+    EVENT_TYPE_BUTTON_UP,
+    EVENT_TYPE_MOUSE_MOVED,
 } event_type_t;
+
+typedef struct window_resized_event_t {
+    u32 width;
+    u32 height;
+} window_resized_event_t;
+
+typedef struct window_scale_changed_event_t {
+    f32 scale_x;
+    f32 scale_y;
+} window_scale_changed_event_t;
+
+typedef struct key_down_event_t {
+    u32 key;
+} key_down_event_t;
+
+typedef struct key_up_event_t {
+    u32 key;
+} key_up_event_t;
+
+typedef struct button_down_event_t {
+    u32 button;
+} button_down_event_t;
+
+typedef struct button_up_event_t {
+    u32 button;
+} button_up_event_t;
+
+typedef struct mouse_moved_event_t {
+    f32 x;
+    f32 y;
+} mouse_moved_event_t;
 
 #endif
