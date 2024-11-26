@@ -15,10 +15,6 @@ array_t* array_new(u32 size) {
     array->length = 0;
     array->data = (void**)malloc(size);
 
-    for (u32 i = 0; i < array->size; i++) {
-        array->data[i] = NULL;
-    }
-
     return array;
 }
 
