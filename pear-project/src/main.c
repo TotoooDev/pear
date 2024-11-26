@@ -2,6 +2,7 @@
 #include <scene/scene.h>
 #include <scene/types/foo.h>
 #include <scene/types/bar.h>
+#include <graphics/window.h>
 
 int main(int argc, char* argv[]) {
     pear_print_hello();
@@ -23,6 +24,10 @@ int main(int argc, char* argv[]) {
     scene_remove_entity(scene, entity1);
     scene_remove_entity(scene, entity2);
     scene_delete(scene);
+
+    window_t* window = window_new("pear engine", 1080, 720);
+    window_update(window);
+    window_delete(window);
 
     return 0;
 }
