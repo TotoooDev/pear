@@ -1,4 +1,6 @@
 #include <scene/scene.h>
+#include <scene/types/foo.h>
+#include <scene/types/bar.h>
 #include <util/array.h>
 #include <core/log.h>
 #include <core/types.h>
@@ -22,14 +24,42 @@ void scene_delete(scene_t* scene) {
     free(scene);
 }
 
-entity_t* scene_add_entity(scene_t* scene, entity_type_t type) {
-    entity_t* entity = entity_new(type);
+entity_t* scene_add_entity(scene_t* scene, entity_type_t type, void* creation_data) {
+    void* data;
+    switch (type) {
+    case ENTITY_TYPE_FOO:
+        data = foo_new(creation_data);
+        break;
+
+    case ENTITY_TYPE_BAR:
+        data = bar_new(creation_data);
+        break;
+
+    default:
+        data = NULL;
+        break;
+    }
+    entity_t* entity = entity_new(type, data);
+
     array_add(scene->entities, entity);
     return entity;
 }
 
 void scene_remove_entity(scene_t* scene, entity_t* entity) {
     array_remove(scene->entities, entity);
+
+    switch (entity_get_type(entity)) {
+    case ENTITY_TYPE_FOO:
+        foo_delete(entity_get_data(entity));
+        break;
+
+    case ENTITY_TYPE_BAR:
+        bar_delete(entity_get_data(entity));
+        break;
+
+    default:
+        break;
+    }
     entity_delete(entity);
 }
 
@@ -38,11 +68,11 @@ void scene_update(scene_t* scene, f32 timestep) {
         entity_t* entity = array_get(scene->entities, i);
         switch (entity_get_type(entity)) {
         case ENTITY_TYPE_FOO:
-            PEAR_INFO("foo");
+            foo_update(entity_get_data(entity), timestep);
             break;
 
         case ENTITY_TYPE_BAR:
-            PEAR_INFO("bar");
+            bar_update(entity_get_data(entity), timestep);
             break;
         
         default:

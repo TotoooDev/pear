@@ -6,9 +6,10 @@
 
 typedef struct entity_t entity_t;
 
-entity_t* entity_new(entity_type_t type);
+entity_t* entity_new(entity_type_t type, void* data);
 void entity_delete(entity_t* entity);
 
 entity_type_t entity_get_type(entity_t* entity);
+void* entity_get_data(entity_t* entity);
 
 #endif
