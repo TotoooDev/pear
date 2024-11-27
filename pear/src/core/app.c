@@ -1,0 +1,68 @@
+#include <core/app.h>
+#include <core/timer.h>
+#include <graphics/window.h>
+#include <event/event_dispatcher.h>
+#include <core/types.h>
+#include <core/log.h>
+#include <stdlib.h>
+
+typedef struct app_t {
+    bool is_running;
+    f32 timestep;
+    f32 last_time;
+
+    window_t* window;
+    scene_t* scene;
+} app_t;
+
+static app_t* app = NULL;
+
+void app_on_event(event_type_t type, void* event, void* user_data) {
+    if (type == EVENT_TYPE_QUIT) {
+        app->is_running = false;
+    }
+}
+
+void app_update_timestep() {
+    f32 current_time = timer_get_time_ms();
+    app->timestep = current_time - app->last_time;
+    app->last_time = current_time;
+}
+
+void app_init() {
+    app = (app_t*)malloc(sizeof(app_t));
+
+    app->is_running = true;
+    app->timestep = 0.0f;
+    app->last_time = 0.0f;
+    app->window = window_new("pear", 1080, 720);
+    app->scene = scene_new();
+
+    event_subscribe(app_on_event, NULL);
+
+    timer_init();
+}
+
+void app_stop() {
+    window_delete(app->window);
+    scene_delete(app->scene);
+    free(app);
+}
+
+void app_run() {
+    while (app->is_running) {
+        app_update_timestep();
+        window_update(app->window);
+        scene_update(app->scene, app->timestep);
+    }
+
+    app_stop();
+}
+
+scene_t* app_get_scene() {
+    return app->scene;
+}
+
+void app_set_scene(scene_t* scene) {
+    app->scene = scene;
+}
