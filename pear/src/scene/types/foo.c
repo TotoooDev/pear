@@ -17,7 +17,7 @@ void foo_delete(foo_t* foo) {
 }
 
 void foo_update(foo_t* foo, f32 timestep) {
-    PEAR_INFO("foo: %d", foo->value);
+    PEAR_INFO("foo: %f", timestep);
 }
 
 void foo_set_value(foo_t* foo, u32 value) {
