@@ -90,6 +90,13 @@ window_t* window_new(const char* title, u32 width, u32 height) {
         PEAR_ERROR("failed to create window!");
     glfwMakeContextCurrent(window->window);
 
+    glfwSetWindowCloseCallback(window->window, window_close_callback);
+    glfwSetWindowSizeCallback(window->window, window_resize_callback);
+    glfwSetWindowContentScaleCallback(window->window, window_scale_callback);
+    glfwSetKeyCallback(window->window, window_key_callback);
+    glfwSetMouseButtonCallback(window->window, window_mouse_button_callback);
+    glfwSetCursorPosCallback(window->window, window_mouse_movement_callback);
+
     return window;
 }
 
