@@ -1,6 +1,8 @@
 #ifndef PEAR_EVENT_H_
 #define PEAR_EVENT_H_
 
+#include <core/types.h>
+
 typedef enum event_type_t {
     EVENT_TYPE_QUIT,
     EVENT_TYPE_WINDOW_RESIZED,

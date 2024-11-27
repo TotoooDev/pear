@@ -5,6 +5,7 @@
 
 typedef void(*event_function_t)(event_type_t, void*, void*);
 
+void event_subscribe(event_function_t function, void* user_data);
 void event_send(event_type_t type, void* event);
 
 #endif
