@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     bar_creation_data_t bar_data = { .value = 2 };
 
     scene_t* scene = app_get_scene();
-    entity_t* entity1 = scene_add_entity(scene, ENTITY_TYPE_FOO, &foo_data);
+    // entity_t* entity1 = scene_add_entity(scene, ENTITY_TYPE_FOO, &foo_data);
     // entity_t* entity2 = scene_add_entity(scene, ENTITY_TYPE_BAR, &bar_data);
 
     app_run();

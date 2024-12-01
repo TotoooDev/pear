@@ -1,13 +1,14 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/platform/opengl/shader.h>
+#include <core/log.h>
 #include <GL/glew.h>
 #include <stdlib.h>
 
 #define SHADER_INFO_LOG_LENGTH 1024
 
 typedef struct shader_t {
-    u32 id
+    u32 id;
 } shader_t;
 
 shader_t* shader_new(const char* vertex_source, const char* fragment_source) {
