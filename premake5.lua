@@ -92,3 +92,72 @@ project "pear-project"
 
     filter "configurations:Release"
         optimize "On"
+
+project "pear-formats"
+    location "pear-formats"
+    kind "StaticLib"
+    language "C"
+
+    targetdir ("bin/" .. outputDir .. "/%{prj.name}")
+    objdir ("bin-intermediate/" .. outputDir .. "/%{prj.name}")
+
+    debugdir ("bin/" .. outputDir .. "/%{prj.name}")
+
+    files {
+        "%{prj.name}/src/**.h",
+        "%{prj.name}/src/**.c",
+    }
+
+    includedirs {
+        "pear-formats/include",
+        "pear-formats/include/vendor"
+    }
+    
+    filter "configurations:Debug"
+        defines {
+            "PEAR_DEBUG",
+        }
+        symbols "On"
+
+    filter "configurations:Release"
+        optimize "On"
+
+project "converter"
+        location "converter"
+        kind "ConsoleApp"
+        language "C++"
+    
+        targetdir ("bin/" .. outputDir .. "/%{prj.name}")
+        objdir ("bin-intermediate/" .. outputDir .. "/%{prj.name}")
+    
+        debugdir ("bin/" .. outputDir .. "/%{prj.name}")
+    
+        files {
+            "%{prj.name}/src/**.hpp",
+            "%{prj.name}/src/**.cpp",
+        }
+    
+        includedirs {
+            "converter/include",
+            "converter/include/vendor",
+            "pear-formats/include"
+        }
+        
+        links ("pear-formats")
+    
+        filter "system:linux"
+            defines {
+                "PEAR_PLATFORM_LINUX",
+            }
+            postbuildcommands {
+                "cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
+            }
+    
+        filter "configurations:Debug"
+            defines {
+                "PEAR_DEBUG",
+            }
+            symbols "On"
+    
+        filter "configurations:Release"
+            optimize "On"
