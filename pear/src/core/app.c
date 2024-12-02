@@ -72,3 +72,7 @@ scene_t* app_get_scene() {
 void app_set_scene(scene_t* scene) {
     app->scene = scene;
 }
+
+window_t* app_get_window() {
+    return app->window;
+}
