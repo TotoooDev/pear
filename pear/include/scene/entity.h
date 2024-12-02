@@ -8,6 +8,7 @@ typedef enum entity_component_t {
     ENTITY_COMPONENT_TRANSFORM,
     ENTITY_COMPONENT_DRAWABLE,
     ENTITY_COMPONENT_CAMERA,
+    ENTITY_COMPONENT_SCRIPT,
     ENTITY_COMPONENT_END
 } entity_component_t;
 

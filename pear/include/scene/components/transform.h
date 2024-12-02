@@ -9,6 +9,7 @@ typedef struct transform_component_t {
     vec3 scale;
 } transform_component_t;
 
-transform_component_t* transformcomponent_create();
+transform_component_t* transformcomponent_new();
+void transformcomponent_get_model_matrix(transform_component_t* transform, mat4 dest);
 
 #endif

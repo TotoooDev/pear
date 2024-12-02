@@ -1,5 +1,6 @@
 #include <scene/entity.h>
 #include <scene/components/transform.h>
+#include <scene/components/script.h>
 #include <core/log.h>
 #include <core/alloc.h>
 #include <stdarg.h>
@@ -33,7 +34,11 @@ entity_t* entity_new_from_va_list(va_list args) {
     while ((current_component = va_arg(args, entity_component_t)) != ENTITY_COMPONENT_END) {
         switch (current_component) {
         case ENTITY_COMPONENT_TRANSFORM:
-            entity->components[(u32)current_component] = transformcomponent_create();
+            entity->components[(u32)current_component] = transformcomponent_new();
+            break;
+
+        case ENTITY_COMPONENT_SCRIPT:
+            entity->components[(u32)current_component] = scriptcomponent_new();
             break;
 
         default:
