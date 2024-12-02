@@ -18,15 +18,13 @@ project "pear"
 
 	debugdir ("bin/" .. outputDir .. "/%{prj.name}")
 
-    files
-	{
+    files {
 		"pear/include/**.h",
 		"pear/src/**.c",
 		"pear/src/vendor/**.c",
 	}
 
-    includedirs
-	{
+    includedirs {
 		"pear/include",
 		"pear/include/vendor"
 	}
@@ -38,8 +36,7 @@ project "pear"
         }
 
     filter "configurations:Debug"
-		defines
-		{
+		defines {
 			"PEAR_DEBUG",
 		}
 		symbols "On"
@@ -57,14 +54,12 @@ project "pear-project"
 
     debugdir ("bin/" .. outputDir .. "/%{prj.name}")
 
-    files
-    {
+    files {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.c",
     }
 
-    includedirs
-    {
+    includedirs {
         "pear-project/include",
         "pear-project/include/vendor",
         "pear/include/vendor",
@@ -90,8 +85,7 @@ project "pear-project"
         }
 
     filter "configurations:Debug"
-        defines
-        {
+        defines {
             "PEAR_DEBUG",
         }
         symbols "On"
