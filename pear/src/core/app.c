@@ -5,7 +5,7 @@
 #include <event/event_dispatcher.h>
 #include <core/types.h>
 #include <core/log.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 typedef struct app_t {
     bool is_running;
@@ -32,7 +32,7 @@ void app_update_timestep() {
 }
 
 void app_init() {
-    app = (app_t*)malloc(sizeof(app_t));
+    app = (app_t*)PEAR_MALLOC(sizeof(app_t));
 
     app->is_running = true;
     app->timestep = 0.0f;
@@ -50,7 +50,7 @@ void app_stop() {
     renderer_delete(app->renderer);
     window_delete(app->window);
     scene_delete(app->scene);
-    free(app);
+    PEAR_FREE(app);
 }
 
 void app_run() {

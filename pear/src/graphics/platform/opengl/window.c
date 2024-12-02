@@ -4,7 +4,7 @@
 #include <event/event_dispatcher.h>
 #include <core/log.h>
 #include <GLFW/glfw3.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 typedef struct window_t {
     GLFWwindow* window;
@@ -82,7 +82,7 @@ window_t* window_new(const char* title, u32 width, u32 height) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window_t* window = (window_t*)malloc(sizeof(window_t));
+    window_t* window = (window_t*)PEAR_MALLOC(sizeof(window_t));
 
     window->window = glfwCreateWindow(width, height, title, NULL, NULL);
 
@@ -103,7 +103,7 @@ window_t* window_new(const char* title, u32 width, u32 height) {
 void window_delete(window_t* window) {
     glfwDestroyWindow(window->window);
     glfwTerminate();
-    free(window);
+    PEAR_FREE(window);
 }
 
 void window_update(window_t* window) {

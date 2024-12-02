@@ -1,6 +1,6 @@
 #include <util/array.h>
 #include <core/log.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 typedef struct array_t {
     u32 size;
@@ -9,18 +9,18 @@ typedef struct array_t {
 } array_t;
 
 array_t* array_new(u32 size) {
-    array_t* array = (array_t*)malloc(sizeof(array_t));
+    array_t* array = (array_t*)PEAR_MALLOC(sizeof(array_t));
 
     array->size = size;
     array->length = 0;
-    array->data = (void**)malloc(size);
+    array->data = (void**)PEAR_MALLOC(size);
 
     return array;
 }
 
 void array_delete(array_t* array) {
-    free(array->data);
-    free(array);
+    PEAR_FREE(array->data);
+    PEAR_FREE(array);
 }
 
 u32 array_add(array_t* array, void* data) {

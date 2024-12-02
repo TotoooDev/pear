@@ -9,7 +9,7 @@
 #include <util/filesystem.h>
 #include <core/log.h>
 #include <GL/glew.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 typedef struct renderer_t {
     shader_t* shader;
@@ -23,7 +23,7 @@ renderer_t* renderer_new() {
         return NULL;
     }
 
-    renderer_t* renderer = (renderer_t*)malloc(sizeof(renderer_t));
+    renderer_t* renderer = (renderer_t*)PEAR_MALLOC(sizeof(renderer_t));
 
     vec3 positions[] = {
         {0.5f,  0.5f, 0.0f},
@@ -56,7 +56,7 @@ renderer_t* renderer_new() {
 }
 
 void renderer_delete(renderer_t* renderer) {
-    free(renderer);
+    PEAR_FREE(renderer);
 }
 
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {

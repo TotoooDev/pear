@@ -1,7 +1,7 @@
 #include <event/event_dispatcher.h>
 #include <core/types.h>
 #include <core/log.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 #define EVENT_NUM_MAX_FUNCTIONS 1024
 

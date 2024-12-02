@@ -1,19 +1,19 @@
 #include <scene/types/foo.h>
 #include <core/log.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 typedef struct foo_t {
     u32 value;
 } foo_t;
 
 foo_t* foo_new(foo_creation_data_t* creation_data) {
-    foo_t* foo = (foo_t*)malloc(sizeof(foo_t));
+    foo_t* foo = (foo_t*)PEAR_MALLOC(sizeof(foo_t));
     foo->value = creation_data->value;
     return foo;
 }
 
 void foo_delete(foo_t* foo) {
-    free(foo);
+    PEAR_FREE(foo);
 }
 
 void foo_update(foo_t* foo, f32 timestep) {

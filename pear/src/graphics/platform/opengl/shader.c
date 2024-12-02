@@ -3,7 +3,7 @@
 #include <graphics/platform/opengl/shader.h>
 #include <core/log.h>
 #include <GL/glew.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 #define SHADER_INFO_LOG_LENGTH 1024
 
@@ -12,7 +12,7 @@ typedef struct shader_t {
 } shader_t;
 
 shader_t* shader_new(const char* vertex_source, const char* fragment_source) {
-    shader_t* shader = (shader_t*)malloc(sizeof(shader_t));
+    shader_t* shader = (shader_t*)PEAR_MALLOC(sizeof(shader_t));
 
     u32 success;
     char info_log[SHADER_INFO_LOG_LENGTH];
@@ -54,7 +54,7 @@ shader_t* shader_new(const char* vertex_source, const char* fragment_source) {
 
 void shader_delete(shader_t* shader) {
     glDeleteProgram(shader->id);
-    free(shader);
+    PEAR_FREE(shader);
 }
 
 void shader_use(shader_t* shader) {

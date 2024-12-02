@@ -5,7 +5,7 @@
 #include <graphics/platform/opengl/mesh_info.h>
 #include <core/log.h>
 #include <GL/glew.h>
-#include <stdlib.h>
+#include <core/alloc.h>
 
 typedef struct mesh_t {
     u32 vao;
@@ -23,12 +23,12 @@ void mesh_enable_attribute(u32 index, u32 num_components, u32 offset, bool activ
 }
 
 mesh_t* mesh_new(mesh_info_t* mesh_info) {
-    mesh_t* mesh = (mesh_t*)malloc(sizeof(mesh_t));
+    mesh_t* mesh = (mesh_t*)PEAR_MALLOC(sizeof(mesh_t));
 
     mesh->num_indices = meshinfo_get_num_indices(mesh_info);
 
     u32 vertices_size = meshinfo_get_vertices_size(mesh_info);
-    f32* vertices = (f32*)malloc(vertices_size);
+    f32* vertices = (f32*)PEAR_MALLOC(vertices_size);
     meshinfo_get_vertices(mesh_info, vertices);
 
     glGenVertexArrays(1, &mesh->vao);
@@ -65,7 +65,7 @@ void mesh_delete(mesh_t* mesh) {
     glDeleteBuffers(1, &(mesh->vbo));
     glDeleteBuffers(1, &(mesh->ebo));
 
-    free(mesh);
+    PEAR_FREE(mesh);
 }
 
 u32 mesh_get_num_indices(mesh_t* mesh) {
