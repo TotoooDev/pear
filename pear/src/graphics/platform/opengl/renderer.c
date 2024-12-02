@@ -6,6 +6,7 @@
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/mesh_info.h>
+#include <util/filesystem.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <stdlib.h>
@@ -13,7 +14,6 @@
 typedef struct renderer_t {
     shader_t* shader;
     mesh_t* mesh;
-    // u32 vao, vbo, ebo;
 } renderer_t;
 
 renderer_t* renderer_new() {
@@ -49,25 +49,8 @@ renderer_t* renderer_new() {
     renderer->mesh = mesh_new(mesh_info);
 
     meshinfo_delete(mesh_info);
-
-    const char* vertex_source = "#version 330 core\n"
-        "layout (location = 0) in vec3 a_pos;\n"
-        "layout (location = 1) in vec3 a_color;\n"
-        "out vec3 color;\n"
-        "void main() {\n"
-        "   color = a_color;\n"
-        "   gl_Position = vec4(a_pos, 1.0f);\n"
-        "}\0"
-    ;
-    const char* fragment_source = "#version 330 core\n"
-        "out vec4 frag_color;\n"
-        "in vec3 color;\n"
-        "void main() {\n"
-        "   // frag_color = vec4(1.0, 0.0, 1.0, 1.0);\n"
-        "   frag_color = vec4(color, 1.0);\n"
-        "}\0"
-    ;
-    renderer->shader = shader_new(vertex_source, fragment_source);
+    
+    renderer->shader = shader_new(fileystem_read_file("shaders/shader.vert"), fileystem_read_file("shaders/shader.frag"));
 
     return renderer;
 }
@@ -84,7 +67,6 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     shader_use(renderer->shader);
 
-    // glBindVertexArray(renderer->vao);
     mesh_use(renderer->mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->mesh), GL_UNSIGNED_INT, 0);
 }
