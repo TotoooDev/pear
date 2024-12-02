@@ -26,7 +26,8 @@ project "pear"
 
     includedirs {
 		"pear/include",
-		"pear/include/vendor"
+		"pear/include/vendor",
+		"pear-formats/include"
 	}
 
     filter "system:linux"
@@ -66,7 +67,10 @@ project "pear-project"
         "pear/include"
     }
     
-    links ("pear")
+    links {
+        "pear",
+        "pear-formats"
+    }
 
     filter "system:linux"
         defines {

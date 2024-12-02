@@ -19,7 +19,6 @@ typedef struct pear_image_t {
 
 pear_image_t pear_image_load(const char* filename, bool* success);
 void pear_image_write(pear_image_t image, const char* filename);
-void pear_image_free(pear_image_t* image);
 
 #ifdef __cplusplus
 }

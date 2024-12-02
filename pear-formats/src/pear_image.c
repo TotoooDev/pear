@@ -54,11 +54,3 @@ void pear_image_write(pear_image_t image, const char* filename) {
 
     fclose(file);
 }
-
-void pear_image_free(pear_image_t* image) {
-    image->width = 0;
-    image->height = 0;
-    image->num_channels = 0;
-    image->data_size = 0;
-    free(image->data);
-}

@@ -11,7 +11,7 @@ void pear_free(void* data);
 #endif
 
 #ifndef PEAR_FREE
-    #define PEAR_FREE(size) pear_free(size)
+    #define PEAR_FREE(data) pear_free(data)
 #endif
 
 #endif
