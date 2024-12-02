@@ -2,16 +2,18 @@
 
 #include <graphics/renderer.h>
 #include <graphics/mesh.h>
+#include <graphics/mesh_info.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
+#include <graphics/platform/opengl/mesh_info.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <stdlib.h>
 
 typedef struct renderer_t {
     shader_t* shader;
-    // mesh_t* mesh;
-    u32 vao, vbo, ebo;
+    mesh_t* mesh;
+    // u32 vao, vbo, ebo;
 } renderer_t;
 
 renderer_t* renderer_new() {
@@ -23,43 +25,46 @@ renderer_t* renderer_new() {
 
     renderer_t* renderer = (renderer_t*)malloc(sizeof(renderer_t));
 
-    f32 vertices[] = {
-        0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
+    vec3 positions[] = {
+        {0.5f,  0.5f, 0.0f},
+        {0.5f, -0.5f, 0.0f},
+        {-0.5f, -0.5f, 0.0f},
+        {-0.5f,  0.5f, 0.0f}
     };
-
+    vec3 colors[] = {
+        {1.0f, 0.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 1.0f},
+        {1.0f, 0.0f, 1.0f}
+    };
     u32 indices[] = {
         0, 1, 3,
         1, 2, 3
     };
+    mesh_info_t* mesh_info = meshinfo_new();
+    meshinfo_add_indices(mesh_info, indices, 6);
+    meshinfo_add_position(mesh_info, positions, 4);
+    meshinfo_add_color(mesh_info, colors, 4);
 
-    glGenVertexArrays(1, &renderer->vao);
-    glGenBuffers(1, &renderer->vbo);
-    glGenBuffers(1, &renderer->ebo);
+    renderer->mesh = mesh_new(mesh_info);
 
-    glBindVertexArray(renderer->vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, renderer->vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32), (void*)0);
-    glEnableVertexAttribArray(0);
+    meshinfo_delete(mesh_info);
 
     const char* vertex_source = "#version 330 core\n"
         "layout (location = 0) in vec3 a_pos;\n"
+        "layout (location = 1) in vec3 a_color;\n"
+        "out vec3 color;\n"
         "void main() {\n"
+        "   color = a_color;\n"
         "   gl_Position = vec4(a_pos, 1.0f);\n"
         "}\0"
     ;
     const char* fragment_source = "#version 330 core\n"
         "out vec4 frag_color;\n"
+        "in vec3 color;\n"
         "void main() {\n"
-        "   frag_color = vec4(1.0, 0.0, 1.0, 1.0);\n"
+        "   // frag_color = vec4(1.0, 0.0, 1.0, 1.0);\n"
+        "   frag_color = vec4(color, 1.0);\n"
         "}\0"
     ;
     renderer->shader = shader_new(vertex_source, fragment_source);
@@ -79,8 +84,9 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     shader_use(renderer->shader);
 
-    glBindVertexArray(renderer->vao);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // glBindVertexArray(renderer->vao);
+    mesh_use(renderer->mesh);
+    glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->mesh), GL_UNSIGNED_INT, 0);
 }
 
 #endif
