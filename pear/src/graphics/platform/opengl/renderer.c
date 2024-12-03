@@ -8,9 +8,12 @@
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/mesh_info.h>
 #include <graphics/platform/opengl/texture.h>
-#include <core/app.h>
+#include <scene/components/drawable.h>
+#include <scene/components/transform.h>
 #include <event/event_dispatcher.h>
 #include <util/filesystem.h>
+#include <util/array.h>
+#include <core/app.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <core/alloc.h>
@@ -32,8 +35,6 @@ typedef struct renderer_t {
     mat4 view_matrix;
 
     shader_t* shader;
-    mesh_t* mesh;
-    texture_t* texture;
     
     camera_t camera;
 } renderer_t;
@@ -99,44 +100,6 @@ renderer_t* renderer_new() {
     renderer_calculate_projection(renderer);
     camera_get_view_matrix(renderer->camera, renderer->view_matrix);
 
-    vec3 positions[] = {
-        {0.5f,  0.5f, 0.0f},
-        {0.5f, -0.5f, 0.0f},
-        {-0.5f, -0.5f, 0.0f},
-        {-0.5f,  0.5f, 0.0f}
-    };
-    vec3 colors[] = {
-        {1.0f, 0.0f, 0.0f},
-        {0.0f, 1.0f, 0.0f},
-        {0.0f, 0.0f, 1.0f},
-        {1.0f, 0.0f, 1.0f}
-    };
-    vec2 texture_coords[] = {
-        {1.0f, 1.0f},
-        {1.0f, 0.0f},
-        {0.0f, 0.0f},
-        {0.0f, 1.0f}
-    };
-    u32 indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-    mesh_info_t* mesh_info = meshinfo_new();
-    meshinfo_add_indices(mesh_info, indices, 6);
-    meshinfo_add_position(mesh_info, positions, 4);
-    meshinfo_add_color(mesh_info, colors, 4);
-    meshinfo_add_texture_coords(mesh_info, texture_coords, 4);
-
-    renderer->mesh = mesh_new(mesh_info);
-
-    meshinfo_delete(mesh_info);
-    
-    bool success;
-    pear_image_t pear_image = pear_image_load("wall.image", &success);
-    image_t* image = image_new_from_pear_image(pear_image);
-    renderer->texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
-    image_delete(image);
-
     event_subscribe(renderer_on_event, renderer);
 
     return renderer;
@@ -152,19 +115,29 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 }
 
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
-    mat4 model_matrix;
-    glm_mat4_identity(model_matrix);
-
     shader_use(renderer->shader);
     shader_set_u32(renderer->shader, 0, "u_platform");
     shader_set_mat4(renderer->shader, renderer->projection_matrix, "u_projection");
     shader_set_mat4(renderer->shader, renderer->view_matrix, "u_view");
-    shader_set_mat4(renderer->shader, model_matrix, "u_model");
     shader_set_i32(renderer->shader, 0, "u_texture");
 
-    texture_use(renderer->texture, 0);
-    mesh_use(renderer->mesh);
-    glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->mesh), GL_UNSIGNED_INT, 0);
+
+    for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
+        entity_t* entity = array_get(scene_get_entities(scene), i);
+        if (entity_has_component(entity, ENTITY_COMPONENT_DRAWABLE) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+            drawable_component_t* drawable = (drawable_component_t*)entity_get_component(entity, ENTITY_COMPONENT_DRAWABLE);
+
+            mat4 model_matrix;
+            transformcomponent_get_model_matrix(transform, model_matrix);
+
+            shader_set_mat4(renderer->shader, model_matrix, "u_model");
+
+            texture_use(drawable->texture, 0);
+            mesh_use(drawable->mesh);
+            glDrawElements(GL_TRIANGLES, mesh_get_num_indices(drawable->mesh), GL_UNSIGNED_INT, 0);
+        }
+    }
 }
 
 void renderer_set_camera(renderer_t* renderer, camera_t camera) {

@@ -64,7 +64,8 @@ project "pear-project"
         "pear-project/include",
         "pear-project/include/vendor",
         "pear/include/vendor",
-        "pear/include"
+        "pear/include",
+        "pear-formats/include"
     }
     
     links {

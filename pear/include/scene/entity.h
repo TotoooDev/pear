@@ -1,7 +1,6 @@
 #ifndef PEAR_SCENE_ENTITY_H_
 #define PEAR_SCENE_ENTITY_H_
 
-#include <scene/entity_type.h>
 #include <core/types.h>
 
 typedef enum entity_component_t {

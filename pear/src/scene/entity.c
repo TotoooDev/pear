@@ -1,5 +1,6 @@
 #include <scene/entity.h>
 #include <scene/components/transform.h>
+#include <scene/components/drawable.h>
 #include <scene/components/script.h>
 #include <core/log.h>
 #include <core/alloc.h>
@@ -35,6 +36,13 @@ entity_t* entity_new_from_va_list(va_list args) {
         switch (current_component) {
         case ENTITY_COMPONENT_TRANSFORM:
             entity->components[(u32)current_component] = transformcomponent_new();
+            break;
+
+        case ENTITY_COMPONENT_DRAWABLE:
+            drawable_component_t* drawable = (drawable_component_t*)PEAR_MALLOC(sizeof(drawable_component_t));
+            drawable->mesh = NULL;
+            drawable->texture = NULL;
+            entity->components[(u32)current_component] = drawable;
             break;
 
         case ENTITY_COMPONENT_SCRIPT:
