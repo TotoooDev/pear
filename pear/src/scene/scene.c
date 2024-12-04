@@ -47,11 +47,11 @@ void scene_delete(scene_t* scene) {
     PEAR_FREE(scene);
 }
 
-entity_t* scene_add_entity(scene_t* scene, ...) {
+entity_t* scene_add_entity(scene_t* scene, const char* name, ...) {
     va_list args;
-    va_start(args, scene);
+    va_start(args, name);
 
-    entity_t* entity = entity_new_from_va_list(args);
+    entity_t* entity = entity_new_from_va_list(name, args);
     
     va_end(args);
     

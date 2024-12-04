@@ -7,8 +7,8 @@ void gui_scene_inspector_set_scene(scene_t* scene) {
     gui_scene = scene;
 }
 
-void gui_transform(struct nk_context* nk_context, entity_t* entity) {
-    if (nk_tree_push(nk_context, NK_TREE_NODE, "transform", NK_MAXIMIZED)) {
+void gui_transform(struct nk_context* nk_context, entity_t* entity, u32 i) {
+    if (nk_tree_push_id(nk_context, NK_TREE_NODE, "transform", NK_MAXIMIZED, i)) {
         transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
 
         nk_layout_row_dynamic(nk_context, 16, 4);
@@ -45,9 +45,9 @@ void gui_scene_inspector(struct nk_context* nk_context, void* user_data) {
         for (u32 i = 0; i < array_get_length(entities); i++) {
             entity_t* entity = array_get(entities, i);
 
-            if (nk_tree_push_id(nk_context, NK_TREE_TAB, "entity", NK_MAXIMIZED, i)) {
+            if (nk_tree_push_id(nk_context, NK_TREE_TAB, entity_get_name(entity), NK_MAXIMIZED, i)) {
                 if (entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-                    gui_transform(nk_context, entity);
+                    gui_transform(nk_context, entity, i);
                 }
 
                 nk_tree_pop(nk_context);

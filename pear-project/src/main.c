@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     app_init();
 
     scene_t* scene = app_get_scene();
-    entity_t* entity = scene_add_entity(scene, ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_DRAWABLE, ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_END);
+    entity_t* entity = scene_add_entity(scene, "entity", ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_DRAWABLE, ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_END);
     
     script_component_t* script = (script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SCRIPT);
     script->on_start = on_start;
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
     meshinfo_delete(mesh_info);
     image_delete(image);
 
-    entity_t* camera = scene_add_entity(scene, ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_END);
+    entity_t* camera = scene_add_entity(scene, "camera", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_END);
     transform_component_t* transform = (transform_component_t*)entity_get_component(camera, ENTITY_COMPONENT_TRANSFORM);
     transform->pos[2] = 2.0f;
     transform->rotation[0] = -90.0f;

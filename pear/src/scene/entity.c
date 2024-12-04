@@ -8,23 +8,25 @@
 #include <stdarg.h>
 
 typedef struct entity_t {
+    const char* name;
     u32 components_bitmask;
     void** components;
 } entity_t;
 
-entity_t* entity_new(entity_component_t component, ...) {
+entity_t* entity_new(const char* name, ...) {
     va_list args;
-    va_start(args, component);
+    va_start(args, name);
 
-    entity_t* entity = entity_new_from_va_list(args);
+    entity_t* entity = entity_new_from_va_list(name, args);
 
     va_end(args);
 
     return entity;
 }
 
-entity_t* entity_new_from_va_list(va_list args) {
+entity_t* entity_new_from_va_list(const char* name, va_list args) {
     entity_t* entity = (entity_t*)PEAR_MALLOC(sizeof(entity_t));
+    entity->name = name;
     
     entity->components_bitmask = 0;
     entity->components = (void**)PEAR_MALLOC(sizeof(void*) * (ENTITY_COMPONENT_END + 1));
@@ -74,6 +76,10 @@ void entity_delete(entity_t* entity) {
     }
 
     PEAR_FREE(entity);
+}
+
+const char* entity_get_name(entity_t* entity) {
+    return entity->name;
 }
 
 void* entity_get_component(entity_t* entity, entity_component_t component) {
