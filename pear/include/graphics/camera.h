@@ -3,13 +3,6 @@
 
 #include <core/types.h>
 
-typedef struct camera_t {
-    vec3 pos;
-    f32 yaw;
-    f32 pitch;
-} camera_t;
-
-camera_t camera_new_at_origin();
-void camera_get_view_matrix(camera_t camera, mat4 dest);
+void camera_get_view_matrix(vec3 pos, f32 yaw, f32 pitch, f32 roll, mat4 dest);
 
 #endif

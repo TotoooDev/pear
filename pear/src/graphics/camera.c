@@ -1,21 +1,13 @@
 #include <graphics/camera.h>
 
-camera_t camera_new_at_origin() {
-    return (camera_t){
-        .pos = { 0.0f, 0.0f, 0.0f },
-        .yaw = -90.0f,
-        .pitch = 0.0f
-    };
-}
-
-void camera_get_view_matrix(camera_t camera, mat4 dest) {
+void camera_get_view_matrix(vec3 pos, f32 yaw, f32 pitch, f32 roll, mat4 dest) {
     vec3 front;
     vec3 up;
     vec3 right;
 
-    front[0] = cos(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
-    front[1] = sin(glm_rad(camera.pitch));
-    front[2] = sin(glm_rad(camera.yaw)) * cos(glm_rad(camera.pitch));
+    front[0] = cos(glm_rad(yaw)) * cos(glm_rad(pitch));
+    front[1] = sin(glm_rad(pitch));
+    front[2] = sin(glm_rad(yaw)) * cos(glm_rad(pitch));
 
     glm_vec3_normalize(front);
 
@@ -27,7 +19,7 @@ void camera_get_view_matrix(camera_t camera, mat4 dest) {
     glm_normalize(up);
 
     vec3 direction;
-    glm_vec3_add(camera.pos, front, direction);
+    glm_vec3_add(pos, front, direction);
 
-    glm_lookat(camera.pos, direction, up, dest);
+    glm_lookat(pos, direction, up, dest);
 }

@@ -1,6 +1,8 @@
 #include <pear.h>
 #include <scene/scene.h>
+#include <scene/components/transform.h>
 #include <scene/components/drawable.h>
+#include <scene/components/camera.h>
 #include <scene/components/script.h>
 #include <graphics/window.h>
 #include <core/app.h>
@@ -69,6 +71,11 @@ int main(int argc, char* argv[]) {
     
     meshinfo_delete(mesh_info);
     image_delete(image);
+
+    entity_t* camera = scene_add_entity(scene, ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_END);
+    transform_component_t* transform = (transform_component_t*)entity_get_component(camera, ENTITY_COMPONENT_TRANSFORM);
+    transform->pos[2] = 2.0f;
+    transform->rotation[0] = -90.0f;
 
     app_run();
 

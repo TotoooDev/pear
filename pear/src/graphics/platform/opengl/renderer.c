@@ -4,12 +4,14 @@
 #include <graphics/mesh.h>
 #include <graphics/mesh_info.h>
 #include <graphics/texture.h>
+#include <graphics/camera.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/mesh_info.h>
 #include <graphics/platform/opengl/texture.h>
-#include <scene/components/drawable.h>
 #include <scene/components/transform.h>
+#include <scene/components/drawable.h>
+#include <scene/components/camera.h>
 #include <event/event_dispatcher.h>
 #include <util/filesystem.h>
 #include <util/array.h>
@@ -35,8 +37,6 @@ typedef struct renderer_t {
     mat4 view_matrix;
 
     shader_t* shader;
-    
-    camera_t camera;
 } renderer_t;
 
 void renderer_calculate_projection(renderer_t* renderer) {
@@ -93,12 +93,11 @@ renderer_t* renderer_new() {
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->shader = shader_new(fileystem_read_file("shaders/shader.vert"), fileystem_read_file("shaders/shader.frag"));
-    renderer->camera = camera_new_at_origin();
-    renderer->camera.pos[2] = 2.0f;
+
+    glm_mat4_identity(renderer->view_matrix);
 
     renderer_set_viewport(renderer);
     renderer_calculate_projection(renderer);
-    camera_get_view_matrix(renderer->camera, renderer->view_matrix);
 
     event_subscribe(renderer_on_event, renderer);
 
@@ -137,16 +136,16 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
             mesh_use(drawable->mesh);
             glDrawElements(GL_TRIANGLES, mesh_get_num_indices(drawable->mesh), GL_UNSIGNED_INT, 0);
         }
+
+        if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+            camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
+
+            if (camera->use) {
+                camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view_matrix);
+            }
+        }
     }
-}
-
-void renderer_set_camera(renderer_t* renderer, camera_t camera) {
-    renderer->camera = camera;
-    camera_get_view_matrix(renderer->camera, renderer->view_matrix);
-}
-
-camera_t renderer_get_camera(renderer_t* renderer) {
-    return renderer->camera;
 }
 
 #endif

@@ -1,6 +1,7 @@
 #include <scene/entity.h>
 #include <scene/components/transform.h>
 #include <scene/components/drawable.h>
+#include <scene/components/camera.h>
 #include <scene/components/script.h>
 #include <core/log.h>
 #include <core/alloc.h>
@@ -43,6 +44,12 @@ entity_t* entity_new_from_va_list(va_list args) {
             drawable->mesh = NULL;
             drawable->texture = NULL;
             entity->components[(u32)current_component] = drawable;
+            break;
+
+        case ENTITY_COMPONENT_CAMERA:
+            camera_component_t* camera = (camera_component_t*)PEAR_MALLOC(sizeof(camera_component_t));
+            camera->use = true;
+            entity->components[(u32)current_component] = camera;
             break;
 
         case ENTITY_COMPONENT_SCRIPT:
