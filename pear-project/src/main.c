@@ -16,7 +16,7 @@ void on_start(entity_t* entity, f32 timestep) {
 }
 
 void on_update(entity_t* entity, f32 timestep) {
-    // PEAR_INFO("i am updated!");
+    PEAR_INFO("i am updated!");
 }
 
 void on_end(entity_t* entity, f32 timestep) {
