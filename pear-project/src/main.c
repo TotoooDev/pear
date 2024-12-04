@@ -5,6 +5,7 @@
 #include <scene/components/camera.h>
 #include <scene/components/script.h>
 #include <graphics/window.h>
+#include <graphics/gui/gui.h>
 #include <core/app.h>
 #include <core/timer.h>
 #include <core/log.h>
@@ -19,6 +20,14 @@ void on_update(entity_t* entity, f32 timestep) {
 
 void on_end(entity_t* entity, f32 timestep) {
     PEAR_INFO("i am deleted!");
+}
+
+void gui(struct nk_context* nk_context, void* user_data) {
+    if (nk_begin(nk_context, "hello!", nk_rect(10, 10, 200, 200), gui_default_window_flags)) {
+        nk_layout_row_dynamic(nk_context, 16, 1);
+        nk_label(nk_context, "welcome to pear!", NK_TEXT_ALIGN_LEFT);
+    }
+    nk_end(nk_context);
 }
 
 int main(int argc, char* argv[]) {
@@ -76,6 +85,8 @@ int main(int argc, char* argv[]) {
     transform_component_t* transform = (transform_component_t*)entity_get_component(camera, ENTITY_COMPONENT_TRANSFORM);
     transform->pos[2] = 2.0f;
     transform->rotation[0] = -90.0f;
+
+    gui_add(gui, NULL);
 
     app_run();
 

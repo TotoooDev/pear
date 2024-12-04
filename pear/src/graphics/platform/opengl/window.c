@@ -1,6 +1,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/window.h>
+#include <graphics/platform/opengl/window.h>
 #include <event/event_dispatcher.h>
 #include <core/log.h>
 #include <GLFW/glfw3.h>
@@ -133,6 +134,10 @@ f32 window_get_scale_y(window_t* window) {
     f32 scale;
     glfwGetWindowContentScale(window->window, NULL, &scale);
     return scale;
+}
+
+GLFWwindow* window_get_glfw(window_t* window) {
+    return window->window;
 }
 
 #endif

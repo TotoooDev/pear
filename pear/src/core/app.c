@@ -2,6 +2,7 @@
 #include <core/timer.h>
 #include <graphics/window.h>
 #include <graphics/renderer.h>
+#include <graphics/gui/gui.h>
 #include <event/event_dispatcher.h>
 #include <core/types.h>
 #include <core/log.h>
@@ -43,10 +44,13 @@ void app_init() {
 
     event_subscribe(app_on_event, NULL);
 
+    gui_init();
+
     timer_init();
 }
 
 void app_stop() {
+    gui_free();
     renderer_delete(app->renderer);
     window_delete(app->window);
     scene_delete(app->scene);
@@ -57,8 +61,13 @@ void app_run() {
     while (app->is_running) {
         app_update_timestep();
         scene_update(app->scene, app->timestep);
+
         renderer_clear(app->renderer, 0.5f, 0.5f, 0.5f);
         renderer_draw_scene(app->renderer, app->scene);
+
+        gui_clear();
+        gui_render();
+
         window_update(app->window);
     }
 
