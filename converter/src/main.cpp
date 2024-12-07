@@ -1,4 +1,5 @@
 #include <image_converter.hpp>
+#include <model_converter.hpp>
 #include <pear_image.h>
 #include <vendor/argparse.hpp>
 
@@ -7,10 +8,10 @@ int main(int argc, char* argv[]) {
 
     parser.add_argument("-o", "--output")
         .help("specify the output file")
-        .default_value("out");
+        .default_value("out.model");
     
     parser.add_argument("-i", "--image")
-        .help("specify to convert an image")
+        .help("specify to convert an image only")
         .flag();
 
     parser.add_argument("-v", "--verbose")
@@ -43,6 +44,9 @@ int main(int argc, char* argv[]) {
         
         return 0;
     }
+
+    ModelConverter converter(input);
+    pear_model_write(converter.get_pear_model(), output.c_str());
 
     return 0;
 }

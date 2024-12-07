@@ -11,12 +11,16 @@
 #include <core/timer.h>
 #include <core/log.h>
 
+#include <pear_model.h>
+
 void on_start(entity_t* entity, f32 timestep) {
     PEAR_INFO("i am created!");
 }
 
 void on_update(entity_t* entity, f32 timestep) {
-    PEAR_INFO("i am updated!");
+    // PEAR_INFO("i am updated!");
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    transform->rotation[1] += 0.004f * timestep;
 }
 
 void on_end(entity_t* entity, f32 timestep) {
@@ -32,6 +36,37 @@ void gui(struct nk_context* nk_context, void* user_data) {
 }
 
 int main(int argc, char* argv[]) {
+    bool success_model;
+    pear_model_t model = pear_model_load("cube.model", &success_model);
+
+    for (u32 i = 0; i < model.num_meshes; i++) {
+        pear_mesh_t mesh = model.meshes[i];
+        PEAR_INFO("mesh %d:", i);
+
+        for (u32 j = 0; j < mesh.num_vertices; j++) {
+            pear_vertex_t vertex = mesh.vertices[j];
+            PEAR_INFO("  vertex %d: %f %f %f", j, vertex.pos[0], vertex.pos[1], vertex.pos[2]);
+        }
+
+        for (u32 j = 0; j < mesh.num_indices; j++) {
+            u32 index = mesh.indices[j];
+            PEAR_INFO("  index %d: %d", j, index);
+        }
+
+        PEAR_INFO("  material index: %d", mesh.material_index);
+    }
+
+    for (u32 i = 0; i < model.num_materials; i++) {
+        pear_material_t material = model.materials[i];
+        PEAR_INFO("material i:");
+        PEAR_INFO("  diffuse: %s", material.diffuse_path);
+        PEAR_INFO("  specular: %s", material.specular_path);
+        PEAR_INFO("  normal: %s", material.normal_path);
+        PEAR_INFO("  color: %f, %f, %f", material.color[0], material.color[1], material.color[2]);
+    }
+
+    pear_model_free(&model);
+
     pear_print_hello();
     app_init();
 

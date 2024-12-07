@@ -154,6 +154,7 @@ project "converter"
             defines {
                 "PEAR_PLATFORM_LINUX",
             }
+            links ("assimp")
             postbuildcommands {
                 "cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
             }

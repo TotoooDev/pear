@@ -13,6 +13,7 @@ pear_image_t pear_image_load(const char* filename, bool* success) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         printf("failed to open file %s!\n", filename);
+        *success = false;
         return image;
     }
     
