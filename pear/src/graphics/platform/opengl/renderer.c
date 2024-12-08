@@ -10,7 +10,7 @@
 #include <graphics/platform/opengl/mesh_info.h>
 #include <graphics/platform/opengl/texture.h>
 #include <scene/components/transform.h>
-#include <scene/components/drawable.h>
+#include <scene/components/model.h>
 #include <scene/components/camera.h>
 #include <event/event_dispatcher.h>
 #include <util/filesystem.h>
@@ -73,6 +73,14 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
     }
 }
 
+void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
+    shader_set_mat4(renderer->shader, model_matrix, "u_model");
+
+    texture_use(material.diffuse, 0);
+    mesh_use(mesh);
+    glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
+}
+
 renderer_t* renderer_new() {
     GLenum res = glewInit();
     if (res != GLEW_OK) {
@@ -109,6 +117,7 @@ void renderer_delete(renderer_t* renderer) {
 }
 
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
+    glEnable(GL_DEPTH_TEST);
     glClearColor(r, g, b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -120,21 +129,20 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     shader_set_mat4(renderer->shader, renderer->view_matrix, "u_view");
     shader_set_i32(renderer->shader, 0, "u_texture");
 
-
     for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
         entity_t* entity = array_get(scene_get_entities(scene), i);
-        if (entity_has_component(entity, ENTITY_COMPONENT_DRAWABLE) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+        if (entity_has_component(entity, ENTITY_COMPONENT_MODEL) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
             transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-            drawable_component_t* drawable = (drawable_component_t*)entity_get_component(entity, ENTITY_COMPONENT_DRAWABLE);
+            model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
 
             mat4 model_matrix;
             transformcomponent_get_model_matrix(transform, model_matrix);
 
-            shader_set_mat4(renderer->shader, model_matrix, "u_model");
-
-            texture_use(drawable->texture, 0);
-            mesh_use(drawable->mesh);
-            glDrawElements(GL_TRIANGLES, mesh_get_num_indices(drawable->mesh), GL_UNSIGNED_INT, 0);
+            for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
+                mesh_t* mesh = model_get_meshes(model->model)[j];
+                material_t material = model_get_materials(model->model)[mesh_get_material_index(mesh)];
+                renderer_draw_mesh(renderer, mesh, material, model_matrix);
+            }
         }
 
         if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {

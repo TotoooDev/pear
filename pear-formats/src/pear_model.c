@@ -49,8 +49,8 @@ pear_material_t pear_model_read_material(FILE* file) {
     material.normal_path = (char*)malloc(sizeof(char) * (normal_length + 1));
 
     fread(material.diffuse_path, sizeof(char), diffuse_length, file);
-    fread(material.specular_path, sizeof(char), diffuse_length, file);
-    fread(material.normal_path, sizeof(char), diffuse_length, file);
+    fread(material.specular_path, sizeof(char), specular_length, file);
+    fread(material.normal_path, sizeof(char), normal_length, file);
 
     material.diffuse_path[diffuse_length] = '\0';
     material.specular_path[specular_length] = '\0';

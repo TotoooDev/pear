@@ -1,6 +1,6 @@
 #include <scene/entity.h>
 #include <scene/components/transform.h>
-#include <scene/components/drawable.h>
+#include <scene/components/model.h>
 #include <scene/components/camera.h>
 #include <scene/components/script.h>
 #include <core/log.h>
@@ -41,11 +41,11 @@ entity_t* entity_new_from_va_list(const char* name, va_list args) {
             entity->components[(u32)current_component] = transformcomponent_new();
             break;
 
-        case ENTITY_COMPONENT_DRAWABLE:
-            drawable_component_t* drawable = (drawable_component_t*)PEAR_MALLOC(sizeof(drawable_component_t));
-            drawable->mesh = NULL;
-            drawable->texture = NULL;
-            entity->components[(u32)current_component] = drawable;
+        case ENTITY_COMPONENT_MODEL:
+            model_component_t* model = (model_component_t*)PEAR_MALLOC(sizeof(model_component_t));
+            model->model = NULL;
+            model->draw = true;
+            entity->components[(u32)current_component] = model;
             break;
 
         case ENTITY_COMPONENT_CAMERA:

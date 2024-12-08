@@ -56,7 +56,7 @@ model_t* model_new_from_pear_model(pear_model_t model) {
         meshinfo_add_normal(mesh_info, normals, mesh.num_vertices);
         meshinfo_add_indices(mesh_info, indices, mesh.num_indices);
         
-        mesh_t* renderer_mesh = mesh_new(mesh_info);
+        mesh_t* renderer_mesh = mesh_new(mesh_info, mesh.material_index);
         meshes[i] = renderer_mesh;
         
         meshinfo_delete(mesh_info);

@@ -6,7 +6,7 @@
 
 ModelConverter::ModelConverter(const std::string& filename) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_GenNormals);
     if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
         std::cout << "error: " << importer.GetErrorString() << std::endl;
         return;
@@ -137,10 +137,11 @@ std::string ModelConverter::process_texture(aiMaterial* mat, aiTextureType type)
         return "";
     }
 
-    aiString filename;
-    mat->GetTexture(type, 0, &filename);
+    aiString assimp_filename;
+    mat->GetTexture(type, 0, &assimp_filename);
+    std::string filename = this->directory + '/' + std::string(assimp_filename.C_Str());
 
-    std::string converted_filename = std::string(filename.C_Str()).append(".image");
+    std::string converted_filename = std::string(filename).append(".image");
 
     for (uint32_t i = 0; i < this->loaded_textures.size(); i++) {
         if (converted_filename == this->loaded_textures[i]) {
@@ -148,7 +149,7 @@ std::string ModelConverter::process_texture(aiMaterial* mat, aiTextureType type)
         }
     }
 
-    ImageConverter image_converter(filename.C_Str());
+    ImageConverter image_converter(filename.c_str());
     pear_image_t image = image_converter.get_pear_image();
     pear_image_write(image, converted_filename.c_str());
 

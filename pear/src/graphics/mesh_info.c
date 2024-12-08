@@ -5,13 +5,11 @@
 typedef struct mesh_info_t {
     u32* indices;
     vec3* positions;
-    vec3* colors;
     vec2* texture_coords;
     vec3* normals;
 
     u32 num_indices;
     u32 num_positions;
-    u32 num_colors;
     u32 num_texture_coords;
     u32 num_normals;
 } mesh_info_t;
@@ -21,13 +19,11 @@ mesh_info_t* meshinfo_new() {
 
     mesh_info->indices = NULL;
     mesh_info->positions = NULL;
-    mesh_info->colors = NULL;
     mesh_info->texture_coords = NULL;
     mesh_info->normals = NULL;
 
     mesh_info->num_indices = 0;
     mesh_info->num_positions = 0;
-    mesh_info->num_colors = 0;
     mesh_info->num_texture_coords = 0;
     mesh_info->num_normals = 0;
 
@@ -37,7 +33,6 @@ mesh_info_t* meshinfo_new() {
 void meshinfo_delete(mesh_info_t* mesh_info) {
     PEAR_FREE(mesh_info->indices);
     PEAR_FREE(mesh_info->positions);
-    PEAR_FREE(mesh_info->colors);
     PEAR_FREE(mesh_info->texture_coords);
     PEAR_FREE(mesh_info->normals);
 
@@ -56,13 +51,6 @@ void meshinfo_add_position(mesh_info_t* mesh_info, vec3* positions, u32 num_posi
     mesh_info->positions = (vec3*)PEAR_MALLOC(positions_size);
     memcpy(mesh_info->positions, positions, positions_size);
     mesh_info->num_positions = num_positions;
-}
-
-void meshinfo_add_color(mesh_info_t* mesh_info, vec3* colors, u32 num_colors) {
-    u32 colors_size = sizeof(vec3) * num_colors;
-    mesh_info->colors = (vec3*)PEAR_MALLOC(colors_size);
-    memcpy(mesh_info->colors, colors, colors_size);
-    mesh_info->num_colors = num_colors;
 }
 
 void meshinfo_add_texture_coords(mesh_info_t* mesh_info, vec2* texture_coords, u32 num_texture_coords) {
@@ -87,10 +75,6 @@ vec3* meshinfo_get_positions(mesh_info_t* mesh_info) {
     return mesh_info->positions;
 }
 
-vec3* meshinfo_get_colors(mesh_info_t* mesh_info) {
-    return mesh_info->colors;
-}
-
 vec2* meshinfo_get_texture_coords(mesh_info_t* mesh_info) {
     return mesh_info->texture_coords;
 }
@@ -107,10 +91,6 @@ u32 meshinfo_get_num_positions(mesh_info_t* mesh_info) {
     return mesh_info->num_positions;
 }
 
-u32 meshinfo_get_num_colors(mesh_info_t* mesh_info) {
-    return mesh_info->num_colors;
-}
-
 u32 meshinfo_get_num_texture_coords(mesh_info_t* mesh_info) {
     return mesh_info->num_texture_coords;
 }
@@ -121,10 +101,6 @@ u32 meshinfo_get_num_normals(mesh_info_t* mesh_info) {
 
 bool meshinfo_has_positions(mesh_info_t* mesh_info) {
     return mesh_info->num_positions != 0 && mesh_info->positions != NULL;
-}
-
-bool meshinfo_has_colors(mesh_info_t* mesh_info) {
-    return mesh_info->num_colors != 0 && mesh_info->colors != NULL;
 }
 
 bool meshinfo_has_texture_coords(mesh_info_t* mesh_info) {

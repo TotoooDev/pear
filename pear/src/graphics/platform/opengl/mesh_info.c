@@ -23,14 +23,12 @@ void meshinfo_get_vertices(mesh_info_t* mesh_info, f32* vertices) {
     u32 index = 0;
 
     meshinfo_add_attribute_vec3(mesh_info, vertices, meshinfo_get_positions(mesh_info), meshinfo_get_num_positions(mesh_info), &index);
-    meshinfo_add_attribute_vec3(mesh_info, vertices, meshinfo_get_colors(mesh_info), meshinfo_get_num_colors(mesh_info), &index);
     meshinfo_add_attribute_vec2(mesh_info, vertices, meshinfo_get_texture_coords(mesh_info), meshinfo_get_num_texture_coords(mesh_info), &index);
     meshinfo_add_attribute_vec3(mesh_info, vertices, meshinfo_get_normals(mesh_info), meshinfo_get_num_normals(mesh_info), &index);
 }
 
 u32 meshinfo_get_vertices_size(mesh_info_t* mesh_info) {
     return meshinfo_get_num_positions(mesh_info) * sizeof(vec3) +
-        meshinfo_get_num_colors(mesh_info) * sizeof(vec3) +
         meshinfo_get_num_texture_coords(mesh_info) * sizeof(vec2) +
         meshinfo_get_num_normals(mesh_info) * sizeof(vec3);
 }

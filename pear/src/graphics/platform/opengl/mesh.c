@@ -13,6 +13,8 @@ typedef struct mesh_t {
     u32 ebo;
 
     u32 num_indices;
+
+    u32 material_index;
 } mesh_t;
 
 void mesh_enable_attribute(u32 index, u32 num_components, u32 offset, bool activate) {
@@ -22,9 +24,10 @@ void mesh_enable_attribute(u32 index, u32 num_components, u32 offset, bool activ
     }
 }
 
-mesh_t* mesh_new(mesh_info_t* mesh_info) {
+mesh_t* mesh_new(mesh_info_t* mesh_info, u32 material_index) {
     mesh_t* mesh = (mesh_t*)PEAR_MALLOC(sizeof(mesh_t));
 
+    mesh->material_index = material_index;
     mesh->num_indices = meshinfo_get_num_indices(mesh_info);
 
     u32 vertices_size = meshinfo_get_vertices_size(mesh_info);
@@ -48,13 +51,10 @@ mesh_t* mesh_new(mesh_info_t* mesh_info) {
     mesh_enable_attribute(0, 3, offset, meshinfo_has_positions(mesh_info)); 
     offset += meshinfo_get_num_positions(mesh_info) * sizeof(vec3);
 
-    mesh_enable_attribute(1, 3, offset, meshinfo_has_colors(mesh_info)); 
-    offset += meshinfo_get_num_positions(mesh_info) * sizeof(vec3);
-
-    mesh_enable_attribute(2, 2, offset, meshinfo_has_texture_coords(mesh_info)); 
+    mesh_enable_attribute(1, 2, offset, meshinfo_has_texture_coords(mesh_info)); 
     offset += meshinfo_get_num_positions(mesh_info) * sizeof(vec2);
 
-    mesh_enable_attribute(3, 3, offset, meshinfo_has_normals(mesh_info)); 
+    mesh_enable_attribute(2, 3, offset, meshinfo_has_normals(mesh_info)); 
     offset += meshinfo_get_num_positions(mesh_info) * sizeof(vec3);
 
     return mesh;
@@ -74,6 +74,10 @@ u32 mesh_get_num_indices(mesh_t* mesh) {
 
 void mesh_use(mesh_t* mesh) {
     glBindVertexArray(mesh->vao);
+}
+
+u32 mesh_get_material_index(mesh_t* mesh) {
+    return mesh->material_index;
 }
 
 #endif
