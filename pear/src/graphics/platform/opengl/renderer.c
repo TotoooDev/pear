@@ -9,6 +9,8 @@
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/mesh_info.h>
 #include <graphics/platform/opengl/texture.h>
+#include <graphics/platform/opengl/ubo_info.h>
+#include <graphics/platform/opengl/ubo.h>
 #include <scene/components/transform.h>
 #include <scene/components/model.h>
 #include <scene/components/camera.h>
@@ -36,11 +38,14 @@ typedef struct renderer_t {
     mat4 projection_matrix;
     mat4 view_matrix;
 
+    ubo_t* ubo_matrices;
+
     shader_t* shader;
 } renderer_t;
 
 void renderer_calculate_projection(renderer_t* renderer) {
     glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection_matrix);
+    ubo_set_mat4(renderer->ubo_matrices, 2, renderer->projection_matrix);
 }
 
 void renderer_set_viewport(renderer_t* renderer) {
@@ -74,7 +79,7 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
 }
 
 void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
-    shader_set_mat4(renderer->shader, model_matrix, "u_model");
+    ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
 
     texture_use(material.diffuse, 0);
     mesh_use(mesh);
@@ -102,6 +107,13 @@ renderer_t* renderer_new() {
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->shader = shader_new(fileystem_read_file("shaders/shader.vert"), fileystem_read_file("shaders/shader.frag"));
 
+    ubo_info_t* info = uboinfo_new();
+    uboinfo_add_mat4(info);
+    uboinfo_add_mat4(info);
+    uboinfo_add_mat4(info);
+    renderer->ubo_matrices = ubo_new(info, true);
+    uboinfo_delete(info);
+
     glm_mat4_identity(renderer->view_matrix);
 
     renderer_set_viewport(renderer);
@@ -125,9 +137,8 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     shader_use(renderer->shader);
     shader_set_u32(renderer->shader, 0, "u_platform");
-    shader_set_mat4(renderer->shader, renderer->projection_matrix, "u_projection");
-    shader_set_mat4(renderer->shader, renderer->view_matrix, "u_view");
     shader_set_i32(renderer->shader, 0, "u_texture");
+    shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
 
     for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
         entity_t* entity = array_get(scene_get_entities(scene), i);
@@ -151,6 +162,7 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
 
             if (camera->use) {
                 camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view_matrix);
+                ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view_matrix);
             }
         }
     }

@@ -85,4 +85,10 @@ void shader_set_mat4(shader_t* shader, mat4 value, const char* name) {
     glUniformMatrix4fv(glGetUniformLocation(shader->id, name), 1, false, (f32*)value);
 }
 
+void shader_set_ubo(shader_t* shader, ubo_t* ubo, const char* name) {
+    ubo_use(ubo);
+    u32 index = glGetUniformBlockIndex(shader->id, name);
+    glUniformBlockBinding(shader->id, index, ubo_get_binding_point(ubo));
+}
+
 #endif

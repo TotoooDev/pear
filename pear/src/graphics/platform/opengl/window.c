@@ -87,8 +87,12 @@ window_t* window_new(const char* title, u32 width, u32 height) {
 
     window->window = glfwCreateWindow(width, height, title, NULL, NULL);
 
-    if (window->window == NULL)
-        PEAR_ERROR("failed to create window!");
+    if (window->window == NULL) {
+        const char* error;
+        u32 error_code = glfwGetError(&error);
+        PEAR_ERROR("failed to create window! %d: %s", error);
+        return NULL;
+    }
     glfwMakeContextCurrent(window->window);
 
     glfwSetWindowCloseCallback(window->window, window_close_callback);
