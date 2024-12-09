@@ -1,5 +1,6 @@
 #include <graphics/gui/scene_inspector.h>
 #include <scene/components/transform.h>
+#include <scene/components/model.h>
 #include <scene/components/camera.h>
 #include <scene/components/script.h>
 
@@ -30,6 +31,19 @@ void gui_transform(struct nk_context* nk_context, entity_t* entity, u32 i) {
         nk_property_float(nk_context, "#y", -FLT_MAX, &(transform->scale[1]), FLT_MAX, 1.0f, 0.01f);
         nk_property_float(nk_context, "#z", -FLT_MAX, &(transform->scale[2]), FLT_MAX, 1.0f, 0.01f);
         
+        nk_tree_pop(nk_context);
+    }
+}
+
+void gui_model(struct nk_context* nk_context, entity_t* entity, u32 i) {
+    if (nk_tree_push_id(nk_context, NK_TREE_NODE, "model", NK_MAXIMIZED, i)) {
+        model_component_t* model_comp = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+        model_t* model = model_comp->model;
+        material_t* materials = model_get_materials(model);
+
+        nk_layout_row_dynamic(nk_context, 16, 1);
+        model_comp->draw = nk_check_label(nk_context, "draw", model_comp->draw);
+
         nk_tree_pop(nk_context);
     }
 }
@@ -77,6 +91,10 @@ void gui_scene_inspector(struct nk_context* nk_context, void* user_data) {
             if (nk_tree_push_id(nk_context, NK_TREE_TAB, entity_get_name(entity), NK_MAXIMIZED, i)) {
                 if (entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
                     gui_transform(nk_context, entity, i);
+                }
+
+                if (entity_has_component(entity, ENTITY_COMPONENT_MODEL)) {
+                    gui_model(nk_context, entity, i);
                 }
 
                 if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA)) {

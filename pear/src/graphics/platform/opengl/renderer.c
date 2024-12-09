@@ -146,14 +146,17 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
             transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
             model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
 
-            mat4 model_matrix;
-            transformcomponent_get_model_matrix(transform, model_matrix);
+            if (model->draw) {
+                mat4 model_matrix;
+                transformcomponent_get_model_matrix(transform, model_matrix);
 
-            for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
-                mesh_t* mesh = model_get_meshes(model->model)[j];
-                material_t material = model_get_materials(model->model)[mesh_get_material_index(mesh)];
-                renderer_draw_mesh(renderer, mesh, material, model_matrix);
+                for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
+                    mesh_t* mesh = model_get_meshes(model->model)[j];
+                    material_t material = model_get_materials(model->model)[mesh_get_material_index(mesh)];
+                    renderer_draw_mesh(renderer, mesh, material, model_matrix);
+                }
             }
+
         }
 
         if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
