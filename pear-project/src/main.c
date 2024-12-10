@@ -7,6 +7,7 @@
 #include <graphics/window.h>
 #include <graphics/gui/gui.h>
 #include <graphics/gui/scene_inspector.h>
+#include <graphics/gui/info.h>
 #include <core/app.h>
 #include <core/timer.h>
 #include <core/log.h>
@@ -51,6 +52,7 @@ int main(int argc, char* argv[]) {
     transform->pos[2] = 5.0f;
     transform->rotation[0] = -90.0f;
 
+    gui_add(gui_info, NULL);
     gui_add(gui_scene_inspector, NULL);
     gui_scene_inspector_set_scene(scene);
 

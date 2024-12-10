@@ -85,3 +85,23 @@ void app_set_scene(scene_t* scene) {
 window_t* app_get_window() {
     return app->window;
 }
+
+f32 app_get_timestep() {
+    return app->timestep;
+}
+
+u32 app_get_version_major() {
+    return 0;
+}
+
+u32 app_get_version_minor() {
+    return 0;
+}
+
+u32 app_get_version_patch() {
+    return 1;
+}
+
+const char* app_get_version_string() {
+    return "pear 0.0.1";
+}

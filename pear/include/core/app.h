@@ -12,5 +12,11 @@ scene_t* app_get_scene();
 void app_set_scene(scene_t* scene);
 
 window_t* app_get_window();
+f32 app_get_timestep();
+
+u32 app_get_version_major();
+u32 app_get_version_minor();
+u32 app_get_version_patch();
+const char* app_get_version_string();
 
 #endif
