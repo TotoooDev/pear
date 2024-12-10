@@ -78,6 +78,43 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
     }
 }
 
+void renderer_opengl_debug_output(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
+    if(id == 131169 || id == 131185 || id == 131218 || id == 131204) {
+        return;
+    }
+
+    switch (type) {
+    case GL_DEBUG_SEVERITY_HIGH:
+        PEAR_ERROR("(%d) %s", id, message);
+        break;
+
+    case GL_DEBUG_SEVERITY_MEDIUM:
+    case GL_DEBUG_SEVERITY_LOW:
+        PEAR_WARN("(%d) %s", id, message);
+        break;
+
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        PEAR_INFO("(%d) %s", id, message);
+        break;
+    }
+}
+
+void renderer_setup_debug_output() {
+#ifdef PEAR_DEBUG
+    i32 flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (!(flags & GL_CONTEXT_FLAG_DEBUG_BIT)) {
+        PEAR_WARN("failed to initialize opengl debug output! good luck debugging >:)");
+        return;
+    }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(renderer_opengl_debug_output, NULL);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+#endif
+}
+
 void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
     shader_set_i32(renderer->shader, 0, "u_texture");
     ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
@@ -120,6 +157,8 @@ renderer_t* renderer_new() {
         PEAR_ERROR("failed to initialize glew! %s", glewGetErrorString(res));
         return NULL;
     }
+
+    renderer_setup_debug_output();
 
     renderer_t* renderer = (renderer_t*)PEAR_MALLOC(sizeof(renderer_t));
 

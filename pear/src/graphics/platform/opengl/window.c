@@ -83,6 +83,10 @@ window_t* window_new(const char* title, u32 width, u32 height) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    #ifdef PEAR_DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+    #endif
+
     window_t* window = (window_t*)PEAR_MALLOC(sizeof(window_t));
 
     window->window = glfwCreateWindow(width, height, title, NULL, NULL);
