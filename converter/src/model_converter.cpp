@@ -13,7 +13,12 @@ ModelConverter::ModelConverter(const std::string& filename) {
     }
 
     this->scene = scene;
-    this->directory = filename.substr(0, filename.find_last_of('/'));
+    if (filename.find_last_of('/') == std::string::npos) {
+        this->directory = "";
+    }
+    else {
+        this->directory = filename.substr(filename.find_last_of('/')) + '/';
+    }
     this->process_node(scene->mRootNode);
 
     this->model.num_meshes = this->meshes.size();
@@ -139,9 +144,10 @@ std::string ModelConverter::process_texture(aiMaterial* mat, aiTextureType type)
 
     aiString assimp_filename;
     mat->GetTexture(type, 0, &assimp_filename);
-    std::string filename = this->directory + '/' + std::string(assimp_filename.C_Str());
+    std::string filename = this->directory + std::string(assimp_filename.C_Str());
 
     std::string converted_filename = std::string(filename).append(".image");
+    std::cout << converted_filename << std::endl;
 
     for (uint32_t i = 0; i < this->loaded_textures.size(); i++) {
         if (converted_filename == this->loaded_textures[i]) {
