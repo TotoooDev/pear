@@ -79,11 +79,39 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
 }
 
 void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
+    shader_set_i32(renderer->shader, 0, "u_texture");
     ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
 
     texture_use(material.diffuse, 0);
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
+}
+
+void renderer_handle_model(renderer_t* renderer, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+
+    if (!model->draw) {
+        return;
+    }
+    mat4 model_matrix;
+    transformcomponent_get_model_matrix(transform, model_matrix);
+
+    for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
+        mesh_t* mesh = model_get_meshes(model->model)[j];
+        material_t material = model_get_materials(model->model)[mesh_get_material_index(mesh)];
+        renderer_draw_mesh(renderer, mesh, material, model_matrix);
+    }
+}
+
+void renderer_handle_camera(renderer_t* renderer, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
+
+    if (camera->use) {
+        camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view_matrix);
+        ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view_matrix);
+    }
 }
 
 renderer_t* renderer_new() {
@@ -137,36 +165,16 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     shader_use(renderer->shader);
     shader_set_u32(renderer->shader, 0, "u_platform");
-    shader_set_i32(renderer->shader, 0, "u_texture");
     shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
 
     for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
         entity_t* entity = array_get(scene_get_entities(scene), i);
         if (entity_has_component(entity, ENTITY_COMPONENT_MODEL) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-            model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-
-            if (model->draw) {
-                mat4 model_matrix;
-                transformcomponent_get_model_matrix(transform, model_matrix);
-
-                for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
-                    mesh_t* mesh = model_get_meshes(model->model)[j];
-                    material_t material = model_get_materials(model->model)[mesh_get_material_index(mesh)];
-                    renderer_draw_mesh(renderer, mesh, material, model_matrix);
-                }
-            }
-
+            renderer_handle_model(renderer, entity);
         }
 
         if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-            camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
-
-            if (camera->use) {
-                camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view_matrix);
-                ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view_matrix);
-            }
+            renderer_handle_camera(renderer, entity);
         }
     }
 }
