@@ -33,6 +33,7 @@ project "pear"
     filter "system:linux"
         defines {
             "PEAR_PLATFORM_LINUX",
+            "PEAR_PLATFORM_GLFW",
             "PEAR_PLATFORM_OPENGL"
         }
 
@@ -76,6 +77,7 @@ project "pear-project"
     filter "system:linux"
         defines {
             "PEAR_PLATFORM_LINUX",
+            "PEAR_PLATFORM_GLFW",
             "PEAR_PLATFORM_OPENGL"
         }
         links {

@@ -43,6 +43,8 @@ typedef struct button_up_event_t {
 typedef struct mouse_moved_event_t {
     f32 x;
     f32 y;
+    f32 rel_x;
+    f32 rel_y;
 } mouse_moved_event_t;
 
 #endif
