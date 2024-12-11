@@ -11,6 +11,10 @@ typedef struct window_t {
     GLFWwindow* window;
 } window_t;
 
+static bool window_first_mouse = true;
+static f32 window_last_mouse_x = 0.0f;
+static f32 window_last_mouse_y = 0.0f;
+
 void window_close_callback(GLFWwindow* window) {
     event_send(EVENT_TYPE_QUIT, NULL);
 }
@@ -44,6 +48,18 @@ void window_mouse_movement_callback(GLFWwindow* window, f64 x, f64 y) {
         .x = x,
         .y = y
     };
+
+    if (window_first_mouse) {
+        event.rel_x = 0.0f;
+        event.rel_y = 0.0f;
+        window_first_mouse = false;
+    }
+    else {
+        event.rel_x = event.x - window_last_mouse_x;
+        event.rel_y = event.y - window_last_mouse_y;
+    }
+    window_last_mouse_x = event.x;
+    window_last_mouse_y = event.y;
 
     event_send(EVENT_TYPE_MOUSE_MOVED, &event);
 }
