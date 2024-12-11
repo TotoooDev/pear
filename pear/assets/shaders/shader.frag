@@ -9,5 +9,6 @@ in VS_OUT {
 uniform sampler2D u_texture;
 
 void main() {
-    frag_color = texture(u_texture, fs_in.texture_coords);
+    // frag_color = texture(u_texture, fs_in.texture_coords);
+    frag_color = vec4(fs_in.texture_coords, 0.0, 1.0);
 }
