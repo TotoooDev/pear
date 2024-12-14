@@ -5,12 +5,17 @@
 #include <event/keyboard.h>
 #include <graphics/camera.h>
 
+#include <graphics/platform/opengl/window.h>
+#include <core/app.h>
+
 static struct {
     bool forward;
     bool backward;
     bool right;
     bool left;
 } keys_down;
+
+static bool lock_mouse = true;
 
 void cameraentity_on_event(event_type_t type, void* e, void* user_data) {
     entity_t* entity = (entity_t*)user_data;
@@ -29,6 +34,12 @@ void cameraentity_on_event(event_type_t type, void* e, void* user_data) {
         }
         if (event->key == PEAR_KEY_D) {
             keys_down.right = true;
+        }
+        if (event->key == PEAR_KEY_LEFT_ALT || event->key == PEAR_KEY_RIGHT_ALT) {
+            #ifdef PEAR_PLATFORM_GLFW
+                window_lock_mouse(app_get_window(), lock_mouse);
+                lock_mouse = !lock_mouse;
+            #endif
         }
         break;
     }
@@ -51,10 +62,12 @@ void cameraentity_on_event(event_type_t type, void* e, void* user_data) {
     }
 
     case EVENT_TYPE_MOUSE_MOVED: {
-        mouse_moved_event_t* event = (mouse_moved_event_t*)e;
-        transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-        transform->rotation[0] += event->rel_x;
-        transform->rotation[1] -= event->rel_y;
+        if (!lock_mouse) {
+            mouse_moved_event_t* event = (mouse_moved_event_t*)e;
+            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+            transform->rotation[0] += event->rel_x;
+            transform->rotation[1] -= event->rel_y;
+        }
         break;
     }
     }

@@ -164,4 +164,13 @@ GLFWwindow* window_get_glfw(window_t* window) {
     return window->window;
 }
 
+void window_lock_mouse(window_t* window, bool lock) {
+    if (lock) {
+        glfwSetInputMode(window->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    else {
+        glfwSetInputMode(window->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+}
+
 #endif
