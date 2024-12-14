@@ -14,6 +14,10 @@ int main(int argc, char* argv[]) {
         .help("specify to convert an image only")
         .flag();
 
+    parser.add_argument("-f", "--flip")
+        .help("flip the images verticaly")
+        .flag();
+
     parser.add_argument("-v", "--verbose")
         .help("increase output verbosity")
         .flag();
@@ -34,18 +38,20 @@ int main(int argc, char* argv[]) {
     std::string input = parser.get("input");
     std::string output = parser.get("--output");
 
+    bool flip = parser["--flip"] == true;
+
     if (parser["--image"] == true) {
         if (parser["--verbose"] == true) {
             std::cout << "converting " << input << "..." << std::endl;
         }
 
-        ImageConverter converter(input);
+        ImageConverter converter(input, flip);
         pear_image_write(converter.get_pear_image(), output.c_str());
         
         return 0;
     }
 
-    ModelConverter converter(input);
+    ModelConverter converter(input, flip);
     pear_model_write(converter.get_pear_model(), output.c_str());
 
     return 0;

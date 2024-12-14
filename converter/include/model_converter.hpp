@@ -7,7 +7,7 @@
 
 class ModelConverter {
 public:
-    ModelConverter(const std::string& filename);
+    ModelConverter(const std::string& filename, bool flip);
     ~ModelConverter();
     pear_model_t get_pear_model();
 
@@ -18,6 +18,7 @@ private:
     std::string process_texture(aiMaterial* mat, aiTextureType type);
 
 private:
+    bool flip;
     std::string directory;
     const aiScene* scene;
     std::vector<pear_mesh_t> meshes;

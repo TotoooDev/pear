@@ -67,6 +67,12 @@ void cameraentity_on_event(event_type_t type, void* e, void* user_data) {
             transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
             transform->rotation[0] += event->rel_x;
             transform->rotation[1] -= event->rel_y;
+            if (transform->rotation[1] > 89.0f) {
+                transform->rotation[1] = 89.0f;
+            }
+            if (transform->rotation[1] < -89.0f) {
+                transform->rotation[1] = -89.0f;
+            }
         }
         break;
     }

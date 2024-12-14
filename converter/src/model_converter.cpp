@@ -4,7 +4,8 @@
 #include <assimp/postprocess.h>
 #include <iostream>
 
-ModelConverter::ModelConverter(const std::string& filename) {
+ModelConverter::ModelConverter(const std::string& filename, bool flip) 
+    : flip(flip) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_GenNormals);
     if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
@@ -155,7 +156,7 @@ std::string ModelConverter::process_texture(aiMaterial* mat, aiTextureType type)
         }
     }
 
-    ImageConverter image_converter(filename.c_str());
+    ImageConverter image_converter(filename.c_str(), this->flip);
     pear_image_t image = image_converter.get_pear_image();
     pear_image_write(image, converted_filename.c_str());
 

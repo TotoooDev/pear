@@ -4,9 +4,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <vendor/stb_image.h>
 
-ImageConverter::ImageConverter(const std::string& filename) {
+ImageConverter::ImageConverter(const std::string& filename, bool flip) {
     int width, height, num_channels;
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(flip);
     uint8_t* data = stbi_load(filename.c_str(), &width, &height, &num_channels, 0);
     if (data == nullptr) {
         std::cout << "failed to open " << filename << "!" << std::endl;

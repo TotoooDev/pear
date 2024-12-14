@@ -5,7 +5,7 @@
 
 class ImageConverter {
 public:
-    ImageConverter(const std::string& filename);
+    ImageConverter(const std::string& filename, bool flip);
     ~ImageConverter();
     pear_image_t get_pear_image();
 
