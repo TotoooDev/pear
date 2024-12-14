@@ -23,7 +23,7 @@ model_t* model_new(mesh_t** meshes, material_t* materials, u32 num_meshes, u32 n
     return model;
 }
 
-model_t* model_new_from_pear_model(pear_model_t model) {
+model_t* model_new_from_pear_model(pear_model_t model, texture_wrapping_t wrapping, texture_filtering_t filtering) {
     mesh_t** meshes = (mesh_t**)PEAR_MALLOC(sizeof(mesh_t*) * model.num_meshes);
     for (u32 i = 0; i < model.num_meshes; i++) {
         pear_mesh_t mesh = model.meshes[i];
@@ -79,7 +79,7 @@ model_t* model_new_from_pear_model(pear_model_t model) {
                 PEAR_ERROR("failed to load texture %s!", material.diffuse_path);
             }
 
-            renderer_material.diffuse = texture_new_from_image(diffuse_image, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_NEAREST);
+            renderer_material.diffuse = texture_new_from_image(diffuse_image, wrapping, filtering);
         }
         if (material.specular_path[0] != '\0') {
             image_t* specular_image = image_new_from_pear_image(pear_image_load(material.specular_path, &success));
@@ -87,7 +87,7 @@ model_t* model_new_from_pear_model(pear_model_t model) {
                 PEAR_ERROR("failed to load texture %s!", material.specular_path);
             }
 
-            renderer_material.specular = texture_new_from_image(specular_image, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_NEAREST);
+            renderer_material.specular = texture_new_from_image(specular_image, wrapping, filtering);
         }
         if (material.normal_path[0] != '\0') {
             image_t* normal_image = image_new_from_pear_image(pear_image_load(material.normal_path, &success));
@@ -95,7 +95,7 @@ model_t* model_new_from_pear_model(pear_model_t model) {
                 PEAR_ERROR("failed to load texture %s!", material.normal_path);
             }
 
-            renderer_material.normal = texture_new_from_image(normal_image, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_NEAREST);
+            renderer_material.normal = texture_new_from_image(normal_image, wrapping, filtering);
         }
 
         glm_vec3_copy(material.color, renderer_material.color);

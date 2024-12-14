@@ -32,7 +32,7 @@ entity_t* modelentity_create(scene_t* scene) {
     }
 
     model_component_t* model_comp = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-    model_comp->model = model_new_from_pear_model(model);
+    model_comp->model = model_new_from_pear_model(model, TEXTURE_WRAPPING_REPEAT, TEXTURE_FILTERING_LINEAR);
     pear_model_free(&model);
 
     transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
