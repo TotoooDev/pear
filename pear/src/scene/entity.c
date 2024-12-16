@@ -2,6 +2,7 @@
 #include <scene/components/transform.h>
 #include <scene/components/model.h>
 #include <scene/components/camera.h>
+#include <scene/components/light.h>
 #include <scene/components/script.h>
 #include <core/log.h>
 #include <core/alloc.h>
@@ -52,6 +53,12 @@ entity_t* entity_new_from_va_list(const char* name, va_list args) {
             camera_component_t* camera = (camera_component_t*)PEAR_MALLOC(sizeof(camera_component_t));
             camera->use = true;
             entity->components[(u32)current_component] = camera;
+            break;
+
+        case ENTITY_COMPONENT_LIGHT:
+            light_component_t* light = (light_component_t*)PEAR_MALLOC(sizeof(light_component_t));
+            light->cast = true;
+            entity->components[(u32)current_component] = light;
             break;
 
         case ENTITY_COMPONENT_SCRIPT:
