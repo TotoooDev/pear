@@ -11,6 +11,7 @@ void array_delete(array_t* array);
 u32 array_add(array_t* array, void* data);
 void array_remove(array_t* array, void* data);
 void array_remove_index(array_t* array, u32 index);
+void array_clear(array_t* array);
 
 void* array_get(array_t* array, u32 index);
 u32 array_get_index(array_t* array, void* data);

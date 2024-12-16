@@ -25,8 +25,8 @@ void array_delete(array_t* array) {
 
 u32 array_add(array_t* array, void* data) {
     if (array->length >= array->size) {
-        PEAR_ERROR("attempt to add an item to an already full array!");
-        return UINT32_MAX;
+        array->size = array->size + array->size / 2;
+        array->data = PEAR_REALLOC(array->data, array->size);
     }
 
     array->data[array->length] = data;
@@ -51,6 +51,10 @@ void array_remove_index(array_t* array, u32 index) {
 
     array->length--;
     array->data[array->length] = NULL;
+}
+
+void array_clear(array_t* array) {
+    array->length = 0;
 }
 
 u32 array_get_index(array_t* array, void* data) {
