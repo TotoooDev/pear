@@ -10,8 +10,7 @@ typedef enum light_type_t {
 } light_type_t;
 
 typedef struct light_t {
-    vec3 direction;
-    vec3 pos;
+    light_type_t type;
 
     vec3 ambient;
     vec3 diffuse;
