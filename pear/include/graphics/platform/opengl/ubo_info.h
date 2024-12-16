@@ -17,10 +17,10 @@ u32 uboinfo_get_buffer_size(ubo_info_t* info);
 void uboinfo_add_i32(ubo_info_t* info);
 void uboinfo_add_u32(ubo_info_t* info);
 void uboinfo_add_f32(ubo_info_t* info);
-void uboinfo_add_f32_array(ubo_info_t* info, u32 array_size);
 void uboinfo_add_vec3(ubo_info_t* info);
 void uboinfo_add_vec4(ubo_info_t* info);
 void uboinfo_add_mat4(ubo_info_t* info);
+void uboinfo_pad_to_16_alignment(ubo_info_t* info);
 
 #endif
 
