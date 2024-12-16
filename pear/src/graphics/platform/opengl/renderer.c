@@ -23,6 +23,8 @@
 #include <GL/glew.h>
 #include <core/alloc.h>
 
+#define RENDERER_NUM_MAX_LIGHTS 128
+
 typedef struct renderer_t {
     f32 fov;
     f32 aspect_ratio;
@@ -45,12 +47,17 @@ typedef struct renderer_t {
     mat4 view_matrix;
 
     ubo_t* ubo_matrices;
+    ubo_t* ubo_lights;
 
     shader_t* shader;
+
+    u32 light_num_components;
 } renderer_t;
 
 void renderer_calculate_projection(renderer_t* renderer) {
     glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection_matrix);
+
+    ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 2, renderer->projection_matrix);
 }
 
@@ -130,8 +137,34 @@ void renderer_init_ubo_matrices(renderer_t* renderer) {
     uboinfo_delete(info);
 }
 
+void renderer_init_ubo_lights(renderer_t* renderer) {
+    ubo_info_t* info = uboinfo_new();
+
+    uboinfo_add_u32(info); // num lights
+    uboinfo_pad_to_16_alignment(info);
+    for (u32 i = 0; i < RENDERER_NUM_MAX_LIGHTS; i++) {
+        uboinfo_add_u32(info); // type
+        uboinfo_add_vec3(info); // pos
+        uboinfo_add_vec3(info); // direction
+        uboinfo_add_vec3(info); // ambient
+        uboinfo_add_vec3(info); // diffuse
+        uboinfo_add_vec3(info); // specular
+        uboinfo_add_f32(info); // constant
+        uboinfo_add_f32(info); // linear
+        uboinfo_add_f32(info); // quadratic
+        uboinfo_add_f32(info); // cutoff
+        uboinfo_add_f32(info); // outer cutoff
+        uboinfo_pad_to_16_alignment(info);
+    }
+
+    renderer->ubo_lights = ubo_new(info, true);
+    uboinfo_delete(info);
+}
+
 void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
     shader_set_i32(renderer->shader, 0, "u_texture");
+
+    ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
 
     texture_use(material.diffuse, 0);
@@ -173,6 +206,29 @@ void renderer_handle_light(renderer_t* renderer, entity_t* entity) {
 }
 
 void renderer_render(renderer_t* renderer) {
+    ubo_use(renderer->ubo_lights);
+    ubo_set_u32(renderer->ubo_lights, 0, array_get_length(renderer->lights));
+
+    for (u32 i = 0; i < array_get_length(renderer->lights); i++) {
+        light_t* light = array_get(renderer->lights, i);
+        transform_component_t* transform = array_get(renderer->light_transforms, i);
+
+        u32 index = 1 + i * renderer->light_num_components;
+
+        ubo_set_u32 (renderer->ubo_lights, index    ,  light->type);
+        ubo_set_vec3(renderer->ubo_lights, index + 1,  transform->pos);
+        ubo_set_vec3(renderer->ubo_lights, index + 2,  transform->rotation);
+        ubo_set_vec3(renderer->ubo_lights, index + 3,  light->ambient);
+        ubo_set_vec3(renderer->ubo_lights, index + 4,  light->diffuse);
+        ubo_set_vec3(renderer->ubo_lights, index + 5,  light->specular);
+        ubo_set_f32 (renderer->ubo_lights, index + 6,  light->constant);
+        ubo_set_f32 (renderer->ubo_lights, index + 7,  light->linear);
+        ubo_set_f32 (renderer->ubo_lights, index + 8,  light->quadratic);
+        ubo_set_f32 (renderer->ubo_lights, index + 9,  light->cutoff);
+        ubo_set_f32 (renderer->ubo_lights, index + 10, light->outer_cutoff);
+    }
+    
+    ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view_matrix);
 
     for (u32 i = 0; i < array_get_length(renderer->models); i++) {
@@ -216,8 +272,10 @@ renderer_t* renderer_new() {
     renderer->light_transforms = array_new(10);
     renderer->model_transforms = array_new(10);
     renderer->shader = shader_new(fileystem_read_file("shaders/shader.vert"), fileystem_read_file("shaders/shader.frag"));
+    renderer->light_num_components = 11;
 
     renderer_init_ubo_matrices(renderer);
+    renderer_init_ubo_lights(renderer);
 
     glm_mat4_identity(renderer->view_matrix);
 
@@ -263,6 +321,7 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     shader_use(renderer->shader);
     shader_set_u32(renderer->shader, 0, "u_platform");
     shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
+    shader_set_ubo(renderer->shader, renderer->ubo_lights, "ubo_lights");
     renderer_render(renderer);
 }
 
