@@ -52,6 +52,7 @@ typedef struct renderer_t {
     shader_t* shader;
 
     u32 light_num_components;
+    vec3 camera_pos;
 } renderer_t;
 
 void renderer_calculate_projection(renderer_t* renderer) {
@@ -141,6 +142,7 @@ void renderer_init_ubo_lights(renderer_t* renderer) {
     ubo_info_t* info = uboinfo_new();
 
     uboinfo_add_u32(info); // num lights
+    uboinfo_add_vec3(info); // view pos
     uboinfo_pad_to_16_alignment(info);
     for (u32 i = 0; i < RENDERER_NUM_MAX_LIGHTS; i++) {
         uboinfo_add_u32(info); // type
@@ -162,12 +164,20 @@ void renderer_init_ubo_lights(renderer_t* renderer) {
 }
 
 void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
-    shader_set_i32(renderer->shader, 0, "u_texture");
+    shader_set_i32(renderer->shader, 0, "u_material.diffuse");
+    shader_set_i32(renderer->shader, 1, "u_material.specular");
+    shader_set_vec3(renderer->shader, material.color, "u_material.color");
+    shader_set_f32(renderer->shader, material.shininess, "u_material.shininess");
 
     ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
 
-    texture_use(material.diffuse, 0);
+    if (material.diffuse != NULL) {
+        texture_use(material.diffuse, 0);
+    }
+    if (material.specular != NULL) {
+        texture_use(material.specular, 1);
+    }
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
 }
@@ -190,6 +200,7 @@ void renderer_handle_camera(renderer_t* renderer, entity_t* entity) {
 
     if (camera->use) {
         camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view_matrix);
+        glm_vec3_copy(transform->pos, renderer->camera_pos);
     }
 }
 
@@ -208,12 +219,13 @@ void renderer_handle_light(renderer_t* renderer, entity_t* entity) {
 void renderer_render(renderer_t* renderer) {
     ubo_use(renderer->ubo_lights);
     ubo_set_u32(renderer->ubo_lights, 0, array_get_length(renderer->lights));
+    ubo_set_vec3(renderer->ubo_lights, 1, renderer->camera_pos);
 
     for (u32 i = 0; i < array_get_length(renderer->lights); i++) {
         light_t* light = array_get(renderer->lights, i);
         transform_component_t* transform = array_get(renderer->light_transforms, i);
 
-        u32 index = 1 + i * renderer->light_num_components;
+        u32 index = 2 + i * renderer->light_num_components;
 
         ubo_set_u32 (renderer->ubo_lights, index    ,  light->type);
         ubo_set_vec3(renderer->ubo_lights, index + 1,  transform->pos);

@@ -22,12 +22,19 @@ int main(int argc, char* argv[]) {
 
     light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
     light->cast = true;
-    light->light.ambient[0] = 1.0f;
-    light->light.ambient[2] = 1.0f;
+    light->light.type = LIGHT_TYPE_DIRECTIONAL;
+    light->light.ambient[0] = 0.2f;
+    light->light.ambient[1] = 0.2f;
+    light->light.ambient[2] = 0.2f;
+    light->light.diffuse[0] = 0.6f;
+    light->light.diffuse[1] = 0.6f;
+    light->light.diffuse[2] = 0.6f;
+    light->light.specular[0] = 1.0f;
+    light->light.specular[1] = 1.0f;
+    light->light.specular[2] = 1.0f;
 
     transform_component_t* transform = entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    transform->pos[0] = 1.0f;
-    transform->pos[2] = 1.0f;
+    transform->rotation[1] = -1.0f;
 
     gui_add(gui_info, NULL);
     gui_add(gui_scene_inspector, NULL);
