@@ -26,6 +26,8 @@ ubo_t* ubo_new(ubo_info_t* info, bool dynamic) {
     glGenBuffers(1, &ubo->id);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo->id);
     glBufferData(GL_UNIFORM_BUFFER, uboinfo_get_buffer_size(info), NULL, usage);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     glBindBufferBase(GL_UNIFORM_BUFFER, ubo_num_buffers, ubo->id);
 
     ubo_num_buffers++;
@@ -34,6 +36,7 @@ ubo_t* ubo_new(ubo_info_t* info, bool dynamic) {
 }
 
 void ubo_delete(ubo_t* ubo) {
+    glDeleteBuffers(1, &ubo->id);
     PEAR_FREE(ubo->offsets);
     PEAR_FREE(ubo);
 }
@@ -50,10 +53,6 @@ void ubo_set_f32(ubo_t* ubo, u32 index, f32 value) {
     glBufferSubData(GL_UNIFORM_BUFFER, ubo->offsets[index], sizeof(f32), &value);
 }
 
-void ubo_set_f32_array(ubo_t* ubo, u32 index, f32* value, u32 num_values) {
-    glBufferSubData(GL_UNIFORM_BUFFER, ubo->offsets[index], sizeof(f32) * num_values, value);
-}
-
 void ubo_set_vec3(ubo_t* ubo, u32 index, vec3 value) {
     glBufferSubData(GL_UNIFORM_BUFFER, ubo->offsets[index], sizeof(vec3), value);
 }
@@ -63,7 +62,6 @@ void ubo_set_vec4(ubo_t* ubo, u32 index, vec4 value) {
 }
 
 void ubo_set_mat4(ubo_t* ubo, u32 index, mat4 value) {
-    // glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), value);
     glBufferSubData(GL_UNIFORM_BUFFER, ubo->offsets[index], sizeof(mat4), value);
 }
 
