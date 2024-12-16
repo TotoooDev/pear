@@ -100,6 +100,7 @@ model_t* model_new_from_pear_model(pear_model_t model, texture_wrapping_t wrappi
 
         glm_vec3_copy(material.color, renderer_material.color);
 
+        renderer_material.shininess = 32.0f;
         materials[i] = renderer_material;
     }
 

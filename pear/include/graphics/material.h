@@ -9,6 +9,7 @@ typedef struct material_t {
     texture_t* normal;
 
     vec3 color;
+    f32 shininess;
 } material_t;
 
 #endif
