@@ -92,3 +92,13 @@ void gui_nk_color_to_vec3(struct nk_colorf nk_color, vec3 color) {
     color[1] = nk_color.g;
     color[2] = nk_color.b;
 }
+
+struct nk_color gui_nk_colorf_to_nk_color(struct nk_colorf color) {
+    struct nk_color nk_color = {
+        .r = color.r * 255.0f,
+        .g = color.g * 255.0f,
+        .b = color.b * 255.0f,
+        .a = color.a * 255.0f
+    };
+    return nk_color;
+}

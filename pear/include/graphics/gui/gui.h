@@ -28,6 +28,7 @@ struct nk_colorf gui_vec4_to_nk_color(vec4 color);
 void gui_nk_color_to_vec4(struct nk_colorf nk_color, vec4 color);
 struct nk_colorf gui_vec3_to_nk_color(vec3 color);
 void gui_nk_color_to_vec3(struct nk_colorf nk_color, vec3 color);
+struct nk_color gui_nk_colorf_to_nk_color(struct nk_colorf color);
 
 struct nk_image gui_image_from_texture(texture_t* texture);
 

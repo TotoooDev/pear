@@ -8,4 +8,6 @@ typedef struct light_component_t {
     bool cast;
 } light_component_t;
 
+light_component_t* lightcomponent_new();
+
 #endif

@@ -56,9 +56,7 @@ entity_t* entity_new_from_va_list(const char* name, va_list args) {
             break;
 
         case ENTITY_COMPONENT_LIGHT:
-            light_component_t* light = (light_component_t*)PEAR_MALLOC(sizeof(light_component_t));
-            light->cast = true;
-            entity->components[(u32)current_component] = light;
+            entity->components[(u32)current_component] = lightcomponent_new();
             break;
 
         case ENTITY_COMPONENT_SCRIPT:
