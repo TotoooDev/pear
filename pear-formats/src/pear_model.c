@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PEAR_MODEL_ID_STRING "pear_model1.0"
+#define PEAR_MODEL_ID_STRING "pear_model1.0.1"
 
 static const char* pear_model_id_string = PEAR_MODEL_ID_STRING;
-static const uint32_t pear_model_id_string_length = 14;
+static const uint32_t pear_model_id_string_length = 16;
 
 pear_vertex_t pear_model_read_vertex(FILE* file) {
     pear_vertex_t vertex;
@@ -57,6 +57,7 @@ pear_material_t pear_model_read_material(FILE* file) {
     material.normal_path[normal_length] = '\0';
 
     fread(material.color, sizeof(float), 3, file);
+    fread(&material.shininess, sizeof(float), 1, file);
 
     return material;
 }
@@ -69,7 +70,6 @@ pear_model_t pear_model_load(const char* filename, bool* success) {
         *success = false;
         return model;
     }
-    
 
     char* id_string = (char*)malloc(sizeof(char) * pear_model_id_string_length);
     fread(id_string, sizeof(char), pear_model_id_string_length, file);
@@ -131,6 +131,7 @@ void pear_model_write_material(pear_material_t material, FILE* file) {
     fwrite(material.normal_path, sizeof(char), normal_length, file);
 
     fwrite(material.color, sizeof(float), 3, file);
+    fwrite(&material.shininess, sizeof(float), 1, file);
 }
 
 void pear_model_write(pear_model_t model, const char* filename) {

@@ -26,9 +26,10 @@ entity_t* modelentity_create(scene_t* scene) {
     script->on_end = on_end;
 
     bool success;
-    pear_model_t model = pear_model_load("sponza/sponza.model", &success);
+    pear_model_t model = pear_model_load("sponza.model", &success);
     if (!success) {
-        PEAR_ERROR("failed to load model cube.model!");
+        PEAR_ERROR("failed to load model sponza.model!");
+        return NULL;
     }
 
     model_component_t* model_comp = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);

@@ -90,7 +90,7 @@ model_t* model_new_from_pear_model(pear_model_t model, texture_wrapping_t wrappi
         renderer_material.specular = model_load_texture(material.specular_path, wrapping, filtering);
         renderer_material.normal = model_load_texture(material.normal_path, wrapping, filtering);
         glm_vec3_copy(material.color, renderer_material.color);
-        renderer_material.shininess = 32.0f;
+        renderer_material.shininess = material.shininess;
         materials[i] = renderer_material;
     }
 

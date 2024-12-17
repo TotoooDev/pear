@@ -27,6 +27,7 @@ typedef struct pear_mesh_t {
 
 typedef struct pear_material_t {
     vec4 color;
+    float shininess;
 
     char* diffuse_path;
     char* specular_path;

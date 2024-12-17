@@ -135,6 +135,8 @@ pear_material_t ModelConverter::process_material(aiMaterial* mat) {
         material.color[2] = 1.0f;
     }
 
+    mat->Get(AI_MATKEY_SHININESS, material.shininess);
+
     return material;
 }
 

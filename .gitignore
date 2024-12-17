@@ -1,4 +1,6 @@
 .vscode/
 bin/
 bin-intermediate/
+**/assets/
+
 Makefile
