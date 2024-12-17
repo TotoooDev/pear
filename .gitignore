@@ -2,5 +2,6 @@
 bin/
 bin-intermediate/
 **/assets/
+!pear/assets/
 
 Makefile
