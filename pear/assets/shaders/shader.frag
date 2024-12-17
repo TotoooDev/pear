@@ -52,7 +52,8 @@ vec3 calculate_directional_light(light_t light, vec3 normal, vec3 view_dir) {
     float diff = max(dot(normal, light_dir), 0.0);
     // specular shading
     vec3 reflect_dir = reflect(-light_dir, normal);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.shininess);
+    vec3 halfway_dir = normalize(light_dir + view_dir);
+    float spec = pow(max(dot(normal, halfway_dir), 0.0), u_material.shininess);
     // combine results
     vec3 ambient = light.ambient * vec3(texture(u_material.diffuse, fs_in.texture_coords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(u_material.diffuse, fs_in.texture_coords));
@@ -67,7 +68,8 @@ vec3 calculate_point_light(light_t light, vec3 normal, vec3 frag_pos, vec3 view_
     float diff = max(dot(normal, light_dir), 0.0);
     // specular shading
     vec3 reflect_dir = reflect(-light_dir, normal);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.shininess);
+    vec3 halfway_dir = normalize(light_dir + view_dir);
+    float spec = pow(max(dot(normal, halfway_dir), 0.0), u_material.shininess);
     // attenuation
     float distance = length(light.pos - frag_pos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
@@ -88,7 +90,8 @@ vec3 calculate_spot_light(light_t light, vec3 normal, vec3 frag_pos, vec3 view_d
     float diff = max(dot(normal, light_dir), 0.0);
     // specular shading
     vec3 reflect_dir = reflect(-light_dir, normal);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.shininess);
+    vec3 halfway_dir = normalize(light_dir + view_dir);
+    float spec = pow(max(dot(normal, halfway_dir), 0.0), u_material.shininess);
     // attenuation
     float distance = length(light.pos - frag_pos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
@@ -130,4 +133,8 @@ void main() {
     }
 
     frag_color = vec4(result, 1.0);
+
+    // gamma correction
+    float gamma = 2.2;
+    frag_color.rgb = pow(frag_color.rgb, vec3(1.0 / gamma));
 }
