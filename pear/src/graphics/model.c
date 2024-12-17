@@ -15,12 +15,12 @@ typedef struct model_t {
 texture_t* model_load_texture(const char* path, texture_wrapping_t wrapping, texture_filtering_t filtering) {
     if (path[0] != '\0') {
         bool success;
-        image_t* diffuse_image = image_new_from_pear_image(pear_image_load(path, &success));
+        image_t* image = image_new_from_pear_image(pear_image_load(path, &success));
         if (!success) {
             PEAR_ERROR("failed to load texture %s!", path);
         }
 
-        return texture_new_from_image(diffuse_image, wrapping, filtering);
+        return texture_new_from_image(image, wrapping, filtering);
     }
 
     return NULL;

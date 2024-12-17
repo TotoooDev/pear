@@ -14,12 +14,13 @@ layout (std140) uniform ubo_matrices {
     mat4 u_model;
     mat4 u_view;
     mat4 u_projection;
+    mat4 u_model_transpose_inverse;
 };
 
 void main() {
     vs_out.frag_pos = vec3(u_model * vec4(a_pos, 1.0));
     vs_out.texture_coords = a_texture_coords;
-    vs_out.normal = mat3(transpose(inverse(u_model))) * a_normal; // move this to the cpu later
+    vs_out.normal = mat3(u_model_transpose_inverse) * a_normal;
 
     gl_Position = u_projection * u_view * u_model * vec4(a_pos, 1.0f);
 }

@@ -131,9 +131,10 @@ void renderer_setup_debug_output() {
 
 void renderer_init_ubo_matrices(renderer_t* renderer) {
     ubo_info_t* info = uboinfo_new();
-    uboinfo_add_mat4(info);
-    uboinfo_add_mat4(info);
-    uboinfo_add_mat4(info);
+    uboinfo_add_mat4(info); // model
+    uboinfo_add_mat4(info); // view
+    uboinfo_add_mat4(info); // projection
+    uboinfo_add_mat4(info); // model transpose inverse
     renderer->ubo_matrices = ubo_new(info, true);
     uboinfo_delete(info);
 }
@@ -169,8 +170,13 @@ void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material
     shader_set_vec3(renderer->shader, material.color, "u_material.color");
     shader_set_f32(renderer->shader, material.shininess, "u_material.shininess");
 
+    mat4 model_transpose_inverse;
+    glm_mat4_inv(model_matrix, model_transpose_inverse);
+    glm_mat4_transpose(model_transpose_inverse);
+
     ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
+    ubo_set_mat4(renderer->ubo_matrices, 3, model_transpose_inverse);
 
     if (material.diffuse != NULL) {
         texture_use(material.diffuse, 0);
@@ -239,7 +245,7 @@ void renderer_render(renderer_t* renderer) {
         ubo_set_f32 (renderer->ubo_lights, index + 9,  light->cutoff);
         ubo_set_f32 (renderer->ubo_lights, index + 10, light->outer_cutoff);
     }
-    
+
     ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view_matrix);
 
