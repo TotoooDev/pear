@@ -73,6 +73,13 @@ void renderer_set_viewport(renderer_t* renderer) {
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
 }
 
+void renderer_init_screen_framebuffer(renderer_t* renderer) {
+    renderer->screen_framebuffer = framebuffer_new();
+    renderer->framebuffer_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_RGB);
+    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_texture);
+    framebuffer_add_texture(renderer->screen_framebuffer, texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH));
+}
+
 void renderer_on_event(event_type_t type, void* e, void* user_data) {
     renderer_t* renderer = (renderer_t*)user_data;
 
@@ -83,9 +90,13 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer->viewport_width_scaled = renderer->viewport_width * renderer->viewport_scale_x;
         renderer->viewport_height_scaled = renderer->viewport_height * renderer->viewport_scale_y;
         renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
-        
+
         renderer_calculate_projection(renderer);
         renderer_set_viewport(renderer);
+        
+        framebuffer_delete(renderer->screen_framebuffer);
+        texture_delete(renderer->framebuffer_texture);
+        renderer_init_screen_framebuffer(renderer);
     }
 
     if (type == EVENT_TYPE_WINDOW_SCALE_CHANGED) {
@@ -96,6 +107,10 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer->viewport_height_scaled = renderer->viewport_height * event->scale_y;
 
         renderer_set_viewport(renderer);
+
+        framebuffer_delete(renderer->screen_framebuffer);
+        texture_delete(renderer->framebuffer_texture);
+        renderer_init_screen_framebuffer(renderer);
     }
 }
 
@@ -169,6 +184,32 @@ void renderer_init_ubo_lights(renderer_t* renderer) {
 
     renderer->ubo_lights = ubo_new(info, true);
     uboinfo_delete(info);
+}
+
+void renderer_init_screen_mesh(renderer_t* renderer) {
+    vec3 positions[] = {
+        {  1.0f,  1.0f, 0.0f },
+        {  1.0f, -1.0f, 0.0f },
+        { -1.0f, -1.0f, 0.0f },
+        { -1.0f,  1.0f, 0.0f }  
+    };
+    vec2 texture_coords[] = {
+        { 1.0f, 1.0f },
+        { 1.0f, 0.0f },
+        { 0.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    u32 indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
+    mesh_info_t* mesh_info = meshinfo_new();
+    meshinfo_add_position(mesh_info, positions, 4);
+    meshinfo_add_texture_coords(mesh_info, texture_coords, 4);
+    meshinfo_add_indices(mesh_info, indices, 6);
+    renderer->screen_mesh = mesh_new(mesh_info, 0);
+    meshinfo_delete(mesh_info);
 }
 
 void renderer_draw_mesh(renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
@@ -317,35 +358,8 @@ renderer_t* renderer_new() {
     renderer->shader_framebuffer = shader_new(fileystem_read_file("shaders/framebuffer.vert"), fileystem_read_file("shaders/framebuffer.frag"));
     renderer->light_num_components = 11;
 
-    renderer->screen_framebuffer = framebuffer_new();
-    renderer->framebuffer_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_RGB);
-    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_texture);
-    framebuffer_add_texture(renderer->screen_framebuffer, texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH));
-
-    vec3 positions[] = {
-        {  1.0f,  1.0f, 0.0f },
-        {  1.0f, -1.0f, 0.0f },
-        { -1.0f, -1.0f, 0.0f },
-        { -1.0f,  1.0f, 0.0f }  
-    };
-    vec2 texture_coords[] = {
-        { 1.0f, 1.0f },
-        { 1.0f, 0.0f },
-        { 0.0f, 0.0f },
-        { 0.0f, 1.0f }
-    };
-    u32 indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-
-    mesh_info_t* mesh_info = meshinfo_new();
-    meshinfo_add_position(mesh_info, positions, 4);
-    meshinfo_add_texture_coords(mesh_info, texture_coords, 4);
-    meshinfo_add_indices(mesh_info, indices, 6);
-    renderer->screen_mesh = mesh_new(mesh_info, 0);
-    meshinfo_delete(mesh_info);
-
+    renderer_init_screen_framebuffer(renderer);
+    renderer_init_screen_mesh(renderer);    
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
 
