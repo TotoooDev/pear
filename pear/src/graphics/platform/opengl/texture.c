@@ -8,6 +8,7 @@
 typedef struct texture_t {
     u32 width;
     u32 height;
+    texture_format_t format;
     u32 id;
 } texture_t;
 
@@ -25,23 +26,6 @@ texture_format_t texture_num_channels_to_format(u32 num_channels) {
     default:
     case 4:
         return TEXTURE_FORMAT_RGBA;
-    }
-}
-
-GLint texture_format_to_opengl(texture_format_t format) {
-    switch (format) {
-    case TEXTURE_FORMAT_R:
-        return GL_RED;
-
-    case TEXTURE_FORMAT_RG:
-        return GL_RG;
-
-    case TEXTURE_FORMAT_RGB:
-        return GL_RGB;
-
-    default:
-    case TEXTURE_FORMAT_RGBA:
-        return GL_RGBA;
     }
 }
 
@@ -98,16 +82,9 @@ texture_t* texture_new(u32 width, u32 height, texture_wrapping_t wrapping, textu
     texture_t* texture = texture_create(wrapping, filtering);
     texture->width = width;
     texture->height = height;
+    texture->format = format;
     GLint gl_format = texture_format_to_opengl(format);
     glTexImage2D(GL_TEXTURE_2D, 0, gl_format, width, height, 0, gl_format, GL_UNSIGNED_BYTE, NULL);
-    return texture;
-}
-
-texture_t* texture_new_depth(u32 width, u32 height, texture_wrapping_t wrapping, texture_filtering_t filtering) {
-    texture_t* texture = texture_create(wrapping, filtering);
-    texture->width = width;
-    texture->height = height;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     return texture;
 }
 
@@ -130,6 +107,33 @@ u32 texture_get_width(texture_t* texture) {
 
 u32 texture_get_height(texture_t* texture) {
     return texture->height;
+}
+
+texture_format_t texture_get_format(texture_t* texture) {
+    return texture->format;
+}
+
+GLenum texture_format_to_opengl(texture_format_t format) {
+    switch (format) {
+    case TEXTURE_FORMAT_R:
+        return GL_RED;
+
+    case TEXTURE_FORMAT_RG:
+        return GL_RG;
+
+    case TEXTURE_FORMAT_RGB:
+        return GL_RGB;
+
+    case TEXTURE_FORMAT_DEPTH:
+        return GL_DEPTH_COMPONENT;
+
+    case TEXTURE_FORMAT_STENCIL:
+        return GL_STENCIL_INDEX;
+
+    default:
+    case TEXTURE_FORMAT_RGBA:
+        return GL_RGBA;
+    }
 }
 
 u32 texture_get_id(texture_t* texture) {

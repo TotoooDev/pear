@@ -7,7 +7,9 @@ typedef enum texture_format_t {
     TEXTURE_FORMAT_R,
     TEXTURE_FORMAT_RG,
     TEXTURE_FORMAT_RGB,
-    TEXTURE_FORMAT_RGBA
+    TEXTURE_FORMAT_RGBA,
+    TEXTURE_FORMAT_DEPTH,
+    TEXTURE_FORMAT_STENCIL
 } texture_format_t;
 
 typedef enum texture_wrapping_t {
@@ -30,5 +32,7 @@ void texture_delete(texture_t* texture);
 
 u32 texture_get_width(texture_t* texture);
 u32 texture_get_height(texture_t* texture);
+
+texture_format_t texture_get_format(texture_t* texture);
 
 #endif

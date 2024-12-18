@@ -5,12 +5,14 @@
 #include <graphics/mesh_info.h>
 #include <graphics/texture.h>
 #include <graphics/camera.h>
+#include <graphics/framebuffer.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/mesh_info.h>
 #include <graphics/platform/opengl/texture.h>
 #include <graphics/platform/opengl/ubo_info.h>
 #include <graphics/platform/opengl/ubo.h>
+#include <graphics/platform/opengl/framebuffer.h>
 #include <scene/components/transform.h>
 #include <scene/components/model.h>
 #include <scene/components/camera.h>
@@ -50,6 +52,11 @@ typedef struct renderer_t {
     ubo_t* ubo_lights;
 
     shader_t* shader;
+    shader_t* shader_framebuffer;
+
+    framebuffer_t* screen_framebuffer;
+    mesh_t* screen_mesh;
+    texture_t* framebuffer_texture;
 
     u32 light_num_components;
     vec3 camera_pos;
@@ -222,7 +229,22 @@ void renderer_handle_light(renderer_t* renderer, entity_t* entity) {
     array_add(renderer->light_transforms, transform);
 }
 
+void renderer_render_to_screen(renderer_t* renderer) {
+    framebuffer_use_default();
+    glDisable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    shader_use(renderer->shader_framebuffer);
+    shader_set_i32(renderer->shader_framebuffer, 0, "u_screen_texture");
+    texture_use(renderer->framebuffer_texture, 0);
+    mesh_use(renderer->screen_mesh);
+    glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->screen_mesh), GL_UNSIGNED_INT, 0);
+}
+
 void renderer_render(renderer_t* renderer) {
+    glEnable(GL_DEPTH);
+    framebuffer_use(renderer->screen_framebuffer);
+
     ubo_use(renderer->ubo_lights);
     ubo_set_u32(renderer->ubo_lights, 0, array_get_length(renderer->lights));
     ubo_set_vec3(renderer->ubo_lights, 1, renderer->camera_pos);
@@ -262,6 +284,8 @@ void renderer_render(renderer_t* renderer) {
             renderer_draw_mesh(renderer, mesh, material, model_matrix);
         }
     }
+
+    renderer_render_to_screen(renderer);
 }
 
 renderer_t* renderer_new() {
@@ -290,7 +314,37 @@ renderer_t* renderer_new() {
     renderer->light_transforms = array_new(10);
     renderer->model_transforms = array_new(10);
     renderer->shader = shader_new(fileystem_read_file("shaders/shader.vert"), fileystem_read_file("shaders/shader.frag"));
+    renderer->shader_framebuffer = shader_new(fileystem_read_file("shaders/framebuffer.vert"), fileystem_read_file("shaders/framebuffer.frag"));
     renderer->light_num_components = 11;
+
+    renderer->screen_framebuffer = framebuffer_new();
+    renderer->framebuffer_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_RGB);
+    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_texture);
+    framebuffer_add_texture(renderer->screen_framebuffer, texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH));
+
+    vec3 positions[] = {
+        {  1.0f,  1.0f, 0.0f },
+        {  1.0f, -1.0f, 0.0f },
+        { -1.0f, -1.0f, 0.0f },
+        { -1.0f,  1.0f, 0.0f }  
+    };
+    vec2 texture_coords[] = {
+        { 1.0f, 1.0f },
+        { 1.0f, 0.0f },
+        { 0.0f, 0.0f },
+        { 0.0f, 1.0f }
+    };
+    u32 indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
+    mesh_info_t* mesh_info = meshinfo_new();
+    meshinfo_add_position(mesh_info, positions, 4);
+    meshinfo_add_texture_coords(mesh_info, texture_coords, 4);
+    meshinfo_add_indices(mesh_info, indices, 6);
+    renderer->screen_mesh = mesh_new(mesh_info, 0);
+    meshinfo_delete(mesh_info);
 
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
@@ -310,6 +364,7 @@ void renderer_delete(renderer_t* renderer) {
 }
 
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
+    framebuffer_use(renderer->screen_framebuffer);
     glEnable(GL_DEPTH_TEST);
     glClearColor(r, g, b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
