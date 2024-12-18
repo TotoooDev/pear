@@ -221,8 +221,8 @@ void renderer_init_screen_mesh(renderer_t* renderer) {
         { 0.0f, 1.0f }
     };
     u32 indices[] = {
-        0, 1, 3,
-        1, 2, 3
+        0, 3, 1,
+        1, 3, 2
     };
 
     mesh_info_t* mesh_info = meshinfo_new();
@@ -387,6 +387,8 @@ renderer_t* renderer_new() {
 
     renderer_set_viewport(renderer);
     renderer_calculate_projection(renderer);
+
+    glEnable(GL_CULL_FACE);
 
     event_subscribe(renderer_on_event, renderer);
 
