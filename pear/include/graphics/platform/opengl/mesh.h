@@ -1,7 +1,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
-#ifndef PEAR_OPENGL_MESH_H
-#define PEAR_OPENGL_MESH_H
+#ifndef PEAR_GRAPHICS_OPENGL_MESH_H
+#define PEAR_GRAPHICS_OPENGL_MESH_H
 
 #include <graphics/mesh.h>
 
