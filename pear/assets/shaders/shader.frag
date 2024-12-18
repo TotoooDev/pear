@@ -133,8 +133,4 @@ void main() {
     }
 
     frag_color = vec4(result, 1.0);
-
-    // gamma correction
-    float gamma = 2.2;
-    frag_color.rgb = pow(frag_color.rgb, vec3(1.0 / gamma));
 }
