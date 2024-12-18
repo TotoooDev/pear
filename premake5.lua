@@ -45,6 +45,7 @@ project "pear"
 
 	filter "configurations:Release"
 		optimize "On"
+        symbols "On"
 
 project "pear-project"
     location "pear-project"
@@ -99,6 +100,7 @@ project "pear-project"
 
     filter "configurations:Release"
         optimize "On"
+        symbols "On"
 
 project "pear-formats"
     location "pear-formats"
@@ -125,9 +127,10 @@ project "pear-formats"
             "PEAR_DEBUG",
         }
         symbols "On"
-
+        
     filter "configurations:Release"
         optimize "On"
+        symbols "On"
 
 project "converter"
         location "converter"

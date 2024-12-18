@@ -20,7 +20,10 @@ texture_t* model_load_texture(const char* path, texture_wrapping_t wrapping, tex
             PEAR_ERROR("failed to load texture %s!", path);
         }
 
-        return texture_new_from_image(image, wrapping, filtering);
+        texture_t* texture = texture_new_from_image(image, wrapping, filtering);
+        image_delete(image);
+
+        return texture;
     }
 
     return NULL;
@@ -100,6 +103,12 @@ model_t* model_new_from_pear_model(pear_model_t model, texture_wrapping_t wrappi
 void model_delete(model_t* model) {
     for (u32 i = 0; i < model->num_meshes; i++) {
         mesh_delete(model->meshes[i]);
+    }
+
+    for (u32 i = 0; i < model->num_materials; i++) {
+        texture_delete(model->materials[i].diffuse);
+        texture_delete(model->materials[i].specular);
+        texture_delete(model->materials[i].normal);
     }
 
     PEAR_FREE(model->meshes);

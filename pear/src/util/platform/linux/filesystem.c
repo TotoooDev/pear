@@ -2,6 +2,7 @@
 
 #include <core/log.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 
 char* fileystem_read_file(const char* filename) {
@@ -18,7 +19,7 @@ char* fileystem_read_file(const char* filename) {
         PEAR_ERROR("failed to read file %s!", filename);
         return NULL;
     }
-
+    
     fclose(file);
 
     return buffer;

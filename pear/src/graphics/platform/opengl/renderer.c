@@ -56,7 +56,8 @@ typedef struct renderer_t {
 
     framebuffer_t* screen_framebuffer;
     mesh_t* screen_mesh;
-    texture_t* framebuffer_texture;
+    texture_t* framebuffer_color_texture;
+    texture_t* framebuffer_depth_texture;
 
     u32 light_num_components;
     vec3 camera_pos;
@@ -75,9 +76,10 @@ void renderer_set_viewport(renderer_t* renderer) {
 
 void renderer_init_screen_framebuffer(renderer_t* renderer) {
     renderer->screen_framebuffer = framebuffer_new();
-    renderer->framebuffer_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_RGB);
-    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_texture);
-    framebuffer_add_texture(renderer->screen_framebuffer, texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH));
+    renderer->framebuffer_color_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_RGB);
+    renderer->framebuffer_depth_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
+    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_color_texture);
+    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_depth_texture);
 }
 
 void renderer_on_event(event_type_t type, void* e, void* user_data) {
@@ -95,7 +97,8 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer_set_viewport(renderer);
         
         framebuffer_delete(renderer->screen_framebuffer);
-        texture_delete(renderer->framebuffer_texture);
+        texture_delete(renderer->framebuffer_color_texture);
+        texture_delete(renderer->framebuffer_depth_texture);
         renderer_init_screen_framebuffer(renderer);
     }
 
@@ -109,7 +112,8 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer_set_viewport(renderer);
 
         framebuffer_delete(renderer->screen_framebuffer);
-        texture_delete(renderer->framebuffer_texture);
+        texture_delete(renderer->framebuffer_color_texture);
+        texture_delete(renderer->framebuffer_depth_texture);
         renderer_init_screen_framebuffer(renderer);
     }
 }
@@ -149,6 +153,23 @@ void renderer_setup_debug_output() {
     glDebugMessageCallback(renderer_opengl_debug_output, NULL);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 #endif
+}
+
+shader_t* renderer_init_shader(const char* vertex_path, const char* fragment_path) {
+    char* vertex_source = fileystem_read_file(vertex_path);
+    char* fragment_source = fileystem_read_file(fragment_path);
+
+    shader_t* shader = shader_new(vertex_source, fragment_source);
+
+    PEAR_FREE(vertex_source);
+    PEAR_FREE(fragment_source);
+
+    return shader;
+}
+
+void renderer_init_shaders(renderer_t* renderer) {
+    renderer->shader = renderer_init_shader("shaders/shader.vert", "shaders/shader.frag");
+    renderer->shader_framebuffer = renderer_init_shader("shaders/framebuffer.vert", "shaders/framebuffer.frag");
 }
 
 void renderer_init_ubo_matrices(renderer_t* renderer) {
@@ -277,7 +298,7 @@ void renderer_render_to_screen(renderer_t* renderer) {
 
     shader_use(renderer->shader_framebuffer);
     shader_set_i32(renderer->shader_framebuffer, 0, "u_screen_texture");
-    texture_use(renderer->framebuffer_texture, 0);
+    texture_use(renderer->framebuffer_color_texture, 0);
     mesh_use(renderer->screen_mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->screen_mesh), GL_UNSIGNED_INT, 0);
 }
@@ -354,10 +375,9 @@ renderer_t* renderer_new() {
     renderer->models = array_new(10);
     renderer->light_transforms = array_new(10);
     renderer->model_transforms = array_new(10);
-    renderer->shader = shader_new(fileystem_read_file("shaders/shader.vert"), fileystem_read_file("shaders/shader.frag"));
-    renderer->shader_framebuffer = shader_new(fileystem_read_file("shaders/framebuffer.vert"), fileystem_read_file("shaders/framebuffer.frag"));
     renderer->light_num_components = 11;
 
+    renderer_init_shaders(renderer);
     renderer_init_screen_framebuffer(renderer);
     renderer_init_screen_mesh(renderer);    
     renderer_init_ubo_matrices(renderer);
@@ -387,7 +407,8 @@ void renderer_delete(renderer_t* renderer) {
 
     framebuffer_delete(renderer->screen_framebuffer);
     mesh_delete(renderer->screen_mesh);
-    texture_delete(renderer->framebuffer_texture);
+    texture_delete(renderer->framebuffer_color_texture);
+    texture_delete(renderer->framebuffer_depth_texture);
 
     PEAR_FREE(renderer);
 }

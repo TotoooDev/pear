@@ -74,11 +74,17 @@ entity_t* entity_new_from_va_list(const char* name, va_list args) {
 }
 
 void entity_delete(entity_t* entity) {
+    if (entity_has_component(entity, ENTITY_COMPONENT_MODEL)) {
+        model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+        model_delete(model->model);
+    }
+
     for (u32 i = 0; i < ENTITY_COMPONENT_END + 1; i++) {
         if (entity->components != NULL) {
             PEAR_FREE(entity->components[i]);
         }
     }
+    PEAR_FREE(entity->components);
 
     PEAR_FREE(entity);
 }

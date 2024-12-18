@@ -57,6 +57,8 @@ mesh_t* mesh_new(mesh_info_t* mesh_info, u32 material_index) {
     mesh_enable_attribute(2, 3, offset, meshinfo_has_normals(mesh_info)); 
     offset += meshinfo_get_num_positions(mesh_info) * sizeof(vec3);
 
+    PEAR_FREE(vertices);
+
     return mesh;
 }
 

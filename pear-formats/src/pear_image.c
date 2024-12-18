@@ -22,10 +22,12 @@ pear_image_t pear_image_load(const char* filename, bool* success) {
     fread(id_string, sizeof(char), pear_image_id_string_length - 1, file);
     id_string[pear_image_id_string_length - 1] = '\0';
     if (strcmp(id_string, pear_image_id_string) != 0) {
+        free(id_string);
         printf("invalid pear_image file! expected id string %s, got %s", pear_image_id_string, id_string);
         *success = false;
         return image;
     }
+    free(id_string);
 
     fread(&image.width, sizeof(uint32_t), 1, file);
     fread(&image.height, sizeof(uint32_t), 1, file);
