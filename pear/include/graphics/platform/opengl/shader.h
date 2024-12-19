@@ -9,6 +9,7 @@
 typedef struct shader_t shader_t;
 
 shader_t* shader_new(const char* vertex_source, const char* fragment_source);
+shader_t* shader_new_from_file(const char* vertex_path, const char* fragment_path);
 void shader_delete(shader_t* shader);
 
 void shader_use(shader_t* shader);

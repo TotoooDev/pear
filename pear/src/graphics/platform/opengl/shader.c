@@ -1,6 +1,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/platform/opengl/shader.h>
+#include <util/filesystem.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <core/alloc.h>
@@ -48,6 +49,18 @@ shader_t* shader_new(const char* vertex_source, const char* fragment_source) {
 
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+
+    return shader;
+}
+
+shader_t* shader_new_from_file(const char* vertex_path, const char* fragment_path) {
+    char* vertex_source = fileystem_read_file(vertex_path);
+    char* fragment_source = fileystem_read_file(fragment_path);
+
+    shader_t* shader = shader_new(vertex_source, fragment_source);
+
+    PEAR_FREE(vertex_source);
+    PEAR_FREE(fragment_source);
 
     return shader;
 }
