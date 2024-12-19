@@ -29,6 +29,12 @@ void framebuffer_delete(framebuffer_t* framebuffer) {
     PEAR_FREE(framebuffer);
 }
 
+void framebuffer_set_depth_only(framebuffer_t* framebuffer) {
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->id);
+    glReadBuffer(GL_NONE);
+    glDrawBuffer(GL_NONE);
+}
+
 void framebuffer_add_texture(framebuffer_t* framebuffer, texture_t* texture) {
     if (texture_get_format(texture) == TEXTURE_FORMAT_DEPTH) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture_get_id(texture), 0);

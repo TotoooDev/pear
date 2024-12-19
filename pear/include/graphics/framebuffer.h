@@ -9,6 +9,7 @@ typedef struct framebuffer_t framebuffer_t;
 framebuffer_t* framebuffer_new();
 void framebuffer_delete(framebuffer_t* framebuffer);
 
+void framebuffer_set_depth_only(framebuffer_t* framebuffer);
 void framebuffer_add_texture(framebuffer_t* framebuffer, texture_t* texture);
 
 #endif
