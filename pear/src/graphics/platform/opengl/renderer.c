@@ -7,11 +7,15 @@
 #include <graphics/platform/opengl/renderers/scene_renderer.h>
 #include <graphics/platform/opengl/renderers/screen_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
+#include <graphics/platform/opengl/ubo.h>
+#include <graphics/platform/opengl/ubo_info.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <core/alloc.h>
+
+#define RENDERER_NUM_MAX_LIGHTS 128
 
 typedef struct renderer_t {
     f32 viewport_width;
@@ -25,6 +29,12 @@ typedef struct renderer_t {
     texture_t* framebuffer_color_texture;
     texture_t* framebuffer_depth_texture;
     mesh_t* screen_mesh;
+
+    framebuffer_t* shadow_framebuffer;
+    texture_t* shadow_depth_map;
+
+    ubo_t* ubo_matrices;
+    ubo_t* ubo_lights;
 
     scene_renderer_t* scene_renderer;
     screen_renderer_t* screen_renderer;
@@ -106,6 +116,49 @@ void renderer_setup_debug_output() {
 #endif
 }
 
+void renderer_init_shadow_framebuffer(renderer_t* renderer) {
+    const u32 shadow_map_size = 1024;
+    renderer->shadow_depth_map = texture_new(shadow_map_size, shadow_map_size, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
+    renderer->shadow_framebuffer = framebuffer_new();
+    framebuffer_set_depth_only(renderer->shadow_framebuffer);
+    framebuffer_add_texture(renderer->shadow_framebuffer, renderer->shadow_depth_map);
+}
+
+void renderer_init_ubo_matrices(renderer_t* renderer) {
+    ubo_info_t* info = uboinfo_new();
+    uboinfo_add_mat4(info); // model
+    uboinfo_add_mat4(info); // view
+    uboinfo_add_mat4(info); // projection
+    uboinfo_add_mat4(info); // model transpose inverse
+    renderer->ubo_matrices = ubo_new(info, true);
+    uboinfo_delete(info);
+}
+
+void renderer_init_ubo_lights(renderer_t* renderer) {
+    ubo_info_t* info = uboinfo_new();
+
+    uboinfo_add_u32(info); // num lights
+    uboinfo_add_vec3(info); // view pos
+    uboinfo_pad_to_16_alignment(info);
+    for (u32 i = 0; i < RENDERER_NUM_MAX_LIGHTS; i++) {
+        uboinfo_add_u32(info); // type
+        uboinfo_add_vec3(info); // pos
+        uboinfo_add_vec3(info); // direction
+        uboinfo_add_vec3(info); // ambient
+        uboinfo_add_vec3(info); // diffuse
+        uboinfo_add_vec3(info); // specular
+        uboinfo_add_f32(info); // constant
+        uboinfo_add_f32(info); // linear
+        uboinfo_add_f32(info); // quadratic
+        uboinfo_add_f32(info); // cutoff
+        uboinfo_add_f32(info); // outer cutoff
+        uboinfo_pad_to_16_alignment(info);
+    }
+
+    renderer->ubo_lights = ubo_new(info, true);
+    uboinfo_delete(info);
+}
+
 renderer_t* renderer_new() {
     GLenum res = glewInit();
     if (res != GLEW_OK) {
@@ -122,11 +175,13 @@ renderer_t* renderer_new() {
     renderer->viewport_scale_y = window_get_scale_y(app_get_window());
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
-    renderer->scene_renderer = scenerenderer_new();
+    
+    renderer_init_ubo_matrices(renderer);
+    renderer_init_ubo_lights(renderer);
+    renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights);
+    
     renderer->screen_renderer = screenrenderer_new();
-
     renderer_init_screen_framebuffer(renderer);
-
 
     return renderer;
 }

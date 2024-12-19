@@ -96,41 +96,6 @@ void scenerenderer_init_shaders(scene_renderer_t* renderer) {
     renderer->shader = shader_new_from_file("shaders/shader.vert", "shaders/shader.frag");
 }
 
-void scenerenderer_init_ubo_matrices(scene_renderer_t* renderer) {
-    ubo_info_t* info = uboinfo_new();
-    uboinfo_add_mat4(info); // model
-    uboinfo_add_mat4(info); // view
-    uboinfo_add_mat4(info); // projection
-    uboinfo_add_mat4(info); // model transpose inverse
-    renderer->ubo_matrices = ubo_new(info, true);
-    uboinfo_delete(info);
-}
-
-void scenerenderer_init_ubo_lights(scene_renderer_t* renderer) {
-    ubo_info_t* info = uboinfo_new();
-
-    uboinfo_add_u32(info); // num lights
-    uboinfo_add_vec3(info); // view pos
-    uboinfo_pad_to_16_alignment(info);
-    for (u32 i = 0; i < RENDERER_NUM_MAX_LIGHTS; i++) {
-        uboinfo_add_u32(info); // type
-        uboinfo_add_vec3(info); // pos
-        uboinfo_add_vec3(info); // direction
-        uboinfo_add_vec3(info); // ambient
-        uboinfo_add_vec3(info); // diffuse
-        uboinfo_add_vec3(info); // specular
-        uboinfo_add_f32(info); // constant
-        uboinfo_add_f32(info); // linear
-        uboinfo_add_f32(info); // quadratic
-        uboinfo_add_f32(info); // cutoff
-        uboinfo_add_f32(info); // outer cutoff
-        uboinfo_pad_to_16_alignment(info);
-    }
-
-    renderer->ubo_lights = ubo_new(info, true);
-    uboinfo_delete(info);
-}
-
 void scenerenderer_draw_mesh(scene_renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
     shader_set_i32(renderer->shader, 0, "u_material.diffuse");
     shader_set_i32(renderer->shader, 1, "u_material.specular");
@@ -231,7 +196,7 @@ void scenerenderer_render(scene_renderer_t* renderer) {
     }
 }
 
-scene_renderer_t* scenerenderer_new() {
+scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights) {
     GLenum res = glewInit();
     if (res != GLEW_OK) {
         PEAR_ERROR("failed to initialize glew! %s", glewGetErrorString(res));
@@ -255,10 +220,10 @@ scene_renderer_t* scenerenderer_new() {
     renderer->light_transforms = array_new(10);
     renderer->model_transforms = array_new(10);
     renderer->light_num_components = 11;
+    renderer->ubo_matrices = ubo_matrices;
+    renderer->ubo_lights = ubo_lights;
 
     scenerenderer_init_shaders(renderer);
-    scenerenderer_init_ubo_matrices(renderer);
-    scenerenderer_init_ubo_lights(renderer);
 
     glm_mat4_identity(renderer->view_matrix);
 
