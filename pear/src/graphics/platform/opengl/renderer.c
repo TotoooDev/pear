@@ -81,7 +81,7 @@ void renderer_opengl_debug_output(GLenum source, GLenum type, unsigned int id, G
         return;
     }
 
-    switch (type) {
+    switch (severity) {
     case GL_DEBUG_SEVERITY_HIGH:
         PEAR_ERROR("(%d) %s", id, message);
         break;
