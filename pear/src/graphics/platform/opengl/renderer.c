@@ -183,6 +183,8 @@ renderer_t* renderer_new() {
     renderer->screen_renderer = screenrenderer_new();
     renderer_init_screen_framebuffer(renderer);
 
+    event_subscribe(renderer_on_event, renderer);
+
     return renderer;
 }
 
