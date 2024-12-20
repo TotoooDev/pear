@@ -1,4 +1,3 @@
-#include <pear.h>
 #include <scene/scene.h>
 #include <graphics/gui/gui.h>
 #include <graphics/gui/scene_inspector.h>
