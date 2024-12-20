@@ -58,6 +58,7 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         texture_delete(renderer->screen_texture);
         texture_delete(renderer->screen_depth_texture);
         renderer_init_screen_framebuffer(renderer);
+        screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->screen_texture);
     }
 
     if (type == EVENT_TYPE_WINDOW_SCALE_CHANGED) {
@@ -71,6 +72,7 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         texture_delete(renderer->screen_texture);
         texture_delete(renderer->screen_depth_texture);
         renderer_init_screen_framebuffer(renderer);
+        screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->screen_texture);
     }
 }
 

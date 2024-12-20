@@ -12,6 +12,7 @@ screen_renderer_t* screenrenderer_new(texture_t* screen_texture);
 void screenrenderer_delete(screen_renderer_t* renderer);
 
 void screenrenderer_render_to_screen(screen_renderer_t* renderer);
+void screenrenderer_set_screen_texture(screen_renderer_t* renderer, texture_t* screen_texture);
 
 #endif
 

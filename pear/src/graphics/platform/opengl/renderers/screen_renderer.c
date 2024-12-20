@@ -81,4 +81,8 @@ void screenrenderer_render_to_screen(screen_renderer_t* renderer) {
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->screen_mesh), GL_UNSIGNED_INT, 0);
 }
 
+void screenrenderer_set_screen_texture(screen_renderer_t* renderer, texture_t* screen_texture) {
+    renderer->screen_texture = screen_texture;
+}
+
 #endif
