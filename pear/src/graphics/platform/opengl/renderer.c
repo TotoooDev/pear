@@ -16,6 +16,7 @@
 #include <core/alloc.h>
 
 #define RENDERER_NUM_MAX_LIGHTS 128
+#define RENDERER_SHADOW_MAP_SIZE 1024
 
 typedef struct renderer_t {
     f32 viewport_width;
@@ -28,6 +29,9 @@ typedef struct renderer_t {
     framebuffer_t* screen_framebuffer;
     texture_t* screen_texture;
     texture_t* screen_depth_texture;
+
+    framebuffer_t* shadow_framebuffer;
+    texture_t* shadow_map;
 
     ubo_t* ubo_matrices;
     ubo_t* ubo_lights;
@@ -148,6 +152,13 @@ void renderer_init_ubo_lights(renderer_t* renderer) {
     uboinfo_delete(info);
 }
 
+void renderer_init_shadow_framebuffer(renderer_t* renderer) {
+    renderer->shadow_map = texture_new(RENDERER_SHADOW_MAP_SIZE, RENDERER_SHADOW_MAP_SIZE, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
+    renderer->shadow_framebuffer = framebuffer_new();
+    framebuffer_add_texture(renderer->shadow_framebuffer, renderer->shadow_map);
+    framebuffer_set_depth_only(renderer->shadow_framebuffer);
+}
+
 renderer_t* renderer_new() {
     GLenum res = glewInit();
     if (res != GLEW_OK) {
@@ -168,6 +179,7 @@ renderer_t* renderer_new() {
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
     renderer_init_screen_framebuffer(renderer);
+    renderer_init_shadow_framebuffer(renderer);
     
     renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights);
     renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
