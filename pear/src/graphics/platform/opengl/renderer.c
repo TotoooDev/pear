@@ -217,6 +217,9 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+    framebuffer_use(renderer->shadow_framebuffer);
+    shadowrenderer_draw_scene(renderer->shadow_renderer, scene);
+
     framebuffer_use(renderer->screen_framebuffer);
     scenerenderer_draw_scene(renderer->scene_renderer, scene);
 
