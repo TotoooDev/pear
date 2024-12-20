@@ -36,6 +36,7 @@ in VS_OUT {
     vec3 frag_pos;
     vec2 texture_coords;
     vec3 normal;
+    vec4 frag_pos_light_space;
 } fs_in;
 
 layout (std140) uniform ubo_lights {
@@ -45,6 +46,23 @@ layout (std140) uniform ubo_lights {
 };
 
 uniform material_t u_material;
+uniform sampler2D u_shadow_map;
+
+float calculate_shadow_directional(vec4 frag_pos_light_space, vec3 normal, vec3 light_dir) {
+    // perform perspective divide
+    vec3 projection_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
+    // transform to [0,1] range
+    projection_coords = projection_coords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closest_depth = texture(u_shadow_map, projection_coords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float current_depth = projection_coords.z;
+    // check whether current frag pos is in shadow
+    float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005);
+    float shadow = current_depth - bias > closest_depth  ? 1.0 : 0.0;
+
+    return shadow;
+}
 
 vec3 calculate_directional_light(light_t light, vec3 normal, vec3 view_dir) {
     vec3 light_dir = normalize(-light.direction);
@@ -58,7 +76,11 @@ vec3 calculate_directional_light(light_t light, vec3 normal, vec3 view_dir) {
     vec3 ambient = light.ambient * vec3(texture(u_material.diffuse, fs_in.texture_coords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(u_material.diffuse, fs_in.texture_coords));
     vec3 specular = light.specular * spec * vec3(texture(u_material.specular, fs_in.texture_coords));
-    return (ambient + diffuse + specular);
+    // shadow stuff
+    float shadow = calculate_shadow_directional(fs_in.frag_pos_light_space, normal, light_dir);
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * texture(u_material.diffuse, fs_in.texture_coords).rgb; 
+    
+    return lighting;
 }
 
 vec3 calculate_point_light(light_t light, vec3 normal, vec3 frag_pos, vec3 view_dir)

@@ -51,6 +51,8 @@ typedef struct scene_renderer_t {
 
     shader_t* shader;
 
+    texture_t* shadow_map;
+
     u32 light_num_components;
     vec3 camera_pos;
 } scene_renderer_t;
@@ -99,6 +101,7 @@ void scenerenderer_init_shaders(scene_renderer_t* renderer) {
 void scenerenderer_draw_mesh(scene_renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
     shader_set_i32(renderer->shader, 0, "u_material.diffuse");
     shader_set_i32(renderer->shader, 1, "u_material.specular");
+    shader_set_i32(renderer->shader, 10, "u_shadow_map");
     shader_set_vec3(renderer->shader, material.color, "u_material.color");
     shader_set_f32(renderer->shader, material.shininess, "u_material.shininess");
 
@@ -116,6 +119,7 @@ void scenerenderer_draw_mesh(scene_renderer_t* renderer, mesh_t* mesh , material
     if (material.specular != NULL) {
         texture_use(material.specular, 1);
     }
+    texture_use(renderer->shadow_map, 10);
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
 }
@@ -196,7 +200,7 @@ void scenerenderer_render(scene_renderer_t* renderer) {
     }
 }
 
-scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights) {
+scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights, texture_t* shadow_map) {
     GLenum res = glewInit();
     if (res != GLEW_OK) {
         PEAR_ERROR("failed to initialize glew! %s", glewGetErrorString(res));
@@ -222,6 +226,7 @@ scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights) {
     renderer->light_num_components = 11;
     renderer->ubo_matrices = ubo_matrices;
     renderer->ubo_lights = ubo_lights;
+    renderer->shadow_map = shadow_map;
 
     scenerenderer_init_shaders(renderer);
 

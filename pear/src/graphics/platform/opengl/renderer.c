@@ -17,7 +17,7 @@
 #include <core/alloc.h>
 
 #define RENDERER_NUM_MAX_LIGHTS 128
-#define RENDERER_SHADOW_MAP_SIZE 1024
+#define RENDERER_SHADOW_MAP_SIZE 2048
 
 typedef struct renderer_t {
     f32 viewport_width;
@@ -184,8 +184,8 @@ renderer_t* renderer_new() {
     renderer_init_screen_framebuffer(renderer);
     renderer_init_shadow_framebuffer(renderer);
     
-    renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights);
-    renderer->screen_renderer = screenrenderer_new(renderer->shadow_map);
+    renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights, renderer->shadow_map);
+    renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
     renderer->shadow_renderer = shadowrenderer_new(renderer->ubo_matrices, renderer->shadow_map);
 
     event_subscribe(renderer_on_event, renderer);
@@ -216,11 +216,13 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 }
 
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
+    glViewport(0, 0, RENDERER_SHADOW_MAP_SIZE, RENDERER_SHADOW_MAP_SIZE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     framebuffer_use(renderer->shadow_framebuffer);
     shadowrenderer_draw_scene(renderer->shadow_renderer, scene);
 
+    glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
     framebuffer_use(renderer->screen_framebuffer);
     scenerenderer_draw_scene(renderer->scene_renderer, scene);
 
