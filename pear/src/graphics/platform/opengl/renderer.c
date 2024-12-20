@@ -42,7 +42,6 @@ void renderer_init_screen_framebuffer(renderer_t* renderer) {
     renderer->screen_depth_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
     framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_texture);
     framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_depth_texture);
-    screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->screen_texture);
 }
 
 void renderer_on_event(event_type_t type, void* e, void* user_data) {
