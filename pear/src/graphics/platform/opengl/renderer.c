@@ -125,6 +125,7 @@ void renderer_init_ubo_matrices(renderer_t* renderer) {
     uboinfo_add_mat4(info); // view
     uboinfo_add_mat4(info); // projection
     uboinfo_add_mat4(info); // model transpose inverse
+    uboinfo_add_mat4(info); // light space transform
     renderer->ubo_matrices = ubo_new(info, true);
     uboinfo_delete(info);
 }
@@ -184,8 +185,8 @@ renderer_t* renderer_new() {
     renderer_init_shadow_framebuffer(renderer);
     
     renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights);
-    renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
-    renderer->shadow_renderer = shadowrenderer_new(renderer->shadow_map);
+    renderer->screen_renderer = screenrenderer_new(renderer->shadow_map);
+    renderer->shadow_renderer = shadowrenderer_new(renderer->ubo_matrices, renderer->shadow_map);
 
     event_subscribe(renderer_on_event, renderer);
 
