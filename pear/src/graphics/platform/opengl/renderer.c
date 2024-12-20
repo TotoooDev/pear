@@ -181,6 +181,12 @@ void renderer_delete(renderer_t* renderer) {
     scenerenderer_delete(renderer->scene_renderer);
     screenrenderer_delete(renderer->screen_renderer);
 
+    framebuffer_delete(renderer->screen_framebuffer);
+    texture_delete(renderer->screen_texture);
+    texture_delete(renderer->screen_depth_texture);
+    ubo_delete(renderer->ubo_matrices);
+    ubo_delete(renderer->ubo_lights);
+
     PEAR_FREE(renderer);
 }
 

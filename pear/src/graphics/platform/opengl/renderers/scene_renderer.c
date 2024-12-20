@@ -241,9 +241,6 @@ void scenerenderer_delete(scene_renderer_t* renderer) {
     array_delete(renderer->lights);
     array_delete(renderer->light_transforms);
 
-    ubo_delete(renderer->ubo_matrices);
-    ubo_delete(renderer->ubo_lights);
-
     shader_delete(renderer->shader);
 
     PEAR_FREE(renderer);
