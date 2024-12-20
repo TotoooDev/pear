@@ -19,7 +19,7 @@
 
 typedef struct screen_renderer_t {
     shader_t* shader_framebuffer;
-    texture_t* framebuffer_color_texture;
+    texture_t* screen_texture;
     mesh_t* screen_mesh;
 } screen_renderer_t;
 
@@ -53,11 +53,13 @@ void screenrenderer_init_screen_mesh(screen_renderer_t* renderer) {
     meshinfo_delete(mesh_info);
 }
 
-screen_renderer_t* screenrenderer_new() {
+screen_renderer_t* screenrenderer_new(texture_t* screen_texture) {
     screen_renderer_t* renderer = (screen_renderer_t*)PEAR_MALLOC(sizeof(screen_renderer_t));
 
+    renderer->screen_texture = screen_texture;
+
     screenrenderer_init_shaders(renderer);
-    screenrenderer_init_screen_mesh(renderer);    
+    screenrenderer_init_screen_mesh(renderer);
 
     return renderer;
 }
@@ -74,13 +76,9 @@ void screenrenderer_render_to_screen(screen_renderer_t* renderer) {
 
     shader_use(renderer->shader_framebuffer);
     shader_set_i32(renderer->shader_framebuffer, 0, "u_screen_texture");
-    texture_use(renderer->framebuffer_color_texture, 0);
+    texture_use(renderer->screen_texture, 0);
     mesh_use(renderer->screen_mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(renderer->screen_mesh), GL_UNSIGNED_INT, 0);
-}
-
-void screenrenderer_set_screen_texture(screen_renderer_t* renderer, texture_t* texture) {
-    renderer->framebuffer_color_texture = texture;
 }
 
 #endif

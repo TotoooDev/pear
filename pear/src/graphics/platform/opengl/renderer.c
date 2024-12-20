@@ -26,9 +26,8 @@ typedef struct renderer_t {
     f32 viewport_height_scaled;
 
     framebuffer_t* screen_framebuffer;
-    texture_t* framebuffer_color_texture;
-    texture_t* framebuffer_depth_texture;
-    mesh_t* screen_mesh;
+    texture_t* screen_texture;
+    texture_t* screen_depth_texture;
 
     ubo_t* ubo_matrices;
     ubo_t* ubo_lights;
@@ -39,11 +38,11 @@ typedef struct renderer_t {
 
 void renderer_init_screen_framebuffer(renderer_t* renderer) {
     renderer->screen_framebuffer = framebuffer_new();
-    renderer->framebuffer_color_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_RGB);
-    renderer->framebuffer_depth_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
-    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_color_texture);
-    framebuffer_add_texture(renderer->screen_framebuffer, renderer->framebuffer_depth_texture);
-    screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->framebuffer_color_texture);
+    renderer->screen_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_RGB);
+    renderer->screen_depth_texture = texture_new(renderer->viewport_width_scaled, renderer->viewport_height_scaled, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
+    framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_texture);
+    framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_depth_texture);
+    screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->screen_texture);
 }
 
 void renderer_on_event(event_type_t type, void* e, void* user_data) {
@@ -57,8 +56,8 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer->viewport_height_scaled = renderer->viewport_height * renderer->viewport_scale_y;
 
         framebuffer_delete(renderer->screen_framebuffer);
-        texture_delete(renderer->framebuffer_color_texture);
-        texture_delete(renderer->framebuffer_depth_texture);
+        texture_delete(renderer->screen_texture);
+        texture_delete(renderer->screen_depth_texture);
         renderer_init_screen_framebuffer(renderer);
     }
 
@@ -70,8 +69,8 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer->viewport_height_scaled = renderer->viewport_height * event->scale_y;
 
         framebuffer_delete(renderer->screen_framebuffer);
-        texture_delete(renderer->framebuffer_color_texture);
-        texture_delete(renderer->framebuffer_depth_texture);
+        texture_delete(renderer->screen_texture);
+        texture_delete(renderer->screen_depth_texture);
         renderer_init_screen_framebuffer(renderer);
     }
 }
@@ -167,10 +166,10 @@ renderer_t* renderer_new() {
     
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
-    renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights);
-    
-    renderer->screen_renderer = screenrenderer_new();
     renderer_init_screen_framebuffer(renderer);
+    
+    renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights);
+    renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
 
     event_subscribe(renderer_on_event, renderer);
 
