@@ -6,6 +6,7 @@
 #include <graphics/window.h>
 #include <graphics/platform/opengl/renderers/scene_renderer.h>
 #include <graphics/platform/opengl/renderers/screen_renderer.h>
+#include <graphics/platform/opengl/renderers/shadow_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
@@ -38,6 +39,7 @@ typedef struct renderer_t {
 
     scene_renderer_t* scene_renderer;
     screen_renderer_t* screen_renderer;
+    shadow_renderer_t* shadow_renderer;
 } renderer_t;
 
 void renderer_init_screen_framebuffer(renderer_t* renderer) {
@@ -183,6 +185,7 @@ renderer_t* renderer_new() {
     
     renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights);
     renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
+    renderer->shadow_renderer = shadowrenderer_new(renderer->shadow_map);
 
     event_subscribe(renderer_on_event, renderer);
 
@@ -192,6 +195,7 @@ renderer_t* renderer_new() {
 void renderer_delete(renderer_t* renderer) {
     scenerenderer_delete(renderer->scene_renderer);
     screenrenderer_delete(renderer->screen_renderer);
+    shadowrenderer_delete(renderer->shadow_renderer);
 
     framebuffer_delete(renderer->screen_framebuffer);
     texture_delete(renderer->screen_texture);
@@ -203,8 +207,11 @@ void renderer_delete(renderer_t* renderer) {
 }
 
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
+    framebuffer_use(renderer->shadow_framebuffer);
+    shadowrenderer_clear(renderer->shadow_renderer);
+
     framebuffer_use(renderer->screen_framebuffer);
-    scenerenderer_clear(renderer->scene_renderer, 0.2f, 0.2f, 0.2f);
+    scenerenderer_clear(renderer->scene_renderer, r, g, b);
 }
 
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
