@@ -30,9 +30,6 @@ typedef struct renderer_t {
     texture_t* framebuffer_depth_texture;
     mesh_t* screen_mesh;
 
-    framebuffer_t* shadow_framebuffer;
-    texture_t* shadow_depth_map;
-
     ubo_t* ubo_matrices;
     ubo_t* ubo_lights;
 
@@ -114,14 +111,6 @@ void renderer_setup_debug_output() {
     glDebugMessageCallback(renderer_opengl_debug_output, NULL);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 #endif
-}
-
-void renderer_init_shadow_framebuffer(renderer_t* renderer) {
-    const u32 shadow_map_size = 1024;
-    renderer->shadow_depth_map = texture_new(shadow_map_size, shadow_map_size, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
-    renderer->shadow_framebuffer = framebuffer_new();
-    framebuffer_set_depth_only(renderer->shadow_framebuffer);
-    framebuffer_add_texture(renderer->shadow_framebuffer, renderer->shadow_depth_map);
 }
 
 void renderer_init_ubo_matrices(renderer_t* renderer) {
