@@ -15,7 +15,7 @@ shadow_renderer_t* shadowrenderer_new(texture_t* screen_texture) {
     shadow_renderer_t* renderer = (shadow_renderer_t*)PEAR_MALLOC(sizeof(shadow_renderer_t));
 
     renderer->screen_texture = screen_texture;
-    renderer->shader_framebuffer = shader_new_from_file("shaders/framebuffer.vert", "shaders/framebuffer.frag");
+    renderer->shader = shader_new_from_file("shaders/shadow.vert", "shaders/shadow.frag");
 
     return renderer;
 }
