@@ -7,7 +7,7 @@
 #include <core/alloc.h>
 
 typedef struct shadow_renderer_t {
-    shader_t* shader_framebuffer;
+    shader_t* shader;
     texture_t* screen_texture;
 } shadow_renderer_t;
 
@@ -21,7 +21,7 @@ shadow_renderer_t* shadowrenderer_new(texture_t* screen_texture) {
 }
 
 void shadowrenderer_delete(shadow_renderer_t* renderer) {
-    shader_delete(renderer->shader_framebuffer);
+    shader_delete(renderer->shader);
     PEAR_FREE(renderer);
 }
 
