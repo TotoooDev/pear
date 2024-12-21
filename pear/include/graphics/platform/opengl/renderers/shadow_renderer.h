@@ -13,7 +13,7 @@ shadow_renderer_t* shadowrenderer_new(ubo_t* ubo_matrices, texture_t* shadow_map
 void shadowrenderer_delete(shadow_renderer_t* renderer);
 
 void shadowrenderer_clear(shadow_renderer_t* renderer);
-void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene);
+void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4 projection);
 
 #endif
 

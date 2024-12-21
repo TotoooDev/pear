@@ -17,7 +17,7 @@
 #include <core/alloc.h>
 
 #define RENDERER_NUM_MAX_LIGHTS 128
-#define RENDERER_SHADOW_MAP_SIZE 2048
+#define RENDERER_SHADOW_MAP_SIZE 4096
 
 typedef struct renderer_t {
     f32 fov;
@@ -31,6 +31,8 @@ typedef struct renderer_t {
     f32 viewport_scale_y;
     f32 viewport_width_scaled;
     f32 viewport_height_scaled;
+
+    mat4 projection;
 
     framebuffer_t* screen_framebuffer;
     texture_t* screen_texture;
@@ -56,11 +58,10 @@ void renderer_init_screen_framebuffer(renderer_t* renderer) {
 }
 
 void renderer_calculate_projection(renderer_t* renderer) {
-    mat4 projection;
-    glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, projection);
+    glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection);
 
     ubo_use(renderer->ubo_matrices);
-    ubo_set_mat4(renderer->ubo_matrices, 2, projection);
+    ubo_set_mat4(renderer->ubo_matrices, 2, renderer->projection);
 }
 
 void renderer_on_event(event_type_t type, void* e, void* user_data) {
@@ -191,8 +192,8 @@ renderer_t* renderer_new() {
 
     renderer_t* renderer = (renderer_t*)PEAR_MALLOC(sizeof(renderer_t));
     renderer->fov = glm_rad(45.0f);
-    renderer->near = 0.01f;
-    renderer->far = 100.0f;
+    renderer->near = 0.1f;
+    renderer->far = 30.0f;
     renderer->viewport_width = window_get_width(app_get_window());
     renderer->viewport_height = window_get_height(app_get_window());
     renderer->viewport_scale_x = window_get_scale_x(app_get_window());
@@ -244,7 +245,7 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     framebuffer_use(renderer->shadow_framebuffer);
-    shadowrenderer_draw_scene(renderer->shadow_renderer, scene);
+    shadowrenderer_draw_scene(renderer->shadow_renderer, scene, renderer->projection);
 
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
     framebuffer_use(renderer->screen_framebuffer);
