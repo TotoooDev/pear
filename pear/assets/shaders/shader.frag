@@ -59,7 +59,15 @@ float calculate_shadow_directional(vec4 frag_pos_light_space, vec3 normal, vec3 
     float current_depth = projection_coords.z;
     // check whether current frag pos is in shadow
     float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005);
-    float shadow = current_depth - bias > closest_depth  ? 1.0 : 0.0;
+    float shadow = 0.0;
+    vec2 texel_size = 1.0 / textureSize(u_shadow_map, 0);
+    for (int x = -1; x < 1; x++) {
+        for (int y = -1; y < 1; y++) {
+            float pcf_depth = texture(u_shadow_map, projection_coords.xy + vec2(x, y) * texel_size).r;
+            shadow += current_depth - bias > pcf_depth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
 
     return shadow;
 }
