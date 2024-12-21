@@ -10,6 +10,7 @@
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
+#include <graphics/gui/renderer.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
 #include <core/log.h>
@@ -213,6 +214,7 @@ renderer_t* renderer_new() {
 
     renderer_calculate_projection(renderer);
 
+    gui_renderer_set_shadow_map(renderer->shadow_map);
     event_subscribe(renderer_on_event, renderer);
 
     return renderer;
