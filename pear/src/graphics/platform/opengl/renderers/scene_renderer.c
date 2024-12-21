@@ -26,24 +26,11 @@
 #define RENDERER_NUM_MAX_LIGHTS 128
 
 typedef struct scene_renderer_t {
-    f32 fov;
-    f32 aspect_ratio;
-    f32 near;
-    f32 far;
-
-    f32 viewport_width;
-    f32 viewport_height;
-    f32 viewport_scale_x;
-    f32 viewport_scale_y;
-    f32 viewport_width_scaled;
-    f32 viewport_height_scaled;
-
     array_t* models;
     array_t* lights;
     array_t* model_transforms;
     array_t* light_transforms;
 
-    mat4 projection_matrix;
     mat4 view_matrix;
 
     ubo_t* ubo_matrices;
@@ -56,43 +43,6 @@ typedef struct scene_renderer_t {
     u32 light_num_components;
     vec3 camera_pos;
 } scene_renderer_t;
-
-void scenerenderer_calculate_projection(scene_renderer_t* renderer) {
-    glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, renderer->projection_matrix);
-
-    ubo_use(renderer->ubo_matrices);
-    ubo_set_mat4(renderer->ubo_matrices, 2, renderer->projection_matrix);
-}
-
-void scenerenderer_set_viewport(scene_renderer_t* renderer) {
-    glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
-}
-
-void scenerenderer_on_event(event_type_t type, void* e, void* user_data) {
-    scene_renderer_t* renderer = (scene_renderer_t*)user_data;
-
-    if (type == EVENT_TYPE_WINDOW_RESIZED) {
-        window_resized_event_t* event = (window_resized_event_t*)e;
-        renderer->viewport_width = event->width;
-        renderer->viewport_height = event->height;
-        renderer->viewport_width_scaled = renderer->viewport_width * renderer->viewport_scale_x;
-        renderer->viewport_height_scaled = renderer->viewport_height * renderer->viewport_scale_y;
-        renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
-
-        scenerenderer_calculate_projection(renderer);
-        scenerenderer_set_viewport(renderer);
-    }
-
-    if (type == EVENT_TYPE_WINDOW_SCALE_CHANGED) {
-        window_scale_changed_event_t* event = (window_scale_changed_event_t*)e;
-        renderer->viewport_scale_x = event->scale_x;
-        renderer->viewport_scale_y = event->scale_y;
-        renderer->viewport_width_scaled = renderer->viewport_width * event->scale_x;
-        renderer->viewport_height_scaled = renderer->viewport_height * event->scale_y;
-
-        scenerenderer_set_viewport(renderer);
-    }
-}
 
 void scenerenderer_init_shaders(scene_renderer_t* renderer) {
     renderer->shader = shader_new_from_file("shaders/shader.vert", "shaders/shader.frag");
@@ -209,16 +159,6 @@ scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights, text
 
     scene_renderer_t* renderer = (scene_renderer_t*)PEAR_MALLOC(sizeof(scene_renderer_t));
 
-    renderer->aspect_ratio = window_get_width(app_get_window()) / (f32)window_get_height(app_get_window());
-    renderer->fov = glm_rad(45.0f);
-    renderer->near = 0.01f;
-    renderer->far = 100.0f;
-    renderer->viewport_width = window_get_width(app_get_window());
-    renderer->viewport_height = window_get_height(app_get_window());
-    renderer->viewport_scale_x = window_get_scale_x(app_get_window());
-    renderer->viewport_scale_y = window_get_scale_y(app_get_window());
-    renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
-    renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->lights = array_new(10);
     renderer->models = array_new(10);
     renderer->light_transforms = array_new(10);
@@ -231,11 +171,6 @@ scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights, text
     scenerenderer_init_shaders(renderer);
 
     glm_mat4_identity(renderer->view_matrix);
-
-    scenerenderer_set_viewport(renderer);
-    scenerenderer_calculate_projection(renderer);
-
-    event_subscribe(scenerenderer_on_event, renderer);
 
     return renderer;
 }

@@ -20,6 +20,11 @@
 #define RENDERER_SHADOW_MAP_SIZE 2048
 
 typedef struct renderer_t {
+    f32 fov;
+    f32 aspect_ratio;
+    f32 near;
+    f32 far;
+
     f32 viewport_width;
     f32 viewport_height;
     f32 viewport_scale_x;
@@ -50,6 +55,14 @@ void renderer_init_screen_framebuffer(renderer_t* renderer) {
     framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_depth_texture);
 }
 
+void renderer_calculate_projection(renderer_t* renderer) {
+    mat4 projection;
+    glm_perspective(renderer->fov, renderer->aspect_ratio, renderer->near, renderer->far, projection);
+
+    ubo_use(renderer->ubo_matrices);
+    ubo_set_mat4(renderer->ubo_matrices, 2, projection);
+}
+
 void renderer_on_event(event_type_t type, void* e, void* user_data) {
     renderer_t* renderer = (renderer_t*)user_data;
 
@@ -59,6 +72,9 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer->viewport_height = event->height;
         renderer->viewport_width_scaled = renderer->viewport_width * renderer->viewport_scale_x;
         renderer->viewport_height_scaled = renderer->viewport_height * renderer->viewport_scale_y;
+        renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
+
+        renderer_calculate_projection(renderer);
 
         framebuffer_delete(renderer->screen_framebuffer);
         texture_delete(renderer->screen_texture);
@@ -73,6 +89,8 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer->viewport_scale_y = event->scale_y;
         renderer->viewport_width_scaled = renderer->viewport_width * event->scale_x;
         renderer->viewport_height_scaled = renderer->viewport_height * event->scale_y;
+
+        renderer_calculate_projection(renderer);
 
         framebuffer_delete(renderer->screen_framebuffer);
         texture_delete(renderer->screen_texture);
@@ -172,12 +190,16 @@ renderer_t* renderer_new() {
     renderer_setup_debug_output();
 
     renderer_t* renderer = (renderer_t*)PEAR_MALLOC(sizeof(renderer_t));
+    renderer->fov = glm_rad(45.0f);
+    renderer->near = 0.01f;
+    renderer->far = 100.0f;
     renderer->viewport_width = window_get_width(app_get_window());
     renderer->viewport_height = window_get_height(app_get_window());
     renderer->viewport_scale_x = window_get_scale_x(app_get_window());
     renderer->viewport_scale_y = window_get_scale_y(app_get_window());
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
+    renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
     
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
@@ -187,6 +209,8 @@ renderer_t* renderer_new() {
     renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights, renderer->shadow_map);
     renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
     renderer->shadow_renderer = shadowrenderer_new(renderer->ubo_matrices, renderer->shadow_map);
+
+    renderer_calculate_projection(renderer);
 
     event_subscribe(renderer_on_event, renderer);
 
