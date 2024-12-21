@@ -7,6 +7,7 @@
 #include <scene/components/model.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
+#include <scene/components/light.h>
 #include <core/log.h>
 #include <GL/glew.h>
 #include <core/alloc.h>
@@ -51,7 +52,7 @@ void shadowrenderer_get_light_view(vec4* corners, vec3 light_dir, mat4 dest) {
     glm_vec3_divs(center, 8.0f, center);
 
     vec3 light_pos;
-    glm_vec3_add(center, light_dir, light_pos);
+    glm_vec3_sub(center, light_dir, light_pos);
     glm_lookat(light_pos, center, (vec3){ 0.0f, 1.0f, 0.0f }, dest);
 }
 
@@ -75,7 +76,7 @@ void shadowrenderer_get_light_projection(vec4* corners, mat4 light_view, mat4 de
         z_max = glm_max(z_max, transform[2]);
     }
 
-    f32 z_multiplier = 2.0f;
+    f32 z_multiplier = 10.0f;
     if (z_min < 0.0f) {
         z_min *= z_multiplier;
     } else {
@@ -110,7 +111,8 @@ void shadowrenderer_clear(shadow_renderer_t* renderer) {
 }
 
 void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4 projection) {
-    vec3 light_dir = { -0.1f, 1.0f, -0.1f };
+    vec4 frustum_corners[8];
+    mat4 view;
 
     for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
         entity_t* entity = array_get(scene_get_entities(scene), i);
@@ -119,15 +121,34 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4
             transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
             camera_component_t* cam = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
 
-            vec4 frustum_corners[8];
-            mat4 view;
             mat4 light_view;
             mat4 light_projection;
             mat4 light_space_transform;
             
             camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], view);
             shadowrenderer_get_frustum_corners(frustum_corners, projection, view);
-            shadowrenderer_get_light_view(frustum_corners, light_dir, light_view);
+        }
+    }
+
+    for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
+        entity_t* entity = array_get(scene_get_entities(scene), i);
+
+        if (entity_has_component(entity, ENTITY_COMPONENT_LIGHT) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+            light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
+
+            if (!light->cast || light->light.type != LIGHT_TYPE_DIRECTIONAL) {
+                continue;
+            }
+
+            mat4 light_view;
+            mat4 light_projection;
+            mat4 light_space_transform;
+
+            vec3 light_direction;
+            glm_vec3_normalize_to(transform->rotation, light_direction);
+            
+            shadowrenderer_get_light_view(frustum_corners, light_direction, light_view);
             shadowrenderer_get_light_projection(frustum_corners, light_view, light_projection);
             glm_mat4_mul(light_projection, light_view, light_space_transform);
 
