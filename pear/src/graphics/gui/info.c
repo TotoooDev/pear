@@ -13,8 +13,12 @@ void gui_info(struct nk_context* nk_context, void* user_data) {
             nk_label(nk_context, "debug mode disabled", NK_TEXT_ALIGN_LEFT);
         #endif
 
-        nk_value_float(nk_context, "timestep", app_get_timestep());
-        nk_value_float(nk_context, "fps", 1.0f / app_get_timestep() * 1000.0f);
+        if (nk_tree_push(nk_context, NK_TREE_TAB, "performance", NK_MAXIMIZED)) {
+            nk_layout_row_dynamic(nk_context, 16, 1);
+            nk_value_float(nk_context, "timestep", app_get_timestep());
+            nk_value_float(nk_context, "fps", 1.0f / app_get_timestep() * 1000.0f);
+            nk_tree_pop(nk_context);
+        }
     }
     nk_end(nk_context);
 }
