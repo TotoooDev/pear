@@ -28,6 +28,6 @@ void gui_renderer(struct nk_context* nk_context, void* user_data) {
         }
         nk_layout_row_dynamic(nk_context, 16, 1);
         
-        nk_end(nk_context);
     }
+    nk_end(nk_context);
 }
