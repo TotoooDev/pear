@@ -121,6 +121,9 @@ void cameraentity_on_update(entity_t* entity, f32 timestep) {
 entity_t* cameraentity_create(scene_t* scene) {
     entity_t* entity = scene_add_entity(scene, "camera", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
 
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    transform->pos[1] = 1.0f;
+
     script_component_t* script = (script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SCRIPT);
     script->on_start = cameraentity_on_start;
     script->on_update = cameraentity_on_update;
