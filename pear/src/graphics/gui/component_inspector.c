@@ -44,6 +44,7 @@ void gui_model(struct nk_context* nk_context, entity_t* entity) {
 
         nk_layout_row_dynamic(nk_context, 16, 1);
         model_comp->draw = nk_check_label(nk_context, "draw", model_comp->draw);
+        model_comp->shadow_caster = nk_check_label(nk_context, "shadow caster", model_comp->shadow_caster);
 
         nk_tree_pop(nk_context);
     }
@@ -73,6 +74,7 @@ void gui_light(struct nk_context* nk_context, entity_t* entity) {
 
         nk_layout_row_dynamic(nk_context, 16, 1);
         light->cast = nk_check_label(nk_context, "cast", light->cast);
+        light->shadow_caster = nk_check_label(nk_context, "shadow caster", light->shadow_caster);
 
         nk_layout_row_dynamic(nk_context, 16, 2);
         nk_label(nk_context, "type:", NK_TEXT_ALIGN_LEFT);

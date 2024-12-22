@@ -6,6 +6,7 @@
 typedef struct light_component_t {
     light_t light;
     bool cast;
+    bool shadow_caster;
 } light_component_t;
 
 light_component_t* lightcomponent_new();

@@ -6,6 +6,7 @@
 typedef struct model_component_t {
     model_t* model;
     bool draw;
+    bool shadow_caster;
 } model_component_t;
 
 #endif

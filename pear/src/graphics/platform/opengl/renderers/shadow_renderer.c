@@ -130,6 +130,10 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4
         }
     }
 
+    mat4 light_view = GLM_MAT4_IDENTITY_INIT;
+    mat4 light_projection = GLM_MAT4_IDENTITY_INIT;
+    mat4 light_space_transform = GLM_MAT4_IDENTITY_INIT;
+
     for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
         entity_t* entity = array_get(scene_get_entities(scene), i);
 
@@ -137,13 +141,10 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4
             transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
             light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
 
-            if (!light->cast || light->light.type != LIGHT_TYPE_DIRECTIONAL) {
+            if (!light->cast || !light->shadow_caster || light->light.type != LIGHT_TYPE_DIRECTIONAL) {
                 continue;
             }
 
-            mat4 light_view;
-            mat4 light_projection;
-            mat4 light_space_transform;
 
             vec3 light_direction;
             glm_vec3_normalize_to(transform->rotation, light_direction);
@@ -152,10 +153,11 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4
             shadowrenderer_get_light_projection(frustum_corners, light_view, light_projection);
             glm_mat4_mul(light_projection, light_view, light_space_transform);
 
-            ubo_use(renderer->ubo_matrices);
-            ubo_set_mat4(renderer->ubo_matrices, 4, light_space_transform);
         }
     }
+    
+    ubo_use(renderer->ubo_matrices);
+    ubo_set_mat4(renderer->ubo_matrices, 4, light_space_transform);
 
     for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
         entity_t* entity = array_get(scene_get_entities(scene), i);
@@ -163,6 +165,10 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4
         if (entity_has_component(entity, ENTITY_COMPONENT_MODEL) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
             transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
             model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+
+            if (!model->shadow_caster) {
+                continue;
+            }
 
             mat4 model_matrix;
             transformcomponent_get_model_matrix(transform, model_matrix);

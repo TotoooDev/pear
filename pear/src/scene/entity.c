@@ -46,6 +46,7 @@ entity_t* entity_new_from_va_list(const char* name, va_list args) {
             model_component_t* model = (model_component_t*)PEAR_MALLOC(sizeof(model_component_t));
             model->model = NULL;
             model->draw = true;
+            model->shadow_caster = true;
             entity->components[(u32)current_component] = model;
             break;
 

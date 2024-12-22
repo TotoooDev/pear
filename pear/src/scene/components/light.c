@@ -5,6 +5,7 @@ light_component_t* lightcomponent_new() {
     light_component_t* light = (light_component_t*)PEAR_MALLOC(sizeof(light_component_t));
 
     light->cast = true;
+    light->shadow_caster = true;
 
     glm_vec3_copy((vec3){ 0.1f, 0.1f, 0.1f }, light->light.ambient);
     glm_vec3_copy((vec3){ 0.6f, 0.6f, 0.6f }, light->light.diffuse);
