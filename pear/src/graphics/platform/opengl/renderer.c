@@ -233,6 +233,7 @@ void renderer_delete(renderer_t* renderer) {
     scenerenderer_delete(renderer->scene_renderer);
     screenrenderer_delete(renderer->screen_renderer);
     shadowrenderer_delete(renderer->shadow_renderer);
+    skyboxrenderer_delete(renderer->skybox_renderer);
 
     framebuffer_delete(renderer->screen_framebuffer);
     texture_delete(renderer->screen_texture);
