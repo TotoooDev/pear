@@ -29,10 +29,6 @@ texture_format_t texture_num_channels_to_format(u32 num_channels) {
     }
 }
 
-GLint texture_num_channels_to_opengl(u32 num_channels) {
-    return texture_format_to_opengl(texture_num_channels_to_format(num_channels));
-}
-
 texture_t* texture_create(texture_wrapping_t wrapping, texture_filtering_t filtering) {
     texture_t* texture = (texture_t*)PEAR_MALLOC(sizeof(texture_t));
 
@@ -137,6 +133,10 @@ GLenum texture_filtering_to_opengl(texture_filtering_t filtering) {
     case TEXTURE_FILTERING_LINEAR:
         return GL_LINEAR;
     }
+}
+
+GLint texture_num_channels_to_opengl(u32 num_channels) {
+    return texture_format_to_opengl(texture_num_channels_to_format(num_channels));
 }
 
 u32 texture_get_id(texture_t* texture) {

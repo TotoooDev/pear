@@ -7,6 +7,7 @@
 #include <graphics/platform/opengl/renderers/scene_renderer.h>
 #include <graphics/platform/opengl/renderers/screen_renderer.h>
 #include <graphics/platform/opengl/renderers/shadow_renderer.h>
+#include <graphics/platform/opengl/renderers/skybox_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
@@ -49,6 +50,7 @@ typedef struct renderer_t {
     scene_renderer_t* scene_renderer;
     screen_renderer_t* screen_renderer;
     shadow_renderer_t* shadow_renderer;
+    skybox_renderer_t* skybox_renderer;
 } renderer_t;
 
 void renderer_init_screen_framebuffer(renderer_t* renderer) {
@@ -214,6 +216,7 @@ renderer_t* renderer_new() {
     renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights, renderer->shadow_map);
     renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
     renderer->shadow_renderer = shadowrenderer_new(renderer->ubo_matrices, renderer->shadow_map);
+    renderer->skybox_renderer = skyboxrenderer_new(renderer->ubo_matrices);
 
     renderer_calculate_projection(renderer);
 
@@ -255,6 +258,10 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
     framebuffer_use(renderer->screen_framebuffer);
     scenerenderer_draw_scene(renderer->scene_renderer, scene);
+
+    glDepthFunc(GL_LEQUAL);
+    skyboxrenderer_draw_scene(renderer->skybox_renderer, scene);
+    glDepthFunc(GL_LESS);
 
     glDisable(GL_DEPTH_TEST);
     framebuffer_use_default();

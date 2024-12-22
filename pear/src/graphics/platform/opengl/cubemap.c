@@ -17,13 +17,13 @@ cubemap_t* cubemap_create(texture_wrapping_t wrapping, texture_filtering_t filte
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->id);
 
     GLenum gl_wrapping = texture_wrapping_to_opengl(wrapping);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapping);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapping);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, gl_wrapping);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, gl_wrapping);	
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, gl_wrapping);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, gl_wrapping);
 
     GLenum gl_filtering = texture_filtering_to_opengl(filtering);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filtering);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filtering);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, gl_filtering);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, gl_filtering);
 
     return cubemap;
 }
@@ -54,7 +54,8 @@ void cubemap_delete(cubemap_t* cubemap) {
     PEAR_FREE(cubemap);
 }
 
-void cubemap_use(cubemap_t* cubemap) {
+void cubemap_use(cubemap_t* cubemap, u32 index) {
+    glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->id);
 }
 

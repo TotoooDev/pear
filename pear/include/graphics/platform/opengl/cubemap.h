@@ -5,7 +5,7 @@
 
 #include <graphics/cubemap.h>
 
-void cubemap_use(cubemap_t* cubemap);
+void cubemap_use(cubemap_t* cubemap, u32 index);
 
 #endif
 
