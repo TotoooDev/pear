@@ -39,39 +39,11 @@ texture_t* texture_create(texture_wrapping_t wrapping, texture_filtering_t filte
     glGenTextures(1, &(texture->id));
     glBindTexture(GL_TEXTURE_2D, texture->id);
 
-    GLenum gl_wrapping;
-    switch (wrapping) {
-    case TEXTURE_WRAPPING_REPEAT:
-        gl_wrapping = GL_REPEAT;
-        break;
-
-    case TEXTURE_WRAPPING_REPEAT_MIRROR:
-        gl_wrapping = GL_MIRRORED_REPEAT;
-        break;
-
-    case TEXTURE_WRAPPING_CLAMP:
-        gl_wrapping = GL_CLAMP_TO_EDGE;
-        break;
-
-    case TEXTURE_WRAPPING_NONE:
-        gl_wrapping = GL_CLAMP_TO_BORDER;
-        break;
-    }
-
+    GLenum gl_wrapping = texture_wrapping_to_opengl(wrapping);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapping);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapping);
 
-    GLenum gl_filtering;
-    switch (filtering) {
-    case TEXTURE_FILTERING_NEAREST:
-        gl_filtering = GL_NEAREST;
-        break;
-
-    case TEXTURE_FILTERING_LINEAR:
-        gl_filtering = GL_LINEAR;
-        break;
-    }
-
+    GLenum gl_filtering = texture_filtering_to_opengl(filtering);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filtering);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filtering);
 
@@ -90,6 +62,9 @@ texture_t* texture_new(u32 width, u32 height, texture_wrapping_t wrapping, textu
 
 texture_t* texture_new_from_image(image_t* image, texture_wrapping_t wrapping, texture_filtering_t filtering) {
     texture_t* texture = texture_create(wrapping, filtering);
+    texture->width = image_get_width(image);
+    texture->height = image_get_height(image);
+    texture->format = texture_num_channels_to_format(image_get_num_channels(image));
     GLint gl_format = texture_num_channels_to_opengl(image_get_num_channels(image));
     glTexImage2D(GL_TEXTURE_2D, 0, gl_format, image_get_width(image), image_get_height(image), 0, gl_format, GL_UNSIGNED_BYTE, image_get_data(image));
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -133,6 +108,34 @@ GLenum texture_format_to_opengl(texture_format_t format) {
     default:
     case TEXTURE_FORMAT_RGBA:
         return GL_RGBA;
+    }
+}
+
+GLenum texture_wrapping_to_opengl(texture_wrapping_t wrapping) {
+    switch (wrapping) {
+    case TEXTURE_WRAPPING_REPEAT:
+        return GL_REPEAT;
+
+    case TEXTURE_WRAPPING_REPEAT_MIRROR:
+        return GL_MIRRORED_REPEAT;
+
+    case TEXTURE_WRAPPING_CLAMP:
+        return GL_CLAMP_TO_EDGE;
+
+    default:
+    case TEXTURE_WRAPPING_NONE:
+        return GL_CLAMP_TO_BORDER;
+    }
+}
+
+GLenum texture_filtering_to_opengl(texture_filtering_t filtering) {
+    switch (filtering) {
+    case TEXTURE_FILTERING_NEAREST:
+        return GL_NEAREST;
+
+    default:
+    case TEXTURE_FILTERING_LINEAR:
+        return GL_LINEAR;
     }
 }
 
