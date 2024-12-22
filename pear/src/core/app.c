@@ -86,6 +86,10 @@ window_t* app_get_window() {
     return app->window;
 }
 
+renderer_t* app_get_renderer() {
+    return app->renderer;
+}
+
 f32 app_get_timestep() {
     return app->timestep;
 }

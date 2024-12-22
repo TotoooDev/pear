@@ -12,4 +12,6 @@ void renderer_delete(renderer_t* renderer);
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b);
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene);
 
+void renderer_set_wireframe(renderer_t* renderer, bool active);
+
 #endif

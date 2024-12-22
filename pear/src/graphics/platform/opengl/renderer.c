@@ -23,6 +23,8 @@
 #define RENDERER_SHADOW_MAP_SIZE 4096
 
 typedef struct renderer_t {
+    bool wireframe;
+
     f32 fov;
     f32 aspect_ratio;
     f32 near;
@@ -197,6 +199,7 @@ renderer_t* renderer_new() {
     renderer_setup_debug_output();
 
     renderer_t* renderer = (renderer_t*)PEAR_MALLOC(sizeof(renderer_t));
+    renderer->wireframe = false;
     renderer->fov = glm_rad(45.0f);
     renderer->near = 0.1f;
     renderer->far = 30.0f;
@@ -255,6 +258,10 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     framebuffer_use(renderer->shadow_framebuffer);
     shadowrenderer_draw_scene(renderer->shadow_renderer, scene, renderer->projection);
 
+    if (renderer->wireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
     framebuffer_use(renderer->screen_framebuffer);
     scenerenderer_draw_scene(renderer->scene_renderer, scene);
@@ -263,9 +270,17 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     skyboxrenderer_draw_scene(renderer->skybox_renderer, scene);
     glDepthFunc(GL_LESS);
 
+    if (renderer->wireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
     glDisable(GL_DEPTH_TEST);
     framebuffer_use_default();
     screenrenderer_render_to_screen(renderer->screen_renderer);
+}
+
+void renderer_set_wireframe(renderer_t* renderer, bool active) {
+    renderer->wireframe = active;
 }
 
 #endif
