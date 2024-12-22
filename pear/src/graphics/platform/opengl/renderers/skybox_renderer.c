@@ -71,8 +71,10 @@ skybox_renderer_t* skyboxrenderer_new(ubo_t* ubo_matrices) {
     return renderer;
 }
 
-void skyboxrenderer_clear(skybox_renderer_t* renderer) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void skyboxrenderer_delete(skybox_renderer_t* renderer) {
+    mesh_delete(renderer->cubemap_mesh);
+    shader_delete(renderer->shader);
+    PEAR_FREE(renderer);
 }
 
 void skyboxrenderer_draw_scene(skybox_renderer_t* renderer, scene_t* scene) {
