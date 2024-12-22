@@ -79,25 +79,21 @@ void skyboxrenderer_delete(skybox_renderer_t* renderer) {
     PEAR_FREE(renderer);
 }
 
-void skyboxrenderer_draw_scene(skybox_renderer_t* renderer, scene_t* scene) {
-    for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
-        entity_t* entity = array_get(scene_get_entities(scene), i);
+void skyboxrenderer_draw_scene(skybox_renderer_t* renderer, array_t* skyboxes) {
+    for (u32 i = 0; i < array_get_length(skyboxes); i++) {
+        skybox_component_t* skybox = array_get(skyboxes, i);
 
-        if (entity_has_component(entity, ENTITY_COMPONENT_SKYBOX)) {
-            skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
-
-            if (!skybox->draw) {
-                continue;
-            }
-
-            shader_use(renderer->shader);
-            shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
-            shader_set_i32(renderer->shader, 0, "u_cubemap");
-
-            mesh_use(renderer->cubemap_mesh);
-            cubemap_use(skybox->cubemap, 0);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+        if (!skybox->draw) {
+            continue;
         }
+        
+        shader_use(renderer->shader);
+        shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
+        shader_set_i32(renderer->shader, 0, "u_cubemap");
+
+        mesh_use(renderer->cubemap_mesh);
+        cubemap_use(skybox->cubemap, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 }
 

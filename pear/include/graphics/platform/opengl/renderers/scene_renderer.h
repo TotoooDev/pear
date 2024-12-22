@@ -13,7 +13,7 @@ scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights, text
 void scenerenderer_delete(scene_renderer_t* renderer);
 
 void scenerenderer_clear(scene_renderer_t* renderer, f32 r, f32 g, f32 b);
-void scenerenderer_draw_scene(scene_renderer_t* renderer, scene_t* scene);
+void scenerenderer_draw_scene(scene_renderer_t* renderer, array_t* models, array_t* lights, array_t* model_transforms, array_t* light_transforms);
 
 #endif
 

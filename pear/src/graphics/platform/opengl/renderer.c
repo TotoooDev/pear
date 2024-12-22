@@ -4,6 +4,7 @@
 #include <graphics/framebuffer.h>
 #include <graphics/mesh.h>
 #include <graphics/window.h>
+#include <graphics/camera.h>
 #include <graphics/platform/opengl/renderers/scene_renderer.h>
 #include <graphics/platform/opengl/renderers/screen_renderer.h>
 #include <graphics/platform/opengl/renderers/shadow_renderer.h>
@@ -13,6 +14,11 @@
 #include <graphics/platform/opengl/ubo_info.h>
 #include <graphics/platform/opengl/texture.h>
 #include <graphics/gui/renderer.h>
+#include <scene/components/transform.h>
+#include <scene/components/camera.h>
+#include <scene/components/model.h>
+#include <scene/components/light.h>
+#include <scene/components/skybox.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
 #include <core/log.h>
@@ -38,6 +44,14 @@ typedef struct renderer_t {
     f32 viewport_height_scaled;
 
     mat4 projection;
+    mat4 view;
+    vec3 camera_pos;
+
+    array_t* models;
+    array_t* lights;
+    array_t* skyboxes;
+    array_t* model_transforms;
+    array_t* light_transforms;
 
     framebuffer_t* screen_framebuffer;
     texture_t* screen_texture;
@@ -189,6 +203,69 @@ void renderer_init_shadow_framebuffer(renderer_t* renderer) {
     framebuffer_set_depth_only(renderer->shadow_framebuffer);
 }
 
+void renderer_handle_model(renderer_t* renderer, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+
+    array_add(renderer->models, model);
+    array_add(renderer->model_transforms, transform);
+}
+
+void renderer_handle_camera(renderer_t* renderer, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
+
+    if (camera->use) {
+        camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view);
+        glm_vec3_copy(transform->pos, renderer->camera_pos);
+    }
+}
+
+void renderer_handle_light(renderer_t* renderer, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
+
+    array_add(renderer->lights, light);
+    array_add(renderer->light_transforms, transform);
+}
+
+void renderer_handle_skybox(renderer_t* renderer, entity_t* entity) {
+    skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
+
+    if (!skybox->draw) {
+        return;
+    }
+
+    array_add(renderer->skyboxes, skybox);
+}
+
+void renderer_handle_scene(renderer_t* renderer, scene_t* scene) {
+    array_t* entities = scene_get_entities(scene);
+    for (u32 i = 0; i < array_get_length(entities); i++) {
+        entity_t* entity = array_get(entities, i);
+
+        if (entity_has_component(entity, ENTITY_COMPONENT_MODEL) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+            renderer_handle_model(renderer, entity);
+        }
+        if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+            renderer_handle_camera(renderer, entity);
+        }
+        if (entity_has_component(entity, ENTITY_COMPONENT_LIGHT) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+            renderer_handle_light(renderer, entity);
+        }
+        if (entity_has_component(entity, ENTITY_COMPONENT_SKYBOX)) {
+            renderer_handle_skybox(renderer, entity);
+        }
+    }
+
+    ubo_use(renderer->ubo_matrices);
+    ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view);
+
+    ubo_use(renderer->ubo_lights);
+    ubo_set_u32(renderer->ubo_lights, 0, array_get_length(renderer->lights));
+    ubo_set_vec3(renderer->ubo_lights, 1, renderer->camera_pos);
+}
+
 renderer_t* renderer_new() {
     GLenum res = glewInit();
     if (res != GLEW_OK) {
@@ -210,6 +287,11 @@ renderer_t* renderer_new() {
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
+    renderer->models = array_new(10);
+    renderer->lights = array_new(10);
+    renderer->skyboxes = array_new(10);
+    renderer->model_transforms = array_new(10);
+    renderer->light_transforms = array_new(10);
     
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
@@ -242,10 +324,22 @@ void renderer_delete(renderer_t* renderer) {
     ubo_delete(renderer->ubo_matrices);
     ubo_delete(renderer->ubo_lights);
 
+    array_delete(renderer->models);
+    array_delete(renderer->lights);
+    array_delete(renderer->skyboxes);
+    array_delete(renderer->model_transforms);
+    array_delete(renderer->light_transforms);
+
     PEAR_FREE(renderer);
 }
 
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
+    array_clear(renderer->lights);
+    array_clear(renderer->models);
+    array_clear(renderer->skyboxes);
+    array_clear(renderer->light_transforms);
+    array_clear(renderer->model_transforms);
+
     framebuffer_use(renderer->shadow_framebuffer);
     shadowrenderer_clear(renderer->shadow_renderer);
 
@@ -254,11 +348,13 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 }
 
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
+    renderer_handle_scene(renderer, scene);
+
     glViewport(0, 0, RENDERER_SHADOW_MAP_SIZE, RENDERER_SHADOW_MAP_SIZE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     framebuffer_use(renderer->shadow_framebuffer);
-    shadowrenderer_draw_scene(renderer->shadow_renderer, scene, renderer->projection);
+    shadowrenderer_draw_scene(renderer->shadow_renderer, renderer->models, renderer->lights, renderer->model_transforms, renderer->light_transforms, renderer->projection, renderer->view);
 
     if (renderer->wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -266,10 +362,10 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
 
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
     framebuffer_use(renderer->screen_framebuffer);
-    scenerenderer_draw_scene(renderer->scene_renderer, scene);
+    scenerenderer_draw_scene(renderer->scene_renderer, renderer->models, renderer->lights, renderer->model_transforms, renderer->light_transforms);
 
     glDepthFunc(GL_LEQUAL);
-    skyboxrenderer_draw_scene(renderer->skybox_renderer, scene);
+    skyboxrenderer_draw_scene(renderer->skybox_renderer, renderer->skyboxes);
     glDepthFunc(GL_LESS);
 
     if (renderer->wireframe) {

@@ -110,81 +110,51 @@ void shadowrenderer_clear(shadow_renderer_t* renderer) {
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void shadowrenderer_draw_scene(shadow_renderer_t* renderer, scene_t* scene, mat4 projection) {
+void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, array_t* lights, array_t* model_transforms, array_t* light_transforms, mat4 projection, mat4 view) {
     vec4 frustum_corners[8];
-    mat4 view;
-
-    for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
-        entity_t* entity = array_get(scene_get_entities(scene), i);
-
-        if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-            camera_component_t* cam = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
-
-            mat4 light_view;
-            mat4 light_projection;
-            mat4 light_space_transform;
-            
-            camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], view);
-            shadowrenderer_get_frustum_corners(frustum_corners, projection, view);
-        }
-    }
-
     mat4 light_view = GLM_MAT4_IDENTITY_INIT;
     mat4 light_projection = GLM_MAT4_IDENTITY_INIT;
     mat4 light_space_transform = GLM_MAT4_IDENTITY_INIT;
 
-    for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
-        entity_t* entity = array_get(scene_get_entities(scene), i);
+    shadowrenderer_get_frustum_corners(frustum_corners, projection, view);
 
-        if (entity_has_component(entity, ENTITY_COMPONENT_LIGHT) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-            light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
+    for (u32 i = 0; i < array_get_length(light_transforms); i++) {
+        transform_component_t* transform = array_get(light_transforms, i);
+        light_component_t* light = array_get(lights, i);
 
-            if (!light->cast || !light->shadow_caster || light->light.type != LIGHT_TYPE_DIRECTIONAL) {
-                continue;
-            }
-
-
-            vec3 light_direction;
-            glm_vec3_normalize_to(transform->rotation, light_direction);
-            
-            shadowrenderer_get_light_view(frustum_corners, light_direction, light_view);
-            shadowrenderer_get_light_projection(frustum_corners, light_view, light_projection);
-            glm_mat4_mul(light_projection, light_view, light_space_transform);
-
+        if (!light->cast || !light->shadow_caster || light->light.type != LIGHT_TYPE_DIRECTIONAL) {
+            continue;
         }
+
+        vec3 light_direction;
+        glm_vec3_normalize_to(transform->rotation, light_direction);
+            
+        shadowrenderer_get_light_view(frustum_corners, light_direction, light_view);
+        shadowrenderer_get_light_projection(frustum_corners, light_view, light_projection);
+        glm_mat4_mul(light_projection, light_view, light_space_transform);
     }
-    
+
     ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 4, light_space_transform);
 
-    for (u32 i = 0; i < array_get_length(scene_get_entities(scene)); i++) {
-        entity_t* entity = array_get(scene_get_entities(scene), i);
+    for (u32 i = 0; i < array_get_length(models); i++) {
+        model_component_t* model = array_get(models, i);
+        transform_component_t* transform = array_get(model_transforms, i);
 
-        if (entity_has_component(entity, ENTITY_COMPONENT_MODEL) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-            model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+        mat4 model_matrix;
+        transformcomponent_get_model_matrix(transform, model_matrix);
 
-            if (!model->shadow_caster) {
-                continue;
-            }
+        for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
+            mesh_t* mesh = model_get_meshes(model->model)[j];
 
-            mat4 model_matrix;
-            transformcomponent_get_model_matrix(transform, model_matrix);
+            ubo_use(renderer->ubo_matrices);
+            ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
 
-            for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
-                mesh_t* mesh = model_get_meshes(model->model)[j];
+            shader_use(renderer->shader);
+            shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
 
-                ubo_use(renderer->ubo_matrices);
-                ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
-
-                shader_use(renderer->shader);
-                shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
-
-                mesh_use(mesh);
-                glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
-            }
+            mesh_use(mesh);
+            glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
         }
     }
 }

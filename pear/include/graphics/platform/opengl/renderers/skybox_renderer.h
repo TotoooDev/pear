@@ -11,7 +11,7 @@ typedef struct skybox_renderer_t skybox_renderer_t;
 skybox_renderer_t* skyboxrenderer_new(ubo_t* ubo_matrices);
 void skyboxrenderer_delete(skybox_renderer_t* renderer);
 
-void skyboxrenderer_draw_scene(skybox_renderer_t* renderer, scene_t* scene);
+void skyboxrenderer_draw_scene(skybox_renderer_t* renderer, array_t* skyboxes);
 
 #endif
 
