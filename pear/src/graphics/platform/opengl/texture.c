@@ -145,4 +145,8 @@ void texture_use(texture_t* texture, u32 texture_id) {
     glBindTexture(GL_TEXTURE_2D, texture->id);
 }
 
+void texture_set_border_color(texture_t* texture, vec4 color) {
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+}
+
 #endif

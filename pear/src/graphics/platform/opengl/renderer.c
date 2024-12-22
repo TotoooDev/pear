@@ -10,6 +10,7 @@
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
+#include <graphics/platform/opengl/texture.h>
 #include <graphics/gui/renderer.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
@@ -177,6 +178,8 @@ void renderer_init_ubo_lights(renderer_t* renderer) {
 
 void renderer_init_shadow_framebuffer(renderer_t* renderer) {
     renderer->shadow_map = texture_new(RENDERER_SHADOW_MAP_SIZE, RENDERER_SHADOW_MAP_SIZE, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR, TEXTURE_FORMAT_DEPTH);
+    texture_set_border_color(renderer->shadow_map, (vec4){ 1.0f, 1.0f, 1.0f, 1.0f });
+
     renderer->shadow_framebuffer = framebuffer_new();
     framebuffer_add_texture(renderer->shadow_framebuffer, renderer->shadow_map);
     framebuffer_set_depth_only(renderer->shadow_framebuffer);
