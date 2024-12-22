@@ -2,6 +2,7 @@
 #define PEAR_SCENE_ENTITY_H_
 
 #include <core/types.h>
+#include <stdarg.h>
 
 typedef enum entity_component_t {
     ENTITY_COMPONENT_TRANSFORM,
@@ -9,6 +10,7 @@ typedef enum entity_component_t {
     ENTITY_COMPONENT_CAMERA,
     ENTITY_COMPONENT_SCRIPT,
     ENTITY_COMPONENT_LIGHT,
+    ENTITY_COMPONENT_SKYBOX,
     ENTITY_COMPONENT_END
 } entity_component_t;
 

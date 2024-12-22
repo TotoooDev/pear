@@ -4,6 +4,7 @@
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
 #include <scene/components/script.h>
+#include <scene/components/skybox.h>
 #include <core/log.h>
 #include <core/alloc.h>
 #include <stdarg.h>
@@ -62,6 +63,13 @@ entity_t* entity_new_from_va_list(const char* name, va_list args) {
 
         case ENTITY_COMPONENT_SCRIPT:
             entity->components[(u32)current_component] = scriptcomponent_new();
+            break;
+
+        case ENTITY_COMPONENT_SKYBOX:
+            skybox_component_t* skybox = (skybox_component_t*)PEAR_MALLOC(sizeof(skybox_component_t));
+            skybox->cubemap = NULL;
+            skybox->draw = true;
+            entity->components[(u32)current_component] = skybox;
             break;
 
         default:
