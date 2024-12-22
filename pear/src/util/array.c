@@ -13,7 +13,7 @@ array_t* array_new(u32 size) {
 
     array->size = size;
     array->length = 0;
-    array->data = (void**)PEAR_MALLOC(size);
+    array->data = (void**)PEAR_MALLOC(sizeof(void*) * size);
 
     return array;
 }
@@ -26,7 +26,7 @@ void array_delete(array_t* array) {
 u32 array_add(array_t* array, void* data) {
     if (array->length >= array->size) {
         array->size = array->size + array->size / 2;
-        array->data = PEAR_REALLOC(array->data, array->size);
+        array->data = PEAR_REALLOC(array->data, sizeof(void*) * array->size);
     }
 
     array->data[array->length] = data;

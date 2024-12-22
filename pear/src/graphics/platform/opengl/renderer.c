@@ -236,6 +236,7 @@ void renderer_delete(renderer_t* renderer) {
     skyboxrenderer_delete(renderer->skybox_renderer);
 
     framebuffer_delete(renderer->screen_framebuffer);
+    framebuffer_delete(renderer->shadow_framebuffer);
     texture_delete(renderer->screen_texture);
     texture_delete(renderer->screen_depth_texture);
     ubo_delete(renderer->ubo_matrices);

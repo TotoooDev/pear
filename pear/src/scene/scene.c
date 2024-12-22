@@ -38,7 +38,7 @@ scene_t* scene_new() {
 }
 
 void scene_delete(scene_t* scene) {
-    for (u32 i = 0; i < array_get_length(scene->entities); i++) {
+    for (i32 i = array_get_length(scene->entities) - 1; i >= 0; i--) {
         entity_t* entity = array_get(scene->entities, i);
         scene_remove_entity(scene, entity);
     }

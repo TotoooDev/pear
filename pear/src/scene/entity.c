@@ -87,6 +87,10 @@ void entity_delete(entity_t* entity) {
         model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
         model_delete(model->model);
     }
+    if (entity_has_component(entity, ENTITY_COMPONENT_SKYBOX)) {
+        skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
+        cubemap_delete(skybox->cubemap);
+    }
 
     for (u32 i = 0; i < ENTITY_COMPONENT_END + 1; i++) {
         if (entity->components != NULL) {

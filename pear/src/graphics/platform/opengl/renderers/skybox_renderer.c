@@ -58,6 +58,8 @@ void skyboxrenderer_init_mesh(skybox_renderer_t* renderer) {
     meshinfo_add_position(mesh_info, positions, 36);
 
     renderer->cubemap_mesh = mesh_new(mesh_info, 0);
+
+    meshinfo_delete(mesh_info);
 }
 
 skybox_renderer_t* skyboxrenderer_new(ubo_t* ubo_matrices) {

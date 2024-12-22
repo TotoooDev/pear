@@ -213,4 +213,8 @@ void skyboxentity_create(scene_t* scene) {
 
     skybox_component_t* skybox = entity_get_component(skybox_entity, ENTITY_COMPONENT_SKYBOX);
     skybox->cubemap = cubemap_new_from_images(images, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_LINEAR);
+
+    for (u32 i = 0; i < 6; i++) {
+        image_delete(images[i]);
+    }
 }
