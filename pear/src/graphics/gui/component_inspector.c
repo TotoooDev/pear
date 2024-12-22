@@ -4,6 +4,7 @@
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
 #include <scene/components/script.h>
+#include <scene/components/skybox.h>
 
 static entity_t* gui_entity = NULL;
 
@@ -136,6 +137,18 @@ void gui_script(struct nk_context* nk_context, entity_t* entity) {
     }
 }
 
+void gui_skybox(struct nk_context* nk_context, entity_t* entity) {
+    if (nk_tree_push(nk_context, NK_TREE_NODE, "skybox", NK_MAXIMIZED)) {
+        skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
+
+        nk_layout_row_dynamic(nk_context, 16, 1);
+
+        skybox->draw = nk_check_label(nk_context, "draw", skybox->draw);
+        
+        nk_tree_pop(nk_context);
+    }
+}
+
 void gui_component_inspector(struct nk_context* nk_context, void* user_data) {
     if (gui_entity == NULL) {
         return;
@@ -160,6 +173,10 @@ void gui_component_inspector(struct nk_context* nk_context, void* user_data) {
 
         if (entity_has_component(gui_entity, ENTITY_COMPONENT_SCRIPT)) {
             gui_script(nk_context, gui_entity);
+        }
+
+        if (entity_has_component(gui_entity, ENTITY_COMPONENT_SKYBOX)) {
+            gui_skybox(nk_context, gui_entity);
         }
     }
     nk_end(nk_context);
