@@ -143,6 +143,10 @@ vec3 calculate_spot_light(light_t light, vec3 normal, vec3 frag_pos, vec3 view_d
 }
 
 void main() {
+    if (texture(u_material.diffuse, fs_in.texture_coords).a < 0.1) {
+        discard;
+    }
+
     vec3 norm = normalize(fs_in.normal);
     vec3 view_dir = normalize(u_view_pos - fs_in.frag_pos);
 
