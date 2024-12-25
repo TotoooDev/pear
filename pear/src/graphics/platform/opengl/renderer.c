@@ -29,7 +29,7 @@
 #define RENDERER_SHADOW_MAP_SIZE 4096
 
 typedef struct renderer_t {
-    bool wireframe;
+    bool enable_wireframe;
 
     f32 fov;
     f32 aspect_ratio;
@@ -276,7 +276,7 @@ renderer_t* renderer_new() {
     renderer_setup_debug_output();
 
     renderer_t* renderer = (renderer_t*)PEAR_MALLOC(sizeof(renderer_t));
-    renderer->wireframe = false;
+    renderer->enable_wireframe = false;
     renderer->fov = glm_rad(45.0f);
     renderer->near = 0.1f;
     renderer->far = 30.0f;
@@ -356,7 +356,7 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     framebuffer_use(renderer->shadow_framebuffer);
     shadowrenderer_draw_scene(renderer->shadow_renderer, renderer->models, renderer->lights, renderer->model_transforms, renderer->light_transforms, renderer->projection, renderer->view);
 
-    if (renderer->wireframe) {
+    if (renderer->enable_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
@@ -368,7 +368,7 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     skyboxrenderer_draw_scene(renderer->skybox_renderer, renderer->skyboxes);
     glDepthFunc(GL_LESS);
 
-    if (renderer->wireframe) {
+    if (renderer->enable_wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
@@ -377,8 +377,8 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     screenrenderer_render_to_screen(renderer->screen_renderer);
 }
 
-void renderer_set_wireframe(renderer_t* renderer, bool active) {
-    renderer->wireframe = active;
+void renderer_enable_wireframe(renderer_t* renderer, bool active) {
+    renderer->enable_wireframe = active;
 }
 
 #endif
