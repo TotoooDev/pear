@@ -68,6 +68,9 @@ skybox_renderer_t* skyboxrenderer_new(ubo_t* ubo_matrices) {
     renderer->ubo_matrices = ubo_matrices;
     renderer->shader = shader_new_from_file("shaders/skybox.vert", "shaders/skybox.frag");
 
+    shader_use(renderer->shader);
+    shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
+
     skyboxrenderer_init_mesh(renderer);
     
     return renderer;
@@ -88,7 +91,6 @@ void skyboxrenderer_draw_scene(skybox_renderer_t* renderer, array_t* skyboxes) {
         }
         
         shader_use(renderer->shader);
-        shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
         shader_set_i32(renderer->shader, 0, "u_cubemap");
 
         mesh_use(renderer->cubemap_mesh);

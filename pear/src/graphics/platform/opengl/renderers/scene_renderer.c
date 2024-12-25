@@ -25,6 +25,10 @@
 
 #define RENDERER_NUM_MAX_LIGHTS 128
 
+#define RENDERER_DIFFUSE_TEXTURE_INDEX 0
+#define RENDERER_SPECULAR_TEXTURE_INDEX 0
+#define RENDERER_SHADOW_MAP_INDEX 10
+
 typedef struct scene_renderer_t {
     ubo_t* ubo_matrices;
     ubo_t* ubo_lights;
@@ -42,11 +46,11 @@ void scenerenderer_init_shaders(scene_renderer_t* renderer) {
 }
 
 void scenerenderer_draw_mesh(scene_renderer_t* renderer, mesh_t* mesh , material_t material, mat4 model_matrix) {
-    shader_set_i32(renderer->shader, 0, "u_material.diffuse");
-    shader_set_i32(renderer->shader, 1, "u_material.specular");
+    shader_use(renderer->shader);
+    shader_set_i32(renderer->shader, RENDERER_DIFFUSE_TEXTURE_INDEX, "u_material.diffuse");
+    shader_set_i32(renderer->shader, RENDERER_SPECULAR_TEXTURE_INDEX, "u_material.specular");
     shader_set_vec3(renderer->shader, material.color, "u_material.color");
     shader_set_f32(renderer->shader, material.shininess, "u_material.shininess");
-    shader_set_i32(renderer->shader, 10, "u_shadow_map");
 
     mat4 model_transpose_inverse;
     glm_mat4_inv(model_matrix, model_transpose_inverse);
@@ -57,12 +61,12 @@ void scenerenderer_draw_mesh(scene_renderer_t* renderer, mesh_t* mesh , material
     ubo_set_mat4(renderer->ubo_matrices, 3, model_transpose_inverse);
 
     if (material.diffuse != NULL) {
-        texture_use(material.diffuse, 0);
+        texture_use(material.diffuse, RENDERER_DIFFUSE_TEXTURE_INDEX);
     }
     if (material.specular != NULL) {
-        texture_use(material.specular, 1);
+        texture_use(material.specular, RENDERER_SPECULAR_TEXTURE_INDEX);
     }
-    texture_use(renderer->shadow_map, 10);
+    texture_use(renderer->shadow_map, RENDERER_SHADOW_MAP_INDEX);
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
 }
@@ -83,6 +87,12 @@ scene_renderer_t* scenerenderer_new(ubo_t* ubo_matrices, ubo_t* ubo_lights, text
 
     scenerenderer_init_shaders(renderer);
 
+    shader_use(renderer->shader);
+    shader_set_u32(renderer->shader, 0, "u_platform");
+    shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
+    shader_set_ubo(renderer->shader, renderer->ubo_lights, "ubo_lights");
+    shader_set_i32(renderer->shader, RENDERER_SHADOW_MAP_INDEX, "u_shadow_map");
+
     return renderer;
 }
 
@@ -97,12 +107,8 @@ void scenerenderer_clear(scene_renderer_t* renderer, f32 r, f32 g, f32 b) {
 }
 
 void scenerenderer_draw_scene(scene_renderer_t* renderer, array_t* models, array_t* lights, array_t* model_transforms, array_t* light_transforms) {
-    shader_use(renderer->shader);
-    shader_set_u32(renderer->shader, 0, "u_platform");
-    shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
-    shader_set_ubo(renderer->shader, renderer->ubo_lights, "ubo_lights");
-
     u32 index = 2;
+    ubo_use(renderer->ubo_lights);
     for (u32 i = 0; i < array_get_length(lights); i++) {
         light_component_t* light = array_get(lights, i);
         transform_component_t* transform = array_get(light_transforms, i);
@@ -111,16 +117,16 @@ void scenerenderer_draw_scene(scene_renderer_t* renderer, array_t* models, array
             continue;
         }
 
-        ubo_set_u32 (renderer->ubo_lights, index++,  light->light.type);
-        ubo_set_vec3(renderer->ubo_lights, index++,  transform->pos);
-        ubo_set_vec3(renderer->ubo_lights, index++,  transform->rotation);
-        ubo_set_vec3(renderer->ubo_lights, index++,  light->light.ambient);
-        ubo_set_vec3(renderer->ubo_lights, index++,  light->light.diffuse);
-        ubo_set_vec3(renderer->ubo_lights, index++,  light->light.specular);
-        ubo_set_f32 (renderer->ubo_lights, index++,  light->light.constant);
-        ubo_set_f32 (renderer->ubo_lights, index++,  light->light.linear);
-        ubo_set_f32 (renderer->ubo_lights, index++,  light->light.quadratic);
-        ubo_set_f32 (renderer->ubo_lights, index++,  light->light.cutoff);
+        ubo_set_u32 (renderer->ubo_lights, index++, light->light.type);
+        ubo_set_vec3(renderer->ubo_lights, index++, transform->pos);
+        ubo_set_vec3(renderer->ubo_lights, index++, transform->rotation);
+        ubo_set_vec3(renderer->ubo_lights, index++, light->light.ambient);
+        ubo_set_vec3(renderer->ubo_lights, index++, light->light.diffuse);
+        ubo_set_vec3(renderer->ubo_lights, index++, light->light.specular);
+        ubo_set_f32 (renderer->ubo_lights, index++, light->light.constant);
+        ubo_set_f32 (renderer->ubo_lights, index++, light->light.linear);
+        ubo_set_f32 (renderer->ubo_lights, index++, light->light.quadratic);
+        ubo_set_f32 (renderer->ubo_lights, index++, light->light.cutoff);
         ubo_set_f32 (renderer->ubo_lights, index++, light->light.outer_cutoff);
     }
 

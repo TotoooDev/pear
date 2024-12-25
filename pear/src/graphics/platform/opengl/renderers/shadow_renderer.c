@@ -98,6 +98,9 @@ shadow_renderer_t* shadowrenderer_new(ubo_t* ubo_matrices, texture_t* screen_tex
     renderer->screen_texture = screen_texture;
     renderer->shader = shader_new_from_file("shaders/shadow.vert", "shaders/shadow.frag");
 
+    shader_use(renderer->shader);
+    shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
+
     return renderer;
 }
 
@@ -151,8 +154,6 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, arr
             ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
 
             shader_use(renderer->shader);
-            shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
-
             mesh_use(mesh);
             glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
         }
