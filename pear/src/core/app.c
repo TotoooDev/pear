@@ -2,6 +2,7 @@
 #include <core/timer.h>
 #include <graphics/window.h>
 #include <graphics/renderer.h>
+#include <graphics/editor/editor.h>
 #include <event/event_dispatcher.h>
 #include <core/types.h>
 #include <core/log.h>
@@ -43,10 +44,16 @@ void app_init() {
 
     event_subscribe(app_on_event, NULL);
 
+    #ifdef PEAR_DEBUG
+        editor_init();
+    #endif
     timer_init();
 }
 
 void app_stop() {
+    #ifdef PEAR_DEBUG
+        editor_free();
+    #endif
     renderer_delete(app->renderer);
     window_delete(app->window);
     scene_delete(app->scene);
@@ -60,6 +67,11 @@ void app_run() {
 
         renderer_clear(app->renderer, 0.5f, 0.5f, 0.5f);
         renderer_draw_scene(app->renderer, app->scene);
+
+        #ifdef PEAR_DEBUG
+            editor_clear();
+            editor_render();
+        #endif
 
         window_update(app->window);
     }

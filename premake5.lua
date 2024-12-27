@@ -31,6 +31,10 @@ project "pear"
 	}
 
     filter "system:linux"
+        linkoptions {
+            -- "-Wl,-rpath=/home/toto/Dev/pear/bin/Debug-linux-x86_64/pear-project/"
+            -- "-Wl,-rpath=$ORIGIN"
+        }
         defines {
             "PEAR_PLATFORM_LINUX",
             "PEAR_PLATFORM_GLFW",
@@ -54,6 +58,7 @@ project "pear-project"
 
     targetdir ("bin/" .. outputDir .. "/%{prj.name}")
     objdir ("bin-intermediate/" .. outputDir .. "/%{prj.name}")
+    libdirs ("pear/lib")
 
     debugdir ("bin/" .. outputDir .. "/%{prj.name}")
 
@@ -71,11 +76,16 @@ project "pear-project"
     }
     
     links {
+        "cimgui",
         "pear",
         "pear-formats"
     }
 
     filter "system:linux"
+        linkoptions {
+            -- "-Wl,-rpath=/home/toto/Dev/pear/bin/Debug-linux-x86_64/pear-project/"
+            "-Wl,-rpath='${ORIGIN}.'"
+        }
         defines {
             "PEAR_PLATFORM_LINUX",
             "PEAR_PLATFORM_GLFW",
@@ -89,7 +99,8 @@ project "pear-project"
         }
         postbuildcommands {
             "cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
-            "cp -R ../pear/assets/* ../bin/" .. outputDir .. "/%{prj.name}/"
+            "cp -R ../pear/assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
+            "cp -R ../pear/lib/* ../bin/" .. outputDir .. "/%{prj.name}/",
         }
 
     filter "configurations:Debug"
