@@ -13,7 +13,6 @@
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
 #include <graphics/platform/opengl/texture.h>
-#include <graphics/gui/renderer.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
 #include <scene/components/model.h>
@@ -305,7 +304,6 @@ renderer_t* renderer_new() {
 
     renderer_calculate_projection(renderer);
 
-    gui_renderer_set_shadow_map(renderer->shadow_map);
     event_subscribe(renderer_on_event, renderer);
 
     return renderer;
