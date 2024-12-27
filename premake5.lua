@@ -31,10 +31,6 @@ project "pear"
 	}
 
     filter "system:linux"
-        linkoptions {
-            -- "-Wl,-rpath=/home/toto/Dev/pear/bin/Debug-linux-x86_64/pear-project/"
-            -- "-Wl,-rpath=$ORIGIN"
-        }
         defines {
             "PEAR_PLATFORM_LINUX",
             "PEAR_PLATFORM_GLFW",
@@ -44,10 +40,15 @@ project "pear"
     filter "configurations:Debug"
 		defines {
 			"PEAR_DEBUG",
+            "PEAR_ENABLE_EDITOR"
 		}
 		symbols "On"
 
 	filter "configurations:Release"
+        defines {
+            "PEAR_RELEASE",
+            "PEAR_ENABLE_EDITOR"
+        }
 		optimize "On"
         symbols "On"
 
@@ -106,10 +107,15 @@ project "pear-project"
     filter "configurations:Debug"
         defines {
             "PEAR_DEBUG",
+            "PEAR_ENABLE_EDITOR"
         }
         symbols "On"
 
     filter "configurations:Release"
+        defines {
+            "PEAR_RELEASE",
+            "PEAR_ENABLE_EDITOR"
+        }
         optimize "On"
         symbols "On"
 

@@ -44,14 +44,14 @@ void app_init() {
 
     event_subscribe(app_on_event, NULL);
 
-    #ifdef PEAR_DEBUG
+    #ifdef PEAR_ENABLE_EDITOR
         editor_init();
     #endif
     timer_init();
 }
 
 void app_stop() {
-    #ifdef PEAR_DEBUG
+    #ifdef PEAR_ENABLE_EDITOR
         editor_free();
     #endif
     renderer_delete(app->renderer);
@@ -68,7 +68,7 @@ void app_run() {
         renderer_clear(app->renderer, 0.5f, 0.5f, 0.5f);
         renderer_draw_scene(app->renderer, app->scene);
 
-        #ifdef PEAR_DEBUG
+        #ifdef PEAR_ENABLE_EDITOR
             editor_clear();
             editor_render();
         #endif
@@ -112,5 +112,10 @@ u32 app_get_version_patch() {
 }
 
 const char* app_get_version_string() {
-    return "pear 0.0.1";
+    #ifdef PEAR_DEBUG
+        return "pear 0.0.1 (debug)";
+    #endif
+    #ifdef PEAR_RELEASE
+        return "pear 0.0.1 (release)";
+    #endif
 }

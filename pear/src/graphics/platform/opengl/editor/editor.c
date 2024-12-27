@@ -1,8 +1,11 @@
-#ifdef PEAR_DEBUG
+#ifdef PEAR_ENABLE_EDITOR
 
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/editor/editor.h>
+#include <graphics/editor/general_info.h>
+#include <graphics/editor/scene_inspector.h>
+#include <graphics/editor/entity_inspector.h>
 #include <graphics/platform/opengl/window.h>
 #include <core/app.h>
 
@@ -13,6 +16,9 @@
 #include <graphics/editor/cimgui/cimconfig.h>
 #include <graphics/platform/opengl/editor/cimgui/cimgui_impl.h>
 
+static bool editor_show_general_info = true;
+static bool editor_show_scene_inspector = true;
+static bool editor_show_entity_inspector = true;
 static bool editor_show_demo = false;
 
 void editor_init() {
@@ -45,6 +51,18 @@ void editor_clear() {
 }
 
 void editor_render() {
+    if (editor_show_general_info) {
+        editor_general_info(&editor_show_general_info);
+    }
+
+    if (editor_show_scene_inspector) {
+        editor_scene_inspector(&editor_show_scene_inspector);
+    }
+
+    if (editor_show_entity_inspector) {
+        editor_entity_inspector(&editor_show_entity_inspector);
+    }
+
     if (editor_show_demo) {
         igShowDemoWindow(&editor_show_demo);
     }
@@ -62,6 +80,18 @@ void editor_render() {
         glfwMakeContextCurrent(backup_current_window);
     }
 #endif
+}
+
+void editor_enable_general_info(bool enable) {
+    editor_show_general_info = enable;
+}
+
+void editor_enable_scene_inspector(bool enable) {
+    editor_show_scene_inspector = enable;
+}
+
+void editor_enable_entity_inspector(bool enable) {
+    editor_show_entity_inspector = enable;
 }
 
 void editor_enable_demo(bool enable) {
