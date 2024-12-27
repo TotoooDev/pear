@@ -3,6 +3,7 @@
 #include <graphics/editor/entity_inspector.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
+#include <scene/components/light.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <graphics/editor/cimgui/cimgui.h>
@@ -29,6 +30,22 @@ void editor_camera(entity_t* entity) {
     }
 }
 
+void editor_light(entity_t* entity) {
+    if (igTreeNode_Str("light")) {
+        light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
+
+        igCombo_Str("type", (i32*)(&light->light.type), "directional\0point\0spot\0", 64);
+        igCheckbox("cast", &light->cast);
+        igCheckbox("shadow caster", &light->shadow_caster);
+
+        igColorEdit3("ambient", light->light.ambient, ImGuiColorEditFlags_None);
+        igColorEdit3("diffuse", light->light.diffuse, ImGuiColorEditFlags_None);
+        igColorEdit3("specular", light->light.specular, ImGuiColorEditFlags_None);
+
+        igTreePop();
+    }
+}
+
 void editor_set_entity(entity_t* entity) {
     editor_entity = entity;
 }
@@ -45,6 +62,10 @@ void editor_entity_inspector(bool* show) {
 
         if (entity_has_component(editor_entity, ENTITY_COMPONENT_CAMERA)) {
             editor_camera(editor_entity);
+        }
+
+        if (entity_has_component(editor_entity, ENTITY_COMPONENT_LIGHT)) {
+            editor_light(editor_entity);
         }
 
         igEnd();
