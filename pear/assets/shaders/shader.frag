@@ -147,11 +147,13 @@ void main() {
         discard;
     }
 
+    uint num_lights = min(u_num_lights, NUM_MAX_LIGHTS);
+
     vec3 norm = normalize(fs_in.normal);
     vec3 view_dir = normalize(u_view_pos - fs_in.frag_pos);
 
     vec3 result = vec3(0.0);
-    for (uint i = 0u; i < u_num_lights && i < NUM_MAX_LIGHTS; i++) {
+    for (uint i = 0u; i < num_lights; i++) {
         light_t light = u_lights[i];
 
         switch (light.type) {
