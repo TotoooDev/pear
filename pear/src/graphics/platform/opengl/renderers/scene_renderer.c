@@ -113,10 +113,6 @@ void scenerenderer_draw_scene(scene_renderer_t* renderer, array_t* models, array
         light_component_t* light = array_get(lights, i);
         transform_component_t* transform = array_get(light_transforms, i);
 
-        if (!light->cast) {
-            continue;
-        }
-
         ubo_set_u32 (renderer->ubo_lights, index++, light->light.type);
         ubo_set_vec3(renderer->ubo_lights, index++, transform->pos);
         ubo_set_vec3(renderer->ubo_lights, index++, transform->rotation);

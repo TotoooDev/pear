@@ -224,6 +224,10 @@ void renderer_handle_light(renderer_t* renderer, entity_t* entity) {
     transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
     light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
 
+    if (!light->cast) {
+        return;
+    }
+
     array_add(renderer->lights, light);
     array_add(renderer->light_transforms, transform);
 }
