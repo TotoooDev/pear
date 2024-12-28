@@ -114,6 +114,7 @@ window_t* window_new(const char* title, u32 width, u32 height) {
         return NULL;
     }
     glfwMakeContextCurrent(window->window);
+    glfwSwapInterval(0);
 
     glfwSetWindowCloseCallback(window->window, window_close_callback);
     glfwSetWindowSizeCallback(window->window, window_resize_callback);
