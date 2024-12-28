@@ -24,8 +24,13 @@ void editor_scene_inspector(bool* show) {
         igText("%d entities", array_get_length(entities));
         for (u32 i = 0; i < array_get_length(entities); i++) {
             entity_t* entity = (entity_t*)array_get(entities, i);
-            if (igButton(entity_get_name(entity), (ImVec2){ 0.0f, 0.0f })) {
-                editor_set_entity(entity);
+            
+            if (igTreeNodeEx_Str(entity_get_name(entity), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding)) {
+                if (igIsItemClicked(ImGuiMouseButton_Left)) {
+                    editor_set_entity(entity);
+                }
+
+                igTreePop();
             }
         }
 

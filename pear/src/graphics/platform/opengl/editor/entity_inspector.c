@@ -104,6 +104,8 @@ void editor_entity_inspector(bool* show) {
     }
 
     if (igBegin("entity inspector", show, ImGuiWindowFlags_None)) {
+        igText(entity_get_name(editor_entity));
+
         if (entity_has_component(editor_entity, ENTITY_COMPONENT_TRANSFORM)) {
             editor_transform(editor_entity);
         }
