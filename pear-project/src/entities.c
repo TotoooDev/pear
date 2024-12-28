@@ -9,6 +9,7 @@
 #include <graphics/image.h>
 #include <graphics/cubemap.h>
 #include <graphics/platform/opengl/window.h>
+#include <core/timer.h>
 #include <core/app.h>
 #include <core/log.h>
 
@@ -122,6 +123,13 @@ void cameraentity_on_update(entity_t* entity, f32 timestep) {
     }
 }
 
+void directional_on_update(entity_t* entity, f32 timestep) {
+    light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
+    light->light.diffuse[0] = sin(timer_get_time_s()) / 2.0f;
+    light->light.diffuse[1] = cos(timer_get_time_s()) / 2.0f;
+    light->light.diffuse[2] = sin(timer_get_time_s() / 2.0f) / 2.0f;
+}
+
 void cameraentity_create(scene_t* scene) {
     entity_t* entity = scene_add_entity(scene, "camera", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
 
@@ -159,12 +167,14 @@ void lightentity_create(scene_t* scene) {
     light_component_t* light;
     transform_component_t* transform;
 
-    entity_t* directional = scene_add_entity(scene, "light", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
+    entity_t* directional = scene_add_entity(scene, "light", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
     light = (light_component_t*)entity_get_component(directional, ENTITY_COMPONENT_LIGHT);
     light->light.type = LIGHT_TYPE_DIRECTIONAL;
     transform = entity_get_component(directional, ENTITY_COMPONENT_TRANSFORM);
     transform->rotation[0] = 0.1f;
     transform->rotation[1] = -1.0f;
+    script_component_t* script = (script_component_t*)entity_get_component(directional, ENTITY_COMPONENT_SCRIPT);
+    script->on_update = directional_on_update;
 
     entity_t* point_1 = scene_add_entity(scene, "point 1", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
     light = (light_component_t*)entity_get_component(point_1, ENTITY_COMPONENT_LIGHT);

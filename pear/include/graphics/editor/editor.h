@@ -14,6 +14,7 @@ void editor_render();
 void editor_enable_general_info(bool enable);
 void editor_enable_scene_inspector(bool enable);
 void editor_enable_entity_inspector(bool enable);
+void editor_enable_renderer_inspector(bool enable);
 void editor_enable_demo(bool enable);
 
 #endif

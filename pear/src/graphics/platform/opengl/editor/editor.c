@@ -6,6 +6,7 @@
 #include <graphics/editor/general_info.h>
 #include <graphics/editor/scene_inspector.h>
 #include <graphics/editor/entity_inspector.h>
+#include <graphics/editor/renderer_inspector.h>
 #include <graphics/platform/opengl/window.h>
 #include <core/app.h>
 
@@ -19,6 +20,7 @@
 static bool editor_show_general_info = true;
 static bool editor_show_scene_inspector = true;
 static bool editor_show_entity_inspector = true;
+static bool editor_show_renderer_inspector = true;
 static bool editor_show_demo = false;
 
 void editor_init() {
@@ -28,9 +30,6 @@ void editor_init() {
     ImGuiIO *ioptr = igGetIO();
     ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
     //ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    #ifdef IMGUI_HAS_DOCK
-        ioptr->ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
-    #endif
 
     ImGui_ImplGlfw_InitForOpenGL(window_get_glfw(app_get_window()), true);
     ImGui_ImplOpenGL3_Init("#version 130");
@@ -63,6 +62,10 @@ void editor_render() {
         editor_entity_inspector(&editor_show_entity_inspector);
     }
 
+    if (editor_show_renderer_inspector) {
+        editor_renderer_inspector(&editor_show_renderer_inspector);
+    }
+
     if (editor_show_demo) {
         igShowDemoWindow(&editor_show_demo);
     }
@@ -92,6 +95,10 @@ void editor_enable_scene_inspector(bool enable) {
 
 void editor_enable_entity_inspector(bool enable) {
     editor_show_entity_inspector = enable;
+}
+
+void editor_enable_renderer_inspector(bool enable) {
+    editor_show_renderer_inspector = enable;
 }
 
 void editor_enable_demo(bool enable) {
