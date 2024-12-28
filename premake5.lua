@@ -79,7 +79,6 @@ project "pear-project"
     links {
         "cimgui",
         "pear",
-        "pear-formats"
     }
 
     filter "system:linux"

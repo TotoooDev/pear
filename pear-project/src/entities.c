@@ -144,14 +144,7 @@ void cameraentity_create(scene_t* scene) {
 }
 
 void modelentity_create(scene_t* scene) {
-    entity_t* entity = scene_add_entity(scene, "entity", ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_END);
-
-    bool success;
-    pear_model_t model = pear_model_load("sponza.model", &success);
-    if (!success) {
-        PEAR_ERROR("failed to load model sponza.model!");
-        return;
-    }
+    /* entity_t* entity = scene_add_entity(scene, "entity", ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_END);
 
     model_component_t* model_comp = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
     model_comp->model = model_new_from_pear_model(model, TEXTURE_WRAPPING_REPEAT, TEXTURE_FILTERING_LINEAR);
@@ -160,7 +153,7 @@ void modelentity_create(scene_t* scene) {
     transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
     transform->scale[0] = 0.01f;
     transform->scale[1] = 0.01f;
-    transform->scale[2] = 0.01f;
+    transform->scale[2] = 0.01f; */
 }
 
 void lightentity_create(scene_t* scene) {
@@ -202,7 +195,7 @@ void lightentity_create(scene_t* scene) {
 }
 
 void skyboxentity_create(scene_t* scene) {
-    entity_t* skybox_entity = scene_add_entity(scene, "skybox", ENTITY_COMPONENT_SKYBOX, ENTITY_COMPONENT_END);
+    /* entity_t* skybox_entity = scene_add_entity(scene, "skybox", ENTITY_COMPONENT_SKYBOX, ENTITY_COMPONENT_END);
 
     bool success;
     pear_image_t right = pear_image_load("skybox/right.image", &success);
@@ -226,5 +219,5 @@ void skyboxentity_create(scene_t* scene) {
 
     for (u32 i = 0; i < 6; i++) {
         image_delete(images[i]);
-    }
+    } */
 }

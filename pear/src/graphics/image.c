@@ -20,11 +20,6 @@ image_t* image_new(u32 width, u32 height, u32 num_channels, void* data) {
     return image;
 }
 
-image_t* image_new_from_pear_image(pear_image_t pear_image) {
-    image_t* image = image_new(pear_image.width, pear_image.height, pear_image.num_channels, pear_image.data);
-    return image;
-}
-
 void image_delete(image_t* image) {
     free(image->data);
     free(image);
