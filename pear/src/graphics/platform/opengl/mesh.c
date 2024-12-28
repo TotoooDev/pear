@@ -13,6 +13,7 @@ typedef struct mesh_t {
     u32 ebo;
 
     u32 num_indices;
+    u32 num_vertices;
 
     u32 material_index;
 } mesh_t;
@@ -29,6 +30,7 @@ mesh_t* mesh_new(mesh_info_t* mesh_info, u32 material_index) {
 
     mesh->material_index = material_index;
     mesh->num_indices = meshinfo_get_num_indices(mesh_info);
+    mesh->num_vertices = meshinfo_get_num_positions(mesh_info);
 
     u32 vertices_size = meshinfo_get_vertices_size(mesh_info);
     f32* vertices = (f32*)PEAR_MALLOC(vertices_size);
@@ -80,6 +82,10 @@ void mesh_use(mesh_t* mesh) {
 
 u32 mesh_get_material_index(mesh_t* mesh) {
     return mesh->material_index;
+}
+
+u32 mesh_get_num_vertices(mesh_t* mesh) {
+    return mesh->num_vertices;
 }
 
 #endif

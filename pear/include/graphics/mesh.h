@@ -9,5 +9,6 @@ mesh_t* mesh_new(mesh_info_t* mesh_info, u32 material_index);
 void mesh_delete(mesh_t* mesh);
 
 u32 mesh_get_material_index(mesh_t* mesh);
+u32 mesh_get_num_vertices(mesh_t* mesh);
 
 #endif

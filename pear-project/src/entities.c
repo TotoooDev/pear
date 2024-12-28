@@ -173,8 +173,8 @@ void lightentity_create(scene_t* scene) {
     transform = entity_get_component(directional, ENTITY_COMPONENT_TRANSFORM);
     transform->rotation[0] = 0.1f;
     transform->rotation[1] = -1.0f;
-    script_component_t* script = (script_component_t*)entity_get_component(directional, ENTITY_COMPONENT_SCRIPT);
-    script->on_update = directional_on_update;
+    // script_component_t* script = (script_component_t*)entity_get_component(directional, ENTITY_COMPONENT_SCRIPT);
+    // script->on_update = directional_on_update;
 
     entity_t* point_1 = scene_add_entity(scene, "point 1", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
     light = (light_component_t*)entity_get_component(point_1, ENTITY_COMPONENT_LIGHT);

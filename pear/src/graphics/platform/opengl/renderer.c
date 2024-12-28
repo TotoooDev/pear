@@ -30,6 +30,9 @@
 typedef struct renderer_t {
     bool enable_wireframe;
 
+    u32 num_meshes;
+    u32 num_vertices;
+
     f32 fov;
     f32 aspect_ratio;
     f32 near;
@@ -206,6 +209,15 @@ void renderer_handle_model(renderer_t* renderer, entity_t* entity) {
     transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
     model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
 
+    if (!model->draw) {
+        return;
+    }
+
+    renderer->num_meshes += model_get_num_meshes(model->model);
+    for (u32 i = 0; i < model_get_num_meshes(model->model); i++) {
+        renderer->num_vertices += mesh_get_num_vertices(model_get_meshes(model->model)[i]);
+    }
+
     array_add(renderer->models, model);
     array_add(renderer->model_transforms, transform);
 }
@@ -347,6 +359,9 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 
     framebuffer_use(renderer->screen_framebuffer);
     scenerenderer_clear(renderer->scene_renderer, r, g, b);
+
+    renderer->num_meshes = 0;
+    renderer->num_vertices = 0;
 }
 
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
@@ -377,6 +392,14 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     glDisable(GL_DEPTH_TEST);
     framebuffer_use_default();
     screenrenderer_render_to_screen(renderer->screen_renderer);
+}
+
+u32 renderer_get_num_meshes(renderer_t* renderer) {
+    return renderer->num_meshes;
+}
+
+u32 renderer_get_num_vertices(renderer_t* renderer) {
+    return renderer->num_vertices;
 }
 
 void renderer_enable_wireframe(renderer_t* renderer, bool active) {

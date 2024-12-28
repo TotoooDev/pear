@@ -130,10 +130,6 @@ void scenerenderer_draw_scene(scene_renderer_t* renderer, array_t* models, array
         model_component_t* model = array_get(models, i);
         transform_component_t* transform = array_get(model_transforms, i);
 
-        if (!model->draw) {
-            continue;
-        }
-
         mat4 model_matrix;
         transformcomponent_get_model_matrix(transform, model_matrix);
 

@@ -15,6 +15,9 @@ void editor_renderer_inspector(bool* show) {
             igText("graphics api: unknow");
         #endif
 
+        igText("%d meshes", renderer_get_num_meshes(app_get_renderer()));
+        igText("%d vertices", renderer_get_num_vertices(app_get_renderer()));
+
         static bool enable_wireframe = false;
         if (igCheckbox("wireframe", &enable_wireframe)) {
             renderer_enable_wireframe(app_get_renderer(), enable_wireframe);
