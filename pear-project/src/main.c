@@ -3,10 +3,15 @@
 #include <graphics/editor/scene_inspector.h>
 #include <core/app.h>
 
+#include <loaders/model.h>
+
 #include <entities.h> 
 
 int main(int argc, char* argv[]) {
     app_init();
+
+    model_t* model = loader_load_gltf("Box.glb");
+    model_delete(model);
 
     scene_t* scene = app_get_scene();
     modelentity_create(scene);

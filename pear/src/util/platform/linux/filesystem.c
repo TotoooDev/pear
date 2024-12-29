@@ -1,5 +1,6 @@
 #ifdef PEAR_PLATFORM_LINUX
 
+#include <util/filesystem.h>
 #include <core/log.h>
 #include <stdio.h>
 #include <stdlib.h>
