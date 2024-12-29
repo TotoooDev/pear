@@ -9,6 +9,7 @@
 #include <graphics/image.h>
 #include <graphics/cubemap.h>
 #include <graphics/platform/opengl/window.h>
+#include <loaders/model.h>
 #include <loaders/image.h>
 #include <core/timer.h>
 #include <core/app.h>
@@ -140,7 +141,7 @@ void cameraentity_create(scene_t* scene) {
 void modelentity_create(scene_t* scene) {
     entity_t* entity = scene_add_entity(scene, "model", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_END);
     model_component_t* model_comp = entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-    model_comp->model = loader_load_gltf("matilda.glb");
+    model_comp->model = loader_load_gltf("sea.glb");
 }
 
 void lightentity_create(scene_t* scene) {

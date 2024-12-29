@@ -13,6 +13,7 @@
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
 #include <graphics/platform/opengl/texture.h>
+#include <graphics/editor/renderer_inspector.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
 #include <scene/components/model.h>
@@ -322,6 +323,10 @@ renderer_t* renderer_new() {
 
     event_subscribe(renderer_on_event, renderer);
 
+    #ifdef PEAR_ENABLE_EDITOR
+        editor_set_shadow_map(renderer->shadow_map);
+    #endif
+
     return renderer;
 }
 
@@ -400,6 +405,21 @@ u32 renderer_get_num_meshes(renderer_t* renderer) {
 
 u32 renderer_get_num_vertices(renderer_t* renderer) {
     return renderer->num_vertices;
+}
+
+void renderer_set_near(renderer_t* renderer, f32 near) {
+    renderer->near = near;
+    renderer_calculate_projection(renderer);
+}
+
+void renderer_set_far(renderer_t* renderer, f32 far) {
+    renderer->far = far;
+    renderer_calculate_projection(renderer);
+}
+
+void renderer_set_fov(renderer_t* renderer, f32 fov) {
+    renderer->fov = glm_rad(fov);
+    renderer_calculate_projection(renderer);
 }
 
 void renderer_enable_wireframe(renderer_t* renderer, bool active) {
