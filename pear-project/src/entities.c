@@ -141,7 +141,7 @@ void cameraentity_create(scene_t* scene) {
 void modelentity_create(scene_t* scene) {
     entity_t* entity = scene_add_entity(scene, "model", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_END);
     model_component_t* model_comp = entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-    model_comp->model = loader_load_gltf("sea.glb");
+    model_comp->model = loader_load_gltf("matilda/scene.gltf");
 }
 
 void lightentity_create(scene_t* scene) {

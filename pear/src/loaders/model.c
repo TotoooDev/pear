@@ -11,7 +11,7 @@
 #define CGLTF_IMPLEMENTATION
 #include <loaders/vendor/cgltf.h>
 
-material_t loader_load_material(cgltf_material* gltf_material) {
+material_t loader_load_material(cgltf_material* gltf_material, char* directory) {
     material_t material;
 
     material.color[0] = gltf_material->pbr_metallic_roughness.base_color_factor[0];
@@ -21,9 +21,18 @@ material_t loader_load_material(cgltf_material* gltf_material) {
     material.shininess = gltf_material->pbr_metallic_roughness.roughness_factor;
 
     if (gltf_material->pbr_metallic_roughness.base_color_texture.texture != NULL) {
-        u8* image_data = cgltf_buffer_view_data(gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view);
+        cgltf_texture* gltf_texture = gltf_material->pbr_metallic_roughness.base_color_texture.texture;
+        image_t* image;
+        if (gltf_texture->image->buffer_view != NULL) {
+            u8* image_data = cgltf_buffer_view_data(gltf_texture->image->buffer_view);
+            image = loader_load_image_data(image_data, gltf_texture->image->buffer_view->size);
+        }
+        else {
+            char texture_path[1024];
+            sprintf(texture_path, "%s/%s", directory, gltf_texture->image->uri);
+            image = loader_load_image(texture_path);
+        }
 
-        image_t* image = loader_load_image_data(image_data, gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view->size);
         texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
         image_delete(image);
         material.diffuse = texture;
@@ -47,12 +56,6 @@ void loader_load_indices(mesh_info_t* mesh_info, cgltf_primitive primitive) {
     }
 
     meshinfo_add_indices(mesh_info, indices, num_indices);
-
-    // PEAR_INFO("    %d indices:", num_indices);
-    // for (u32 k = 0; k < num_indices; k++) {
-    //     PEAR_INFO("      %d", indices[k]);
-    // }
-
     PEAR_FREE(indices);
 }
 
@@ -66,15 +69,6 @@ void loader_load_positions(mesh_info_t* mesh_info, cgltf_attribute attribute) {
     }
 
     meshinfo_add_position(mesh_info, positions, num_data / 3);
-
-    // PEAR_INFO("    %s", attribute.name);
-    // PEAR_INFO("      type: %d", attribute.type);
-    // PEAR_INFO("      index: %d", attribute.index);
-    // PEAR_INFO("      num data: %d", num_data);
-    // for (u32 l = 0; l < num_data; l += 3) {
-    //     PEAR_INFO("        %f %f %f", positions[l], positions[l + 1], positions[l + 2]);
-    // }
-
     PEAR_FREE(positions);
 }
 
@@ -88,15 +82,6 @@ void loader_load_normals(mesh_info_t* mesh_info, cgltf_attribute attribute) {
     }
 
     meshinfo_add_normal(mesh_info, normals, num_data / 3);
-
-    // PEAR_INFO("    %s", attribute.name);
-    // PEAR_INFO("      type: %d", attribute.type);
-    // PEAR_INFO("      index: %d", attribute.index);
-    // PEAR_INFO("      num data: %d", num_data);
-    // for (u32 l = 0; l < num_data; l += 3) {
-    //     PEAR_INFO("        %f %f %f", normals[l], normals[l + 1], normals[l + 2]);
-    // }
-
     PEAR_FREE(normals);
 }
 
@@ -110,15 +95,6 @@ void loader_load_texture_coords(mesh_info_t* mesh_info, cgltf_attribute attribut
     }
 
     meshinfo_add_texture_coords(mesh_info, texture_coords, num_data / 2);
-
-    // PEAR_INFO("    %s", attribute.name);
-    // PEAR_INFO("      type: %d", attribute.type);
-    // PEAR_INFO("      index: %d", attribute.index);
-    // PEAR_INFO("      num data: %d", num_data);
-    // for (u32 l = 0; l < num_data; l += 2) {
-    //     PEAR_INFO("        %f %f", texture_coords[l], texture_coords[l + 1]);
-    // }
-
     PEAR_FREE(texture_coords);
 }
 
@@ -160,18 +136,18 @@ model_t* loader_load_gltf(const char* filename) {
         return NULL;
     }
 
-    // materials are duplicated
+    u32 directory_index = strrchr(filename, '/') - filename;
+    char directory[1024];
+    strcpy(directory, filename);
+    directory[directory_index] = '\0';
+
     u32 num_materials = 0;
     material_t* materials = (material_t*)PEAR_MALLOC(sizeof(material_t) * data->materials_count);
     array_t* loaded_materials = array_new(5);
     mesh_t** meshes = (mesh_t**)PEAR_MALLOC(sizeof(mesh_t*) * data->meshes_count);
 
-    // PEAR_INFO("%d meshes:", data->meshes_count);
     for (u32 i = 0; i < data->meshes_count; i++) {
-        // PEAR_INFO("  %s", data->meshes[i].name);
-        // PEAR_INFO("  primitives:");
         for (u32 j = 0; j < data->meshes[i].primitives_count; j++) {
-            // PEAR_INFO("    type: %d", data->meshes[i].primitives[j].type);
             if (data->meshes[i].primitives[j].type != cgltf_primitive_type_triangles) {
                 PEAR_ERROR("pear does not support other primitives than triangles!");
                 return NULL;
@@ -193,7 +169,7 @@ model_t* loader_load_gltf(const char* filename) {
                 }
             }
             if (!skip) {
-                material_t material = loader_load_material(gltf_material);
+                material_t material = loader_load_material(gltf_material, directory);
                 array_add(loaded_materials, gltf_material);
                     
                 materials[num_materials] = material;
