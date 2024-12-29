@@ -13,10 +13,6 @@ int main(int argc, char* argv[]) {
 
     scene_t* scene = app_get_scene();
 
-    entity_t* entity = scene_add_entity(scene, "model", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_END);
-    model_component_t* model_comp = entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-    model_comp->model = loader_load_gltf("matilda.glb");
-
     modelentity_create(scene);
     cameraentity_create(scene);
     lightentity_create(scene);
