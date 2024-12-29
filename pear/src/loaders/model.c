@@ -3,12 +3,39 @@
 #include <graphics/mesh_info.h>
 #include <graphics/mesh.h>
 #include <graphics/texture.h>
+#include <util/array.h>
 #include <core/log.h>
 #include <core/alloc.h>
 #include <stdio.h>
 
 #define CGLTF_IMPLEMENTATION
 #include <loaders/vendor/cgltf.h>
+
+material_t loader_load_material(cgltf_material* gltf_material) {
+    material_t material;
+
+    material.color[0] = gltf_material->pbr_metallic_roughness.base_color_factor[0];
+    material.color[1] = gltf_material->pbr_metallic_roughness.base_color_factor[1];
+    material.color[2] = gltf_material->pbr_metallic_roughness.base_color_factor[2];
+
+    material.shininess = gltf_material->pbr_metallic_roughness.roughness_factor;
+
+    if (gltf_material->pbr_metallic_roughness.base_color_texture.texture != NULL) {
+        u8* image_data = cgltf_buffer_view_data(gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view);
+
+        image_t* image = loader_load_image_data(image_data, gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view->size);
+        texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
+        image_delete(image);
+        material.diffuse = texture;
+    }
+    else {
+        material.diffuse = NULL;
+    }
+    material.specular = NULL;
+    material.normal = NULL;
+
+    return material;
+}
 
 void loader_load_indices(mesh_info_t* mesh_info, cgltf_primitive primitive) {
     u32 num_indices = cgltf_accessor_unpack_indices(primitive.indices, NULL, 0, 0);
@@ -134,7 +161,9 @@ model_t* loader_load_gltf(const char* filename) {
     }
 
     // materials are duplicated
-    material_t* materials = (material_t*)PEAR_MALLOC(sizeof(material_t) * data->meshes_count);
+    u32 num_materials = 0;
+    material_t* materials = (material_t*)PEAR_MALLOC(sizeof(material_t) * data->materials_count);
+    array_t* loaded_materials = array_new(5);
     mesh_t** meshes = (mesh_t**)PEAR_MALLOC(sizeof(mesh_t*) * data->meshes_count);
 
     // PEAR_INFO("%d meshes:", data->meshes_count);
@@ -153,36 +182,33 @@ model_t* loader_load_gltf(const char* filename) {
             loader_load_indices(mesh_info, data->meshes[i].primitives[j]);
             loader_load_attributes(mesh_info, data->meshes[i].primitives[j]);
 
+            u32 index;
             cgltf_material* gltf_material = data->meshes[i].primitives[j].material;
-
-            materials[i].color[0] = gltf_material->pbr_metallic_roughness.base_color_factor[0];
-            materials[i].color[1] = gltf_material->pbr_metallic_roughness.base_color_factor[1];
-            materials[i].color[2] = gltf_material->pbr_metallic_roughness.base_color_factor[2];
-
-            materials[i].shininess = gltf_material->pbr_metallic_roughness.roughness_factor;
-
-            if (gltf_material->pbr_metallic_roughness.base_color_texture.texture != NULL) {
-                u8* image_data = cgltf_buffer_view_data(gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view);
-
-                image_t* image = loader_load_image_data(image_data, gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view->size);
-                texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
-                image_delete(image);
-                materials[i].diffuse = texture;
+            bool skip = false;
+            for (u32 k = 0; k < array_get_length(loaded_materials); k++) {
+                if (array_get(loaded_materials, k) == gltf_material) {
+                    index = k;
+                    skip = true;
+                    break;
+                }
             }
-            else {
-                materials[i].diffuse = NULL;
+            if (!skip) {
+                material_t material = loader_load_material(gltf_material);
+                array_add(loaded_materials, gltf_material);
+                    
+                materials[num_materials] = material;
+                index = num_materials;
+                num_materials++;
             }
-            materials[i].specular = NULL;
-            materials[i].normal = NULL;
 
-            mesh_t* mesh = mesh_new(mesh_info, i);
+            mesh_t* mesh = mesh_new(mesh_info, index);
             meshes[i] = mesh;
 
             meshinfo_delete(mesh_info);
         }
     }
 
-    model_t* model = model_new(meshes, materials, data->meshes_count, data->meshes_count);
+    model_t* model = model_new(meshes, materials, data->meshes_count, num_materials);
 
     cgltf_free(data);
 
