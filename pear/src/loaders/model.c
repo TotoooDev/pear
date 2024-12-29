@@ -136,10 +136,16 @@ model_t* loader_load_gltf(const char* filename) {
         return NULL;
     }
 
-    u32 directory_index = strrchr(filename, '/') - filename;
     char directory[1024];
-    strcpy(directory, filename);
-    directory[directory_index] = '\0';
+    char* slash = strrchr(filename, '/');
+    if (slash == NULL) {
+        directory[0] = '\0';
+    }
+    else {
+        u32 directory_index = strrchr(filename, '/') - filename;
+        strcpy(directory, filename);
+        directory[directory_index] = '\0';
+    }
 
     u32 num_materials = 0;
     material_t* materials = (material_t*)PEAR_MALLOC(sizeof(material_t) * data->materials_count);
