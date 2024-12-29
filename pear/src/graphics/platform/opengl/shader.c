@@ -54,8 +54,8 @@ shader_t* shader_new(const char* vertex_source, const char* fragment_source) {
 }
 
 shader_t* shader_new_from_file(const char* vertex_path, const char* fragment_path) {
-    char* vertex_source = fileystem_read_file(vertex_path);
-    char* fragment_source = fileystem_read_file(fragment_path);
+    char* vertex_source = filesystem_read_file(vertex_path);
+    char* fragment_source = filesystem_read_file(fragment_path);
 
     shader_t* shader = shader_new(vertex_source, fragment_source);
 

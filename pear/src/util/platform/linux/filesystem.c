@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-char* fileystem_read_file(const char* filename) {
+char* filesystem_read_file(const char* filename) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         PEAR_ERROR("failed to open file %s!", filename);
