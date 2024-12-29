@@ -78,6 +78,7 @@ project "pear-project"
     
     links {
         "cimgui",
+        "lua",
         "pear",
     }
 
@@ -98,8 +99,7 @@ project "pear-project"
         }
         postbuildcommands {
             "cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
-            "cp -R ../pear/assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
-            "cp -R ../pear/lib/* ../bin/" .. outputDir .. "/%{prj.name}/",
+            "cp -R ../pear/assets/* ../bin/" .. outputDir .. "/%{prj.name}/"
         }
 
     filter "configurations:Debug"
