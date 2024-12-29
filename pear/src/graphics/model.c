@@ -28,9 +28,15 @@ void model_delete(model_t* model) {
     }
 
     for (u32 i = 0; i < model->num_materials; i++) {
-        texture_delete(model->materials[i].diffuse);
-        texture_delete(model->materials[i].specular);
-        texture_delete(model->materials[i].normal);
+        if (model->materials[i].diffuse != NULL) {
+            texture_delete(model->materials[i].diffuse);
+        }
+        if (model->materials[i].specular != NULL) {
+            texture_delete(model->materials[i].specular);
+        }
+        if (model->materials[i].normal != NULL) {
+            texture_delete(model->materials[i].normal);
+        }
     }
 
     PEAR_FREE(model->meshes);

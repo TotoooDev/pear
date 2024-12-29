@@ -6,15 +6,29 @@ typedef struct image_t {
     u32 width;
     u32 height;
     u32 num_channels;
+    u32 data_size;
     void* data;
 } image_t;
 
-image_t* image_new(u32 width, u32 height, u32 num_channels, void* data) {
+image_t* image_new(u32 num_channels, void* data, u32 data_size) {
+    image_t* image = (image_t*)PEAR_MALLOC(sizeof(image_t));
+
+    image->width = 0;
+    image->height = 0;
+    image->num_channels = num_channels;
+    image->data_size = data_size;
+    image->data = data;
+
+    return image;
+}
+
+image_t* image_new_size(u32 width, u32 height, u32 num_channels, void* data) {
     image_t* image = (image_t*)PEAR_MALLOC(sizeof(image_t));
 
     image->width = width;
     image->height = height;
     image->num_channels = num_channels;
+    image->data_size = width * height * num_channels;
     image->data = data;
 
     return image;
