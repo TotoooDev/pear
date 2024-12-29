@@ -1,4 +1,5 @@
 #include <loaders/model.h>
+#include <loaders/image.h>
 #include <graphics/mesh_info.h>
 #include <graphics/mesh.h>
 #include <graphics/texture.h>
@@ -161,15 +162,11 @@ model_t* loader_load_gltf(const char* filename) {
             materials[i].shininess = gltf_material->pbr_metallic_roughness.roughness_factor;
 
             if (gltf_material->pbr_metallic_roughness.base_color_texture.texture != NULL) {
-                // load diffuse texture
-                // cgltf_buffer* buffer = gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view->buffer;
                 u8* image_data = cgltf_buffer_view_data(gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view);
-                // void* image_data = PEAR_MALLOC(buffer->size);
-                // memcpy(image_data, buffer->data, buffer->size);
 
-                image_t* image = image_new(4, image_data, gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view->size);
+                image_t* image = loader_load_image_data(image_data, gltf_material->pbr_metallic_roughness.base_color_texture.texture->image->buffer_view->size);
                 texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
-                // image_delete(image);
+                image_delete(image);
                 materials[i].diffuse = texture;
             }
             else {
