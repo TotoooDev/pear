@@ -114,6 +114,7 @@ void shadowrenderer_clear(shadow_renderer_t* renderer) {
 }
 
 void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, array_t* lights, array_t* model_transforms, array_t* light_transforms, mat4 projection, mat4 view) {
+    u32 num_light_casters = 0;
     vec4 frustum_corners[8];
     mat4 light_view = GLM_MAT4_IDENTITY_INIT;
     mat4 light_projection = GLM_MAT4_IDENTITY_INIT;
@@ -135,7 +136,17 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, arr
         shadowrenderer_get_light_view(frustum_corners, light_direction, light_view);
         shadowrenderer_get_light_projection(frustum_corners, light_view, light_projection);
         glm_mat4_mul(light_projection, light_view, light_space_transform);
+
+        num_light_casters++;
     }
+
+    if (num_light_casters <= 0) {
+        return;
+    }
+
+    // glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f, light_projection);
+    // glm_lookat((vec3){ -2.0f, 4.0f, -1.0f }, (vec3){ 0.0f, 0.0f, 0.0f }, (vec3){ 0.0f, 1.0f, 0.0f }, light_view);
+    // glm_mat4_mul(light_projection, light_view, light_space_transform);
 
     ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 4, light_space_transform);
@@ -143,6 +154,10 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, arr
     for (u32 i = 0; i < array_get_length(models); i++) {
         model_component_t* model = array_get(models, i);
         transform_component_t* transform = array_get(model_transforms, i);
+
+        if (!model->shadow_caster) {
+            continue;
+        }
 
         mat4 model_matrix;
         transformcomponent_get_model_matrix(transform, model_matrix);

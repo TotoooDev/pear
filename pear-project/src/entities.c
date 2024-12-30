@@ -146,42 +146,50 @@ void modelentity_create(scene_t* scene) {
     transform->scale[0] = 50.0f;
     transform->scale[1] = 50.0f;
     transform->scale[2] = 50.0f;
+
+    entity = scene_add_entity(scene, "model 2", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_END);
+    model_comp = entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+    model_comp->model = loader_load_gltf("Avocado.glb");
+    transform = entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    transform->scale[0] = 50.0f;
+    transform->scale[1] = 50.0f;
+    transform->scale[2] = 50.0f;
 }
 
 void lightentity_create(scene_t* scene) {
     light_component_t* light;
     transform_component_t* transform;
 
-    entity_t* directional = scene_add_entity(scene, "light", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
+    entity_t* directional = scene_add_entity(scene, "light", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
     light = (light_component_t*)entity_get_component(directional, ENTITY_COMPONENT_LIGHT);
     light->light.type = LIGHT_TYPE_DIRECTIONAL;
     transform = entity_get_component(directional, ENTITY_COMPONENT_TRANSFORM);
     transform->rotation[0] = 0.1f;
     transform->rotation[1] = -1.0f;
 
-    entity_t* point_1 = scene_add_entity(scene, "point 1", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
-    light = (light_component_t*)entity_get_component(point_1, ENTITY_COMPONENT_LIGHT);
-    light->light.type = LIGHT_TYPE_POINT;
-    transform = entity_get_component(point_1, ENTITY_COMPONENT_TRANSFORM);
-    transform->pos[0] = 9.0f;
-    transform->pos[1] = 3.0f;
-    transform->pos[2] = -3.0f;
-
-    entity_t* point_2 = scene_add_entity(scene, "point 2", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
-    light = (light_component_t*)entity_get_component(point_2, ENTITY_COMPONENT_LIGHT);
-    light->light.type = LIGHT_TYPE_POINT;
-    transform = entity_get_component(point_2, ENTITY_COMPONENT_TRANSFORM);
-    transform->pos[0] = -7.0f;
-    transform->pos[1] = 2.0f;
-    transform->pos[2] = -3.0f;
-
-    entity_t* point_3 = scene_add_entity(scene, "point 3", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
-    light = (light_component_t*)entity_get_component(point_3, ENTITY_COMPONENT_LIGHT);
-    light->light.type = LIGHT_TYPE_POINT;
-    transform = entity_get_component(point_3, ENTITY_COMPONENT_TRANSFORM);
-    transform->pos[0] = 3.0f;
-    transform->pos[1] = 4.0f;
-    transform->pos[2] = 4.0f;
+    // entity_t* point_1 = scene_add_entity(scene, "point 1", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
+    // light = (light_component_t*)entity_get_component(point_1, ENTITY_COMPONENT_LIGHT);
+    // light->light.type = LIGHT_TYPE_POINT;
+    // transform = entity_get_component(point_1, ENTITY_COMPONENT_TRANSFORM);
+    // transform->pos[0] = 9.0f;
+    // transform->pos[1] = 3.0f;
+    // transform->pos[2] = -3.0f;
+// 
+    // entity_t* point_2 = scene_add_entity(scene, "point 2", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
+    // light = (light_component_t*)entity_get_component(point_2, ENTITY_COMPONENT_LIGHT);
+    // light->light.type = LIGHT_TYPE_POINT;
+    // transform = entity_get_component(point_2, ENTITY_COMPONENT_TRANSFORM);
+    // transform->pos[0] = -7.0f;
+    // transform->pos[1] = 2.0f;
+    // transform->pos[2] = -3.0f;
+// 
+    // entity_t* point_3 = scene_add_entity(scene, "point 3", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_LIGHT, ENTITY_COMPONENT_END);
+    // light = (light_component_t*)entity_get_component(point_3, ENTITY_COMPONENT_LIGHT);
+    // light->light.type = LIGHT_TYPE_POINT;
+    // transform = entity_get_component(point_3, ENTITY_COMPONENT_TRANSFORM);
+    // transform->pos[0] = 3.0f;
+    // transform->pos[1] = 4.0f;
+    // transform->pos[2] = 4.0f;
 }
 
 void skyboxentity_create(scene_t* scene) {

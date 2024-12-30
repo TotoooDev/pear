@@ -48,7 +48,7 @@ void editor_renderer_inspector(bool* show) {
         if (editor_shadow_map != NULL) {
             if (igTreeNode_Str("shadow map")) {
                 #ifdef PEAR_PLATFORM_OPENGL
-                    igImage(texture_get_id(editor_shadow_map), (ImVec2){ 128.0f, 128.0f }, (ImVec2){ 1.0f, 0.0f }, (ImVec2){ 0.0f, -1.0f }, (ImVec4){ 1.0f, 1.0f, 1.0f, 1.0f }, (ImVec4){ 0.0f, 0.0f, 0.0f, 0.0f });
+                    igImage(texture_get_id(editor_shadow_map), (ImVec2){ 128.0f, 128.0f }, (ImVec2){ 0.0f, 0.0f }, (ImVec2){ 1.0f, 1.0f }, (ImVec4){ 1.0f, 1.0f, 1.0f, 1.0f }, (ImVec4){ 0.0f, 0.0f, 0.0f, 0.0f });
                 #endif
 
                 igTreePop();
