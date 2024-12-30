@@ -144,10 +144,6 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, arr
         return;
     }
 
-    // glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f, light_projection);
-    // glm_lookat((vec3){ -2.0f, 4.0f, -1.0f }, (vec3){ 0.0f, 0.0f, 0.0f }, (vec3){ 0.0f, 1.0f, 0.0f }, light_view);
-    // glm_mat4_mul(light_projection, light_view, light_space_transform);
-
     ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 4, light_space_transform);
 

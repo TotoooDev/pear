@@ -146,14 +146,6 @@ void modelentity_create(scene_t* scene) {
     transform->scale[0] = 50.0f;
     transform->scale[1] = 50.0f;
     transform->scale[2] = 50.0f;
-
-    entity = scene_add_entity(scene, "model 2", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_END);
-    model_comp = entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-    model_comp->model = loader_load_gltf("Avocado.glb");
-    transform = entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    transform->scale[0] = 50.0f;
-    transform->scale[1] = 50.0f;
-    transform->scale[2] = 50.0f;
 }
 
 void lightentity_create(scene_t* scene) {
