@@ -36,9 +36,11 @@ material_t loader_load_material(cgltf_material* gltf_material, char* directory) 
         texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);
         image_delete(image);
         material.diffuse = texture;
+        material.use_color = false;
     }
     else {
         material.diffuse = NULL;
+        material.use_color = true;
     }
     material.specular = NULL;
     material.normal = NULL;

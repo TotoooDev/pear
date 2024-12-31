@@ -10,6 +10,8 @@ typedef struct material_t {
 
     vec3 color;
     f32 shininess;
+
+    bool use_color;
 } material_t;
 
 #endif
