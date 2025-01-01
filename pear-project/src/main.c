@@ -9,6 +9,11 @@
 
 int main(int argc, char* argv[]) {
     script_t* script = script_new_from_file("scripts/script.lua");
+    script_on_start(script);
+    script_on_update(script, 0.16f);
+    script_set_number(script, 100.0f, "bar");
+    script_on_update(script, 0.16f);
+    script_on_destroy(script);
     script_delete(script);
 
     app_init();
