@@ -38,68 +38,97 @@ entity_t* entity_new_from_va_list(const char* name, va_list args) {
 
     entity_component_t current_component;
     while ((current_component = va_arg(args, entity_component_t)) != ENTITY_COMPONENT_END) {
-        switch (current_component) {
-        case ENTITY_COMPONENT_TRANSFORM:
-            entity->components[(u32)current_component] = transformcomponent_new();
-            break;
-
-        case ENTITY_COMPONENT_MODEL:
-            model_component_t* model = (model_component_t*)PEAR_MALLOC(sizeof(model_component_t));
-            model->model = NULL;
-            model->draw = true;
-            model->shadow_caster = true;
-            entity->components[(u32)current_component] = model;
-            break;
-
-        case ENTITY_COMPONENT_CAMERA:
-            camera_component_t* camera = (camera_component_t*)PEAR_MALLOC(sizeof(camera_component_t));
-            camera->use = true;
-            entity->components[(u32)current_component] = camera;
-            break;
-
-        case ENTITY_COMPONENT_LIGHT:
-            entity->components[(u32)current_component] = lightcomponent_new();
-            break;
-
-        case ENTITY_COMPONENT_SCRIPT:
-            entity->components[(u32)current_component] = scriptcomponent_new();
-            break;
-
-        case ENTITY_COMPONENT_SKYBOX:
-            skybox_component_t* skybox = (skybox_component_t*)PEAR_MALLOC(sizeof(skybox_component_t));
-            skybox->cubemap = NULL;
-            skybox->draw = true;
-            entity->components[(u32)current_component] = skybox;
-            break;
-
-        default:
-            PEAR_WARN("component %d is not implemented!", (u32)current_component);
-            break;
-        }
-        entity->components_bitmask |= 1 << (u32)current_component;
+        entity_add_component(entity, current_component);
     }
 
     return entity;
 }
 
 void entity_delete(entity_t* entity) {
-    if (entity_has_component(entity, ENTITY_COMPONENT_MODEL)) {
-        model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-        model_delete(model->model);
-    }
-    if (entity_has_component(entity, ENTITY_COMPONENT_SKYBOX)) {
-        skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
-        cubemap_delete(skybox->cubemap);
-    }
-
     for (u32 i = 0; i < ENTITY_COMPONENT_END + 1; i++) {
-        if (entity->components != NULL) {
-            PEAR_FREE(entity->components[i]);
+        if (entity_has_component(entity, (entity_component_t)i)) {
+            entity_remove_component(entity, (entity_component_t)i);
         }
     }
     PEAR_FREE(entity->components);
 
     PEAR_FREE(entity);
+}
+
+void* entity_add_component(entity_t* entity, entity_component_t component) {
+    if (entity_has_component(entity, component)) {
+        PEAR_WARN("entity %s already has component %d!", entity->name, component);
+        return entity_get_component(entity, component);
+    }
+
+    switch (component) {
+    case ENTITY_COMPONENT_TRANSFORM:
+        entity->components[(u32)component] = transformcomponent_new();
+        break;
+
+    case ENTITY_COMPONENT_MODEL:
+        model_component_t* model = (model_component_t*)PEAR_MALLOC(sizeof(model_component_t));
+        model->model = NULL;
+        model->draw = true;
+        model->shadow_caster = true;
+        entity->components[(u32)component] = model;
+        break;
+
+    case ENTITY_COMPONENT_CAMERA:
+        camera_component_t* camera = (camera_component_t*)PEAR_MALLOC(sizeof(camera_component_t));
+        camera->use = true;
+        entity->components[(u32)component] = camera;
+        break;
+
+    case ENTITY_COMPONENT_LIGHT:
+        entity->components[(u32)component] = lightcomponent_new();
+        break;
+
+    case ENTITY_COMPONENT_SCRIPT:
+        entity->components[(u32)component] = scriptcomponent_new();
+        break;
+
+    case ENTITY_COMPONENT_SKYBOX:
+        skybox_component_t* skybox = (skybox_component_t*)PEAR_MALLOC(sizeof(skybox_component_t));
+        skybox->cubemap = NULL;
+        skybox->draw = true;
+        entity->components[(u32)component] = skybox;
+        break;
+
+    default:
+        PEAR_WARN("component %d is not implemented!", (u32)component);
+        return NULL;
+    }
+
+    entity->components_bitmask |= 1 << (u32)component;
+
+    return entity->components[(u32)component];
+}
+
+void entity_remove_component(entity_t* entity, entity_component_t component) {
+    if (!entity_has_component(entity, component)) {
+        PEAR_WARN("entity %s has no component %d!", entity->name, component);
+        return;
+    }
+
+    switch (component) {
+    case ENTITY_COMPONENT_MODEL:
+        model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+        model_delete(model->model);
+        break;
+
+    case ENTITY_COMPONENT_SKYBOX:
+        skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
+        cubemap_delete(skybox->cubemap);
+        break;
+
+    default:
+        break;
+    }
+
+    PEAR_FREE(entity->components[(u32)component]);
+
+    entity->components_bitmask ^= 1 << (u32)component;
 }
 
 const char* entity_get_name(entity_t* entity) {
