@@ -13,6 +13,29 @@
 
 static entity_t* editor_entity = NULL;
 
+void editor_component_combo() {
+    const char* items[] = {
+        "transform",
+        "model",
+        "camera",
+        "script",
+        "light",
+        "skybox"
+    };
+
+    static i32 current_item = -1;
+    igCombo_Str_arr("component", &current_item, items, 6, 64);
+    if (igButton("add component", (ImVec2){ 0.0f, 0.0f })) {
+        entity_add_component(editor_entity, (entity_component_t)current_item);
+        current_item = -1;
+    }
+    igSameLine(0.0f, 8.0f);
+    if (igButton("remove component", (ImVec2){ 0.0f, 0.0f })) {
+        entity_remove_component(editor_entity, (entity_component_t)current_item);
+        current_item = -1;
+    }
+}
+
 void editor_transform(entity_t* entity) {
     if (igTreeNodeEx_Str("transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
@@ -119,6 +142,12 @@ void editor_entity_inspector(bool* show) {
 
     if (igBegin("entity inspector", show, ImGuiWindowFlags_None)) {
         igText(entity_get_name(editor_entity));
+
+        igSeparator();
+        
+        editor_component_combo();
+
+        igSeparator();
 
         if (entity_has_component(editor_entity, ENTITY_COMPONENT_TRANSFORM)) {
             editor_transform(editor_entity);
