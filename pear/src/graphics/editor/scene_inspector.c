@@ -22,6 +22,7 @@ void editor_scene_inspector(bool* show) {
 
         array_t* entities = scene_get_entities(editor_scene);
         igText("%d entities", array_get_length(entities));
+        igSeparator();
         for (u32 i = 0; i < array_get_length(entities); i++) {
             entity_t* entity = (entity_t*)array_get(entities, i);
             

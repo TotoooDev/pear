@@ -9,6 +9,7 @@
 void editor_general_info(bool* show) {
     if (igBegin("general info", show, ImGuiWindowFlags_None)) {
         igText("%s", app_get_version_string());
+        igSeparator();
         igText("timestep: %f", app_get_timestep());
         igText("%f fps", 1.0f / app_get_timestep() * 1000.0f);
         igEnd();

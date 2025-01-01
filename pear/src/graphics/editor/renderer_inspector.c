@@ -22,8 +22,12 @@ void editor_renderer_inspector(bool* show) {
             igText("graphics api: unknow");
         #endif
 
+        igSeparator();
+
         igText("%d meshes", renderer_get_num_meshes(app_get_renderer()));
         igText("%d vertices", renderer_get_num_vertices(app_get_renderer()));
+
+        igSeparator();
 
         static f32 near = 0.1f;
         if (igDragFloat("near", &near, 0.1f, 0.0f, FLT_MAX, "%.3f", ImGuiSliderFlags_None)) {
@@ -44,6 +48,8 @@ void editor_renderer_inspector(bool* show) {
         if (igCheckbox("wireframe", &enable_wireframe)) {
             renderer_enable_wireframe(app_get_renderer(), enable_wireframe);
         }
+
+        igSeparator();
 
         if (editor_shadow_map != NULL) {
             if (igTreeNode_Str("shadow map")) {
