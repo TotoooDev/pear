@@ -68,3 +68,28 @@ void script_set_number(script_t* script, f64 number, const char* name) {
     lua_pushnumber(script->state, number);
     lua_setglobal(script->state, name);
 }
+
+void script_set_string(script_t* script, const char* str, const char* name) {
+    lua_pushstring(script->state, str);
+    lua_setglobal(script->state, name);
+}
+
+void script_set_bool(script_t* script, bool boolean, const char* name) {
+    lua_pushboolean(script->state, boolean);
+    lua_setglobal(script->state, name);
+}
+
+f64 script_get_number(script_t* script, const char* name) {
+    lua_getglobal(script->state, name);
+    return lua_tonumber(script->state, -1);
+}
+
+char* script_get_string(script_t* script, const char* name) {
+    lua_getglobal(script->state, name);
+    return lua_tostring(script->state, -1);
+}
+
+bool script_get_boolean(script_t* script, const char* name) {
+    lua_getglobal(script->state, name);
+    return lua_toboolean(script->state, -1);
+}

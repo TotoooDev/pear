@@ -6,10 +6,12 @@
 #include <entities.h> 
 
 #include <script/script.h>
+#include <core/log.h>
 
 int main(int argc, char* argv[]) {
     script_t* script = script_new_from_file("scripts/script.lua");
     script_on_start(script);
+    PEAR_INFO("%f", script_get_number(script, "g"));
     script_on_update(script, 0.16f);
     script_set_number(script, 100.0f, "bar");
     script_on_update(script, 0.16f);
