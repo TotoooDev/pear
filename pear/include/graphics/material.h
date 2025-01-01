@@ -4,6 +4,8 @@
 #include <graphics/texture.h>
 
 typedef struct material_t {
+    char name[256];
+
     texture_t* diffuse;
     texture_t* specular;
     texture_t* normal;

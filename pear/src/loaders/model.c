@@ -14,6 +14,13 @@
 material_t loader_load_material(cgltf_material* gltf_material, char* directory) {
     material_t material;
 
+    if (strlen(gltf_material->name) > 255) {
+        strcpy(material.name, "original name too long!");
+    }
+    else {
+        strcpy(material.name, gltf_material->name);
+    }
+
     material.color[0] = gltf_material->pbr_metallic_roughness.base_color_factor[0];
     material.color[1] = gltf_material->pbr_metallic_roughness.base_color_factor[1];
     material.color[2] = gltf_material->pbr_metallic_roughness.base_color_factor[2];
@@ -179,8 +186,10 @@ model_t* loader_load_gltf(const char* filename) {
             if (!skip) {
                 material_t material = loader_load_material(gltf_material, directory);
                 array_add(loaded_materials, gltf_material);
-                    
-                materials[num_materials] = material;
+                
+                // this caused an error (assignment of read-only location) so i fixed it with a good old memcpy
+                // materials[num_materials] = material;
+                memcpy(&materials[num_materials], &material, sizeof(material_t));
                 index = num_materials;
                 num_materials++;
             }
