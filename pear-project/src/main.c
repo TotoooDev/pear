@@ -3,12 +3,14 @@
 #include <graphics/editor/scene_inspector.h>
 #include <core/app.h>
 
-#include <loaders/model.h>
-#include <scene/components/model.h>
-
 #include <entities.h> 
 
+#include <script/script.h>
+
 int main(int argc, char* argv[]) {
+    script_t* script = script_new_from_file("scripts/script.lua");
+    script_delete(script);
+
     app_init();
 
     scene_t* scene = app_get_scene();
