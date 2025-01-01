@@ -1,10 +1,14 @@
 #include <script/script.h>
 #include <util/filesystem.h>
+#include <core/types.h>
+#include <core/log.h>
 #include <core/alloc.h>
 #include <script/vendor/lua.h>
 #include <script/vendor/lauxlib.h>
 #include <script/vendor/lualib.h>
 #include <string.h>
+
+#define PEAR_ERROR_LUA(script) PEAR_ERROR("[LUA] %s", lua_tostring(script->state, -1))
 
 typedef struct script_t {
     lua_State* state;
@@ -16,8 +20,15 @@ script_t* script_new(const char* script_str) {
     script->state = luaL_newstate();
     luaL_openlibs(script->state);
 
-    // luaL_loadbuffer(script->state, script_str, strlen(script_str), "cool lua script");
-    luaL_dostring(script->state, script_str);
+    if (luaL_dostring(script->state, script_str) != LUA_OK) {
+        PEAR_ERROR_LUA(script);
+        script_delete(script);
+        return NULL;
+    }
+
+    lua_getglobal(script->state, "foo");
+    f64 foo = lua_tonumber(script->state, -1);
+    PEAR_INFO("%f", foo);
 
     return script;
 }
