@@ -16,6 +16,12 @@ typedef struct script_t {
     lua_State* state;
 } script_t;
 
+static i32 script_log_info(lua_State* l) {
+    const char* str = lua_tostring(l, 1);
+    PEAR_INFO("[LUA] %s", str);
+    return 0;
+}
+
 script_t* script_new(const char* script_str) {
     script_t* script = (script_t*)PEAR_MALLOC(sizeof(script_t));
 
@@ -28,7 +34,12 @@ script_t* script_new(const char* script_str) {
         return NULL;
     }
 
-    lua_pcall(script->state, 0, 0, 0);
+    static const struct luaL_Reg lib[] = {
+        { "log_info", script_log_info },
+        { NULL, NULL }
+    };
+    luaL_newlib(script->state, lib);
+    lua_setglobal(script->state, "pear");
 
     return script;
 }
@@ -89,4 +100,31 @@ const char* script_get_string(script_t* script, const char* name) {
 bool script_get_boolean(script_t* script, const char* name) {
     lua_getglobal(script->state, name);
     return lua_toboolean(script->state, -1);
+}
+
+void script_dump_stack(script_t* script) {
+    PEAR_INFO("stack dump!");
+
+    int i;
+    int top = lua_gettop(script->state);
+    for (i = 1; i <= top; i++) {  /* repeat for each level */
+        int t = lua_type(script->state, i);
+        switch (t) {
+        case LUA_TSTRING:  /* strings */
+            PEAR_INFO("  `%s'", lua_tostring(script->state, i));
+            break;
+    
+        case LUA_TBOOLEAN:  /* booleans */
+            PEAR_INFO("  %s", lua_toboolean(script->state, i) ? "true" : "false");
+            break;
+    
+        case LUA_TNUMBER:  /* numbers */
+            PEAR_INFO("  %g", lua_tonumber(script->state, i));
+            break;
+    
+        default:  /* other values */
+            PEAR_INFO("  %s", lua_typename(script->state, t));
+            break;
+        }
+    }
 }
