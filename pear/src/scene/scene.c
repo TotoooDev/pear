@@ -1,5 +1,6 @@
 #include <scene/scene.h>
 #include <scene/components/script.h>
+#include <scene/components/lua_script.h>
 #include <util/array.h>
 #include <core/log.h>
 #include <core/types.h>
@@ -29,6 +30,21 @@ void scene_update_script_component(scene_t* scene, entity_t* entity, f32 timeste
     if (script->on_update != NULL) {
         script->on_update(entity, timestep);
     }
+}
+
+void scene_update_lua_script_component(scene_t* scene, entity_t* entity, f32 timestep) {
+    lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+    
+    if (!script->run) {
+        return;
+    }
+
+    if (!script->has_started) {
+        script_on_start(script->script);
+        script->has_started = true;
+    }
+
+    script_on_update(script->script, timestep);
 }
 
 scene_t* scene_new() {
@@ -67,6 +83,13 @@ void scene_remove_entity(scene_t* scene, entity_t* entity) {
         }
     }
 
+    if (entity_has_component(entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
+        lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+        if (script->run) {
+            script_on_destroy(script->script);
+        }
+    }
+
     array_remove(scene->entities, entity);
     entity_delete(entity);
 }
@@ -77,6 +100,10 @@ void scene_update(scene_t* scene, f32 timestep) {
 
         if (entity_has_component(entity, ENTITY_COMPONENT_SCRIPT)) {
             scene_update_script_component(scene, entity, timestep);
+        }
+
+        if (entity_has_component(entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
+            scene_update_lua_script_component(scene, entity, timestep);
         }
     }
 }

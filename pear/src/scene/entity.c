@@ -4,6 +4,7 @@
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
 #include <scene/components/script.h>
+#include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
 #include <core/log.h>
 #include <core/alloc.h>
@@ -88,6 +89,14 @@ void* entity_add_component(entity_t* entity, entity_component_t component) {
         entity->components[(u32)component] = scriptcomponent_new();
         break;
 
+    case ENTITY_COMPONENT_LUA_SCRIPT:
+        lua_script_component_t* script = (lua_script_component_t*)PEAR_MALLOC(sizeof(lua_script_component_t));
+        script->run = true;
+        script->has_started = false;
+        script->script = NULL;
+        entity->components[(u32)component] = script;
+        break;
+
     case ENTITY_COMPONENT_SKYBOX:
         skybox_component_t* skybox = (skybox_component_t*)PEAR_MALLOC(sizeof(skybox_component_t));
         skybox->cubemap = NULL;
@@ -115,6 +124,11 @@ void entity_remove_component(entity_t* entity, entity_component_t component) {
     case ENTITY_COMPONENT_MODEL:
         model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
         model_delete(model->model);
+        break;
+
+    case ENTITY_COMPONENT_LUA_SCRIPT:
+        lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+        script_delete(script->script);
         break;
 
     case ENTITY_COMPONENT_SKYBOX:

@@ -5,22 +5,18 @@
 
 #include <entities.h> 
 
+#include <scene/components/lua_script.h>
 #include <script/script.h>
 #include <core/log.h>
 
 int main(int argc, char* argv[]) {
-    script_t* script = script_new_from_file("scripts/script.lua");
-    script_on_start(script);
-    PEAR_INFO("%f", script_get_number(script, "g"));
-    script_on_update(script, 0.16f);
-    script_set_number(script, 100.0f, "bar");
-    script_on_update(script, 0.16f);
-    script_on_destroy(script);
-    script_delete(script);
-
     app_init();
 
     scene_t* scene = app_get_scene();
+
+    entity_t* entity = scene_add_entity(scene, "scripted entity", ENTITY_COMPONENT_LUA_SCRIPT, ENTITY_COMPONENT_END);
+    lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+    script->script = script_new_from_file("scripts/script.lua");
 
     modelentity_create(scene);
     cameraentity_create(scene);

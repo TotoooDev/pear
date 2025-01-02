@@ -14,13 +14,11 @@
 
 typedef struct script_t {
     lua_State* state;
-    bool has_started;
 } script_t;
 
 script_t* script_new(const char* script_str) {
     script_t* script = (script_t*)PEAR_MALLOC(sizeof(script_t));
 
-    script->has_started = false;
     script->state = luaL_newstate();
     luaL_openlibs(script->state);
 
@@ -50,7 +48,6 @@ void script_delete(script_t* script) {
 void script_on_start(script_t* script) {
     lua_getglobal(script->state, "on_start");
     PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
-    script->has_started = true;
 }
 
 void script_on_update(script_t* script, f64 timestep) {
@@ -84,7 +81,7 @@ f64 script_get_number(script_t* script, const char* name) {
     return lua_tonumber(script->state, -1);
 }
 
-char* script_get_string(script_t* script, const char* name) {
+const char* script_get_string(script_t* script, const char* name) {
     lua_getglobal(script->state, name);
     return lua_tostring(script->state, -1);
 }
