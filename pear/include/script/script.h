@@ -24,6 +24,8 @@ void script_end_table(script_t* script);
 f64 script_get_number(script_t* script, const char* name);
 const char* script_get_string(script_t* script, const char* name);
 bool script_get_boolean(script_t* script, const char* name);
+void script_get_table(script_t* script, const char* name);
+void script_end_table_read(script_t* script);
 
 void script_dump_stack(script_t* script);
 

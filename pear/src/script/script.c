@@ -13,17 +13,46 @@
 #define PEAR_ERROR_LUA() PEAR_ERROR("[LUA] %s", lua_tostring(script->state, -1))
 #define PEAR_CALL_LUA(ret) if (ret != LUA_OK) { PEAR_ERROR_LUA(); }
 
+#define PEAR_SET_VALUE(script, value, name, lua_func) \
+    if (!script->in_table_creation) { \
+        lua_getglobal(script->state, "pear"); \
+    } \
+    lua_pushstring(script->state, name); \
+    lua_func(script->state, value); \
+    lua_settable(script->state, -3); \
+    if (!script->in_table_creation) { \
+        lua_setglobal(script->state, "pear"); \
+    }
+
+#define PEAR_GET_VALUE(script, name, type, lua_func) \
+    if (!script->in_table_read) { \
+        lua_getglobal(script->state, "pear"); \
+    } \
+    lua_getfield(script->state, -1, name); \
+    type number = lua_func(script->state, -1); \
+    if (script->in_table_read) { \
+        lua_pop(script->state, 1); \
+    } \
+    else { \
+        lua_pop(script->state, 3); \
+    } \
+    return number
+
 typedef struct script_t {
     lua_State* state;
     bool in_table_creation;
-    u32 table_depth;
+    bool in_table_read;
+    u32 table_creation_depth;
+    u32 table_read_depth;
 } script_t;
 
 script_t* script_new(const char* script_str) {
     script_t* script = (script_t*)PEAR_MALLOC(sizeof(script_t));
 
     script->in_table_creation = false;
-    script->table_depth = 0;
+    script->in_table_read = false;
+    script->table_creation_depth = 0;
+    script->table_read_depth = 0;
 
     script->state = luaL_newstate();
     luaL_openlibs(script->state);
@@ -75,59 +104,19 @@ void script_on_destroy(script_t* script) {
 }
 
 void script_set_number(script_t* script, f64 number, const char* name) {
-    if (!script->in_table_creation) {
-        lua_getglobal(script->state, "pear");
-    }
-    
-    lua_pushstring(script->state, name);
-    lua_pushnumber(script->state, number);
-    lua_settable(script->state, -3);
-
-    if (!script->in_table_creation) {
-        lua_setglobal(script->state, "pear");
-    }
+    PEAR_SET_VALUE(script, number, name, lua_pushnumber);
 }
 
 void script_set_string(script_t* script, const char* str, const char* name) {
-    if (!script->in_table_creation) {
-        lua_getglobal(script->state, "pear");
-    }
-    
-    lua_pushstring(script->state, name);
-    lua_pushstring(script->state, str);
-    lua_settable(script->state, -3);
-
-    if (!script->in_table_creation) {
-        lua_setglobal(script->state, "pear");
-    }
+    PEAR_SET_VALUE(script, str, name, lua_pushstring);
 }
 
 void script_set_bool(script_t* script, bool boolean, const char* name) {
-    if (!script->in_table_creation) {
-        lua_getglobal(script->state, "pear");
-    }
-    
-    lua_pushstring(script->state, name);
-    lua_pushboolean(script->state, boolean);
-    lua_settable(script->state, -3);
-
-    if (!script->in_table_creation) {
-        lua_setglobal(script->state, "pear");
-    }
+    PEAR_SET_VALUE(script, boolean, name, lua_pushboolean);
 }
 
 void script_set_function(script_t* script, lua_CFunction function, const char* name) {
-    if (!script->in_table_creation) {
-        lua_getglobal(script->state, "pear");
-    }
-    
-    lua_pushstring(script->state, name);
-    lua_pushcfunction(script->state, function);
-    lua_settable(script->state, -3);
-
-    if (!script->in_table_creation) {
-        lua_setglobal(script->state, "pear");
-    }
+    PEAR_SET_VALUE(script, function, name, lua_pushcfunction);
 }
 
 void script_begin_table(script_t* script, const char* name) {
@@ -135,40 +124,63 @@ void script_begin_table(script_t* script, const char* name) {
         script->in_table_creation = true;
         lua_getglobal(script->state, "pear");
     }
-    script->table_depth++;
+    script->table_creation_depth++;
     
     lua_pushstring(script->state, name);
     lua_newtable(script->state);
 }
 
 void script_end_table(script_t* script) {
-    if (script->in_table_creation) {
-        lua_settable(script->state, -3);
-        script->table_depth--;
-        script->in_table_creation = script->table_depth > 0;
-
-        if (!script->in_table_creation) {
-            lua_setglobal(script->state, "pear");
-        }
-    }
-    else {
+    if (!script->in_table_creation) {
         PEAR_WARN("trying to call script_end_table without calling script_begin_table!");
+    }
+
+    lua_settable(script->state, -3);
+    script->table_creation_depth--;
+    script->in_table_creation = script->table_creation_depth > 0;
+
+    if (!script->in_table_creation) {
+        lua_setglobal(script->state, "pear");
     }
 }
 
 f64 script_get_number(script_t* script, const char* name) {
-    lua_getglobal(script->state, name);
-    return lua_tonumber(script->state, -1);
+    PEAR_GET_VALUE(script, name, f64, lua_tonumber);
 }
 
 const char* script_get_string(script_t* script, const char* name) {
-    lua_getglobal(script->state, name);
-    return lua_tostring(script->state, -1);
+    PEAR_GET_VALUE(script, name, const char*, lua_tostring);
 }
 
 bool script_get_boolean(script_t* script, const char* name) {
-    lua_getglobal(script->state, name);
-    return lua_toboolean(script->state, -1);
+    PEAR_GET_VALUE(script, name, bool, lua_toboolean);
+}
+
+void script_get_table(script_t* script, const char* name) {
+    if (!script->in_table_read) {
+        script->in_table_read = true;
+        lua_getglobal(script->state, "pear");
+    }
+    script->table_read_depth++;
+
+    lua_getfield(script->state, -1, name);
+}
+
+void script_end_table_read(script_t* script) {
+    if (!script->in_table_read) {
+        PEAR_WARN("trying to call script_end_table_read without calling script_get_table!");
+        return;
+    }
+
+    lua_pop(script->state, 1);
+    script->table_read_depth--;
+
+    if (script->table_read_depth < 1) {
+        lua_pop(script->state, 1);
+        script->table_read_depth--;
+    }
+
+    script->in_table_read = script->table_read_depth > 0;
 }
 
 void script_dump_stack(script_t* script) {
