@@ -89,18 +89,24 @@ void script_delete(script_t* script) {
 
 void script_on_start(script_t* script) {
     lua_getglobal(script->state, "on_start");
-    PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+    if (lua_isfunction(script->state, -1)) {
+        PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+    }
 }
 
 void script_on_update(script_t* script, f64 timestep) {
     lua_getglobal(script->state, "on_update");
-    lua_pushnumber(script->state, timestep);
-    PEAR_CALL_LUA(lua_pcall(script->state, 1, 0, 0));
+    if (lua_isfunction(script->state, -1)) {
+        lua_pushnumber(script->state, timestep);
+        PEAR_CALL_LUA(lua_pcall(script->state, 1, 0, 0));
+    }
 }
 
 void script_on_destroy(script_t* script) {
     lua_getglobal(script->state, "on_destroy");
-    PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+    if (lua_isfunction(script->state, -1)) {
+        PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+    }
 }
 
 void script_set_number(script_t* script, f64 number, const char* name) {
