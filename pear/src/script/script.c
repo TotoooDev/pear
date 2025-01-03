@@ -65,6 +65,17 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
             script_set_bool(script, false, event_get_key_string(event->key));
         script_end_table(script);
     }
+
+    if (type == EVENT_TYPE_MOUSE_MOVED) {
+        mouse_moved_event_t* event = (mouse_moved_event_t*)e;
+        vec2 relative = { event->rel_x, event->rel_y };
+        vec2 pos = { event->x, event->y };
+
+        script_begin_table(script, "mouse");
+            script_set_vec2(script, pos, "pos");
+            script_set_vec2(script, relative, "relative");
+        script_end_table(script);
+    }
 }
 
 script_t* script_new(const char* script_str) {
@@ -97,6 +108,11 @@ script_t* script_new(const char* script_str) {
     script_begin_table(script, "key");
     script_end_table(script);
 
+    script_begin_table(script, "mouse");
+        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "pos");
+        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "relative");
+    script_end_table(script);
+
     event_subscribe(script_on_event, script);
 
     return script;
@@ -123,11 +139,17 @@ void script_on_start(script_t* script) {
 
 void script_on_update(script_t* script, f64 timestep) {
     script->timestep = timestep;
+    
     lua_getglobal(script->state, "on_update");
     if (lua_isfunction(script->state, -1)) {
         lua_pushnumber(script->state, script->timestep);
         PEAR_CALL_LUA(lua_pcall(script->state, 1, 0, 0));
     }
+
+    script_begin_table(script, "mouse");
+        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "pos");
+        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "relative");
+    script_end_table(script);
 }
 
 void script_on_destroy(script_t* script) {
@@ -151,6 +173,21 @@ void script_set_bool(script_t* script, bool boolean, const char* name) {
 
 void script_set_function(script_t* script, lua_CFunction function, const char* name) {
     PEAR_SET_VALUE(script, function, name, lua_pushcfunction);
+}
+
+void script_set_vec2(script_t* script, vec2 vec, const char* name) {
+    script_begin_table(script, name);
+        script_set_number(script, vec[0], "x");
+        script_set_number(script, vec[1], "y");
+    script_end_table(script);
+}
+
+void script_set_vec3(script_t* script, vec3 vec, const char* name) {
+    script_begin_table(script, name);
+        script_set_number(script, vec[0], "x");
+        script_set_number(script, vec[1], "y");
+        script_set_number(script, vec[2], "z");
+    script_end_table(script);
 }
 
 void script_begin_table(script_t* script, const char* name) {
@@ -190,12 +227,11 @@ bool script_get_boolean(script_t* script, const char* name) {
     PEAR_GET_VALUE(script, name, bool, lua_toboolean);
 }
 
-void script_set_vec3(script_t* script, vec3 vec, const char* name) {
-    script_begin_table(script, name);
-        script_set_number(script, vec[0], "x");
-        script_set_number(script, vec[1], "y");
-        script_set_number(script, vec[2], "z");
-    script_end_table(script);
+void script_get_vec2(script_t* script, const char* name, vec2 dest) {
+    script_get_table(script, name);
+        dest[0] = script_get_number(script, "x");
+        dest[1] = script_get_number(script, "y");
+    script_end_table_read(script);
 }
 
 void script_get_vec3(script_t* script, const char* name, vec3 dest) {

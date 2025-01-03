@@ -1,7 +1,9 @@
 #include <scene/scene.h>
 #include <scene/components/transform.h>
+#include <scene/components/camera.h>
 #include <scene/components/script.h>
 #include <scene/components/lua_script.h>
+#include <graphics/camera.h>
 #include <util/array.h>
 #include <core/log.h>
 #include <core/types.h>
@@ -24,6 +26,25 @@ void scene_set_lua_script_values(entity_t* entity) {
             script_set_vec3(script, transform->pos, "pos");
             script_set_vec3(script, transform->rotation, "rotation");
             script_set_vec3(script, transform->scale, "scale");
+        script_end_table(script);
+    }
+
+    if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA)) {
+        transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+        camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
+
+        vec3 front;
+        vec3 right;
+        vec3 up;
+        camera_get_front(transform->rotation[0], transform->rotation[1], transform->rotation[2], front);
+        camera_get_right(transform->rotation[0], transform->rotation[1], transform->rotation[2], right);
+        camera_get_up(transform->rotation[0], transform->rotation[1], transform->rotation[2], up);
+
+        script_begin_table(script, "camera");
+            script_set_bool(script, camera->use, "use");
+            script_set_vec3(script, front, "front");
+            script_set_vec3(script, right, "right");
+            script_set_vec3(script, up, "up");
         script_end_table(script);
     }
 }
