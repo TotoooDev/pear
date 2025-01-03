@@ -1,5 +1,7 @@
 #include <script/script.h>
 #include <script/log.h>
+#include <event/event_dispatcher.h>
+#include <event/keyboard.h>
 #include <util/filesystem.h>
 #include <core/log.h>
 #include <core/alloc.h>
@@ -44,7 +46,26 @@ typedef struct script_t {
     bool in_table_read;
     u32 table_creation_depth;
     u32 table_read_depth;
+    f64 timestep;
 } script_t;
+
+void script_on_event(event_type_t type, void* e, void* user_data) {
+    script_t* script = (script_t*)user_data;
+
+    if (type == EVENT_TYPE_KEY_DOWN) {
+        key_down_event_t* event = (key_down_event_t*)e;
+        script_begin_table(script, "key");
+            script_set_bool(script, true, event_get_key_string(event->key));
+        script_end_table(script);
+    }
+
+    if (type == EVENT_TYPE_KEY_UP) {
+        key_up_event_t* event = (key_up_event_t*)e;
+        script_begin_table(script, "key");
+            script_set_bool(script, false, event_get_key_string(event->key));
+        script_end_table(script);
+    }
+}
 
 script_t* script_new(const char* script_str) {
     script_t* script = (script_t*)PEAR_MALLOC(sizeof(script_t));
@@ -53,6 +74,7 @@ script_t* script_new(const char* script_str) {
     script->in_table_read = false;
     script->table_creation_depth = 0;
     script->table_read_depth = 0;
+    script->timestep = 0.0f;
 
     script->state = luaL_newstate();
     luaL_openlibs(script->state);
@@ -71,6 +93,11 @@ script_t* script_new(const char* script_str) {
         script_set_function(script, script_log_warn, "warn");
         script_set_function(script, script_log_error, "error");
     script_end_table(script);
+
+    script_begin_table(script, "key");
+    script_end_table(script);
+
+    event_subscribe(script_on_event, script);
 
     return script;
 }
@@ -95,9 +122,10 @@ void script_on_start(script_t* script) {
 }
 
 void script_on_update(script_t* script, f64 timestep) {
+    script->timestep = timestep;
     lua_getglobal(script->state, "on_update");
     if (lua_isfunction(script->state, -1)) {
-        lua_pushnumber(script->state, timestep);
+        lua_pushnumber(script->state, script->timestep);
         PEAR_CALL_LUA(lua_pcall(script->state, 1, 0, 0));
     }
 }
