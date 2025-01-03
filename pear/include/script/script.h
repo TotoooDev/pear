@@ -33,4 +33,9 @@ void script_end_table_read(script_t* script);
 
 void script_dump_stack(script_t* script);
 
+#ifdef PEAR_ENABLE_EDITOR
+void script_init_editor(script_t* script);
+void script_on_editor(script_t* script);
+#endif
+
 #endif

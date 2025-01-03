@@ -113,6 +113,14 @@ script_t* script_new(const char* script_str) {
         script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "relative");
     script_end_table(script);
 
+    #ifdef PEAR_ENABLE_EDITOR
+        script_init_editor(script);
+    #else
+        script_begin_table(script, "editor");
+            script_set_bool(script, false, "enabled");
+        script_end_table(script);
+    #endif
+
     event_subscribe(script_on_event, script);
 
     return script;
@@ -294,3 +302,44 @@ void script_dump_stack(script_t* script) {
         }
     }
 }
+
+#ifdef PEAR_ENABLE_EDITOR
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+#include <graphics/editor/cimgui/cimgui.h>
+
+i32 script_checkbox_item(lua_State* l) {
+    const char* label = lua_tostring(l, 1);
+    bool value = lua_toboolean(l, 2);
+    igCheckbox(label, &value);
+    lua_pushboolean(l, value);
+    return 1;
+}
+
+i32 script_drag_number_item(lua_State* l) {
+    const char* label = lua_tostring(l, 1);
+    f32 value = lua_tonumber(l, 2);
+    f64 speed = lua_tonumber(l, 3);
+    f32 min = lua_tonumber(l, 4);
+    f32 max = lua_tonumber(l, 5);
+    igDragFloat(label, &value, speed, min, max, "%.3f", ImGuiSliderFlags_None);
+    lua_pushnumber(l, value);
+    return 1;
+}
+
+void script_init_editor(script_t* script) {
+    script_begin_table(script, "editor");
+        script_set_bool(script, true, "enabled");
+        script_set_function(script, script_checkbox_item, "checkbox");
+        script_set_function(script, script_drag_number_item, "drag_number");
+    script_end_table(script);
+}
+
+void script_on_editor(script_t* script) {
+    igSeparator();
+
+    lua_getglobal(script->state, "on_editor");
+    if (lua_isfunction(script->state, -1)) {
+        PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+    }
+}
+#endif
