@@ -3,5 +3,6 @@ bin/
 bin-intermediate/
 **/assets/
 !pear/assets/
+!pear-project/assets/scripts/
 
 Makefile

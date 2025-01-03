@@ -94,6 +94,7 @@ void scene_update_lua_script_component(scene_t* scene, entity_t* entity, f32 tim
     if (!script->has_started) {
         script_on_start(script->script);
         script->has_started = true;
+        scene_set_entity_script_values(entity);
     }
 
     script_on_update(script->script, timestep);

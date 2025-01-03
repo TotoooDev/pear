@@ -18,10 +18,6 @@
 
 void cameraentity_create(scene_t* scene) {
     entity_t* entity = scene_add_entity(scene, "camera", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_LUA_SCRIPT, ENTITY_COMPONENT_END);
-
-    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    transform->pos[1] = 1.0f;
-    
     lua_script_component_t* script = entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
     script->script = script_new_from_file("scripts/camera.lua");
 }
@@ -30,10 +26,6 @@ void modelentity_create(scene_t* scene) {
     entity_t* entity = scene_add_entity(scene, "model", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_LUA_SCRIPT, ENTITY_COMPONENT_END);
     model_component_t* model_comp = entity_get_component(entity, ENTITY_COMPONENT_MODEL);
     model_comp->model = loader_load_gltf("Avocado.glb");
-    transform_component_t* transform = entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    transform->scale[0] = 50.0f;
-    transform->scale[1] = 50.0f;
-    transform->scale[2] = 50.0f;
     lua_script_component_t* script = entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
     script->script = script_new_from_file("scripts/script.lua");
 }
