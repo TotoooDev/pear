@@ -2,6 +2,7 @@
 #define PEAR_EVENT_KEYBOARD_H_
 
 #include <event/platform/glfw/keyboard.h>
+#include <core/types.h>
 
 #define PEAR_KEY_SPACE              PEAR_PLATFORM_KEY_SPACE
 #define PEAR_KEY_APOSTROPHE         PEAR_PLATFORM_KEY_APOSTROPHE
@@ -63,7 +64,7 @@
 #define PEAR_KEY_LEFT               PEAR_PLATFORM_KEY_LEFT
 #define PEAR_KEY_DOWN               PEAR_PLATFORM_KEY_DOWN
 #define PEAR_KEY_UP                 PEAR_PLATFORM_KEY_UP
-#define PEAR_KEY_PAGE_UP            PEAR_PLATFORM_KEY_DOWN
+#define PEAR_KEY_PAGE_UP            PEAR_PLATFORM_KEY_PAGE_UP
 #define PEAR_KEY_PAGE_DOWN          PEAR_PLATFORM_KEY_PAGE_DOWN
 #define PEAR_KEY_HOME               PEAR_PLATFORM_KEY_HOME
 #define PEAR_KEY_END                PEAR_PLATFORM_KEY_END
@@ -72,31 +73,31 @@
 #define PEAR_KEY_NUM_LOCK           PEAR_PLATFORM_KEY_NUM_LOCK
 #define PEAR_KEY_PRINT_SCREEN       PEAR_PLATFORM_KEY_PRINT_SCREEN
 #define PEAR_KEY_PAUSE              PEAR_PLATFORM_KEY_PAUSE
-#define PEAR_KEY_F1                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F2                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F3                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F4                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F5                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F6                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F7                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F8                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F9                 PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F10                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F11                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F12                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F13                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F14                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F15                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F16                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F17                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F18                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F19                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F20                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F21                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F22                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F23                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F24                PEAR_PLATFORM_KEY_F
-#define PEAR_KEY_F25                PEAR_PLATFORM_KEY_F
+#define PEAR_KEY_F1                 PEAR_PLATFORM_KEY_F1
+#define PEAR_KEY_F2                 PEAR_PLATFORM_KEY_F2
+#define PEAR_KEY_F3                 PEAR_PLATFORM_KEY_F3
+#define PEAR_KEY_F4                 PEAR_PLATFORM_KEY_F4
+#define PEAR_KEY_F5                 PEAR_PLATFORM_KEY_F5
+#define PEAR_KEY_F6                 PEAR_PLATFORM_KEY_F6
+#define PEAR_KEY_F7                 PEAR_PLATFORM_KEY_F7
+#define PEAR_KEY_F8                 PEAR_PLATFORM_KEY_F8
+#define PEAR_KEY_F9                 PEAR_PLATFORM_KEY_F9
+#define PEAR_KEY_F10                PEAR_PLATFORM_KEY_F10
+#define PEAR_KEY_F11                PEAR_PLATFORM_KEY_F11
+#define PEAR_KEY_F12                PEAR_PLATFORM_KEY_F12
+#define PEAR_KEY_F13                PEAR_PLATFORM_KEY_F13
+#define PEAR_KEY_F14                PEAR_PLATFORM_KEY_F14
+#define PEAR_KEY_F15                PEAR_PLATFORM_KEY_F15
+#define PEAR_KEY_F16                PEAR_PLATFORM_KEY_F16
+#define PEAR_KEY_F17                PEAR_PLATFORM_KEY_F17
+#define PEAR_KEY_F18                PEAR_PLATFORM_KEY_F18
+#define PEAR_KEY_F19                PEAR_PLATFORM_KEY_F19
+#define PEAR_KEY_F20                PEAR_PLATFORM_KEY_F20
+#define PEAR_KEY_F21                PEAR_PLATFORM_KEY_F21
+#define PEAR_KEY_F22                PEAR_PLATFORM_KEY_F22
+#define PEAR_KEY_F23                PEAR_PLATFORM_KEY_F23
+#define PEAR_KEY_F24                PEAR_PLATFORM_KEY_F24
+#define PEAR_KEY_F25                PEAR_PLATFORM_KEY_F25
 #define PEAR_KEY_KP_0               PEAR_PLATFORM_KEY_KP_0
 #define PEAR_KEY_KP_1               PEAR_PLATFORM_KEY_KP_1
 #define PEAR_KEY_KP_2               PEAR_PLATFORM_KEY_KP_2
@@ -123,5 +124,7 @@
 #define PEAR_KEY_RIGHT_ALT          PEAR_PLATFORM_KEY_RIGHT_ALT
 #define PEAR_KEY_RIGHT_SUPER        PEAR_PLATFORM_KEY_RIGHT_SUPER
 #define PEAR_KEY_MENU               PEAR_PLATFORM_KEY_MENU
+
+const char* event_get_key_string(u32 key);
 
 #endif
