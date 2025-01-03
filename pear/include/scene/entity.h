@@ -4,6 +4,8 @@
 #include <core/types.h>
 #include <stdarg.h>
 
+#define ENTITY_NAME_MAX_LENGTH 256
+
 typedef enum entity_component_t {
     ENTITY_COMPONENT_TRANSFORM,
     ENTITY_COMPONENT_MODEL,
@@ -24,7 +26,7 @@ void entity_delete(entity_t* entity);
 void* entity_add_component(entity_t* entity, entity_component_t component);
 void entity_remove_component(entity_t* entity, entity_component_t component);
 
-const char* entity_get_name(entity_t* entity);
+char* entity_get_name(entity_t* entity);
 void* entity_get_component(entity_t* entity, entity_component_t component);
 bool entity_has_component(entity_t* entity, entity_component_t component);
 

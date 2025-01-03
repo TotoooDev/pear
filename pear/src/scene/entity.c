@@ -8,10 +8,11 @@
 #include <scene/components/skybox.h>
 #include <core/log.h>
 #include <core/alloc.h>
+#include <string.h>
 #include <stdarg.h>
 
 typedef struct entity_t {
-    const char* name;
+    char* name;
     u32 components_bitmask;
     void** components;
 } entity_t;
@@ -29,7 +30,9 @@ entity_t* entity_new(const char* name, ...) {
 
 entity_t* entity_new_from_va_list(const char* name, va_list args) {
     entity_t* entity = (entity_t*)PEAR_MALLOC(sizeof(entity_t));
-    entity->name = name;
+
+    entity->name = PEAR_MALLOC(sizeof(char) * ENTITY_NAME_MAX_LENGTH);
+    strcpy(entity->name, name);
     
     entity->components_bitmask = 0;
     entity->components = (void**)PEAR_MALLOC(sizeof(void*) * (ENTITY_COMPONENT_END + 1));
@@ -53,6 +56,7 @@ void entity_delete(entity_t* entity) {
     }
     PEAR_FREE(entity->components);
 
+    PEAR_FREE(entity->name);
     PEAR_FREE(entity);
 }
 
@@ -145,7 +149,7 @@ void entity_remove_component(entity_t* entity, entity_component_t component) {
     entity->components_bitmask ^= 1 << (u32)component;
 }
 
-const char* entity_get_name(entity_t* entity) {
+char* entity_get_name(entity_t* entity) {
     return entity->name;
 }
 

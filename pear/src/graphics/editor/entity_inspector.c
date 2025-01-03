@@ -8,6 +8,7 @@
 #include <scene/components/script.h>
 #include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
+#include <string.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <graphics/editor/cimgui/cimgui.h>
@@ -156,7 +157,7 @@ void editor_entity_inspector(bool* show) {
     }
 
     if (igBegin("entity inspector", show, ImGuiWindowFlags_None)) {
-        igText(entity_get_name(editor_entity));
+        igInputText("name", entity_get_name(editor_entity), ENTITY_NAME_MAX_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL);
 
         igSeparator();
         
