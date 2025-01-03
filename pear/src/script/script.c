@@ -223,7 +223,7 @@ const char* script_get_string(script_t* script, const char* name) {
     PEAR_GET_VALUE(script, name, const char*, lua_tostring);
 }
 
-bool script_get_boolean(script_t* script, const char* name) {
+bool script_get_bool(script_t* script, const char* name) {
     PEAR_GET_VALUE(script, name, bool, lua_toboolean);
 }
 
