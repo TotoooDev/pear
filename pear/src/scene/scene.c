@@ -61,6 +61,14 @@ void scene_set_entity_script_values(entity_t* entity) {
             script_get_vec3(script, "scale", transform->scale);
         script_end_table_read(script);
     }
+
+    if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA)) {
+        camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
+
+        script_get_table(script, "camera");
+            camera->use = script_get_bool(script, "use");
+        script_end_table_read(script);
+    }
 }
 
 void scene_update_script_component(scene_t* scene, entity_t* entity, f32 timestep) {
