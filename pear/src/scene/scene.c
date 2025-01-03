@@ -1,4 +1,5 @@
 #include <scene/scene.h>
+#include <scene/components/transform.h>
 #include <scene/components/script.h>
 #include <scene/components/lua_script.h>
 #include <util/array.h>
@@ -12,6 +13,34 @@
 typedef struct scene_t {
     array_t* entities;
 } scene_t;
+
+void scene_set_lua_script_values(entity_t* entity) {
+    lua_script_component_t* script_comp = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+    script_t* script = script_comp->script;
+
+    if (entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+        transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+        script_begin_table(script, "transform");
+            script_set_vec3(script, transform->pos, "pos");
+            script_set_vec3(script, transform->rotation, "rotation");
+            script_set_vec3(script, transform->scale, "scale");
+        script_end_table(script);
+    }
+}
+
+void scene_set_entity_script_values(entity_t* entity) {
+    lua_script_component_t* script_comp = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+    script_t* script = script_comp->script;
+
+    if (entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+        transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+        script_get_table(script, "transform");
+            script_get_vec3(script, "pos", transform->pos);
+            script_get_vec3(script, "rotation", transform->rotation);
+            script_get_vec3(script, "scale", transform->scale);
+        script_end_table_read(script);
+    }
+}
 
 void scene_update_script_component(scene_t* scene, entity_t* entity, f32 timestep) {
     script_component_t* script = (script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SCRIPT);
@@ -39,12 +68,15 @@ void scene_update_lua_script_component(scene_t* scene, entity_t* entity, f32 tim
         return;
     }
 
+    scene_set_lua_script_values(entity);
+    
     if (!script->has_started) {
         script_on_start(script->script);
         script->has_started = true;
     }
 
     script_on_update(script->script, timestep);
+    scene_set_entity_script_values(entity);
 }
 
 scene_t* scene_new() {

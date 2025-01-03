@@ -3,6 +3,7 @@
 #include <scene/components/model.h>
 #include <scene/components/light.h>
 #include <scene/components/skybox.h>
+#include <scene/components/lua_script.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <graphics/camera.h>
@@ -139,18 +140,15 @@ void cameraentity_create(scene_t* scene) {
 }
 
 void modelentity_create(scene_t* scene) {
-    entity_t* entity = scene_add_entity(scene, "model", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_END);
+    entity_t* entity = scene_add_entity(scene, "model", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_MODEL, ENTITY_COMPONENT_LUA_SCRIPT, ENTITY_COMPONENT_END);
     model_component_t* model_comp = entity_get_component(entity, ENTITY_COMPONENT_MODEL);
     model_comp->model = loader_load_gltf("Avocado.glb");
     transform_component_t* transform = entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
     transform->scale[0] = 50.0f;
     transform->scale[1] = 50.0f;
     transform->scale[2] = 50.0f;
-
-    entity_remove_component(entity, ENTITY_COMPONENT_MODEL);
-
-    model_comp = entity_add_component(entity, ENTITY_COMPONENT_MODEL);
-    model_comp->model = loader_load_gltf("Avocado.glb");
+    lua_script_component_t* script = entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+    script->script = script_new_from_file("scripts/script.lua");
 }
 
 void lightentity_create(scene_t* scene) {

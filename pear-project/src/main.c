@@ -14,10 +14,6 @@ int main(int argc, char* argv[]) {
 
     scene_t* scene = app_get_scene();
 
-    entity_t* entity = scene_add_entity(scene, "scripted entity", ENTITY_COMPONENT_LUA_SCRIPT, ENTITY_COMPONENT_END);
-    lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
-    script->script = script_new_from_file("scripts/script.lua");
-
     modelentity_create(scene);
     cameraentity_create(scene);
     lightentity_create(scene);
