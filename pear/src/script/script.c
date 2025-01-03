@@ -156,6 +156,22 @@ bool script_get_boolean(script_t* script, const char* name) {
     PEAR_GET_VALUE(script, name, bool, lua_toboolean);
 }
 
+void script_set_vec3(script_t* script, vec3 vec, const char* name) {
+    script_begin_table(script, name);
+        script_set_number(script, vec[0], "x");
+        script_set_number(script, vec[1], "y");
+        script_set_number(script, vec[2], "z");
+    script_end_table(script);
+}
+
+void script_get_vec3(script_t* script, const char* name, vec3 dest) {
+    script_get_table(script, name);
+        dest[0] = script_get_number(script, "x");
+        dest[1] = script_get_number(script, "y");
+        dest[2] = script_get_number(script, "z");
+    script_end_table_read(script);
+}
+
 void script_get_table(script_t* script, const char* name) {
     if (!script->in_table_read) {
         script->in_table_read = true;
@@ -177,7 +193,6 @@ void script_end_table_read(script_t* script) {
 
     if (script->table_read_depth < 1) {
         lua_pop(script->state, 1);
-        script->table_read_depth--;
     }
 
     script->in_table_read = script->table_read_depth > 0;
