@@ -7,6 +7,8 @@ light_component_t* lightcomponent_new() {
     light->cast = true;
     light->shadow_caster = true;
 
+    light->light.type = LIGHT_TYPE_DIRECTIONAL;
+
     glm_vec3_copy((vec3){ 0.1f, 0.1f, 0.1f }, light->light.ambient);
     glm_vec3_copy((vec3){ 0.6f, 0.6f, 0.6f }, light->light.diffuse);
     glm_vec3_copy((vec3){ 1.0f, 1.0f, 1.0f }, light->light.specular);
