@@ -194,9 +194,8 @@ void editor_entity_inspector(bool* show) {
         if (entity_has_component(editor_entity, ENTITY_COMPONENT_SKYBOX)) {
             editor_skybox(editor_entity);
         }
-
-        igEnd();
     }
+    igEnd();
 }
 
 #endif

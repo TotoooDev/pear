@@ -12,8 +12,8 @@ void editor_general_info(bool* show) {
         igSeparator();
         igText("timestep: %f", app_get_timestep());
         igText("%f fps", 1.0f / app_get_timestep() * 1000.0f);
-        igEnd();
     }
+    igEnd();
 }
 
 #endif

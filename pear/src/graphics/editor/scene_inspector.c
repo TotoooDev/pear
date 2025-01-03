@@ -39,9 +39,8 @@ void editor_scene_inspector(bool* show) {
                 igTreePop();
             }
         }
-
-        igEnd();
     }
+    igEnd();
 }
 
 #endif

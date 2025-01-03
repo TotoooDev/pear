@@ -60,9 +60,8 @@ void editor_renderer_inspector(bool* show) {
                 igTreePop();
             }
         }
-
-        igEnd();
     }
+    igEnd();
 }
 
 #endif
