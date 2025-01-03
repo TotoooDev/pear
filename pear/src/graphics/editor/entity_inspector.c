@@ -6,6 +6,7 @@
 #include <scene/components/light.h>
 #include <scene/components/model.h>
 #include <scene/components/script.h>
+#include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
@@ -19,12 +20,13 @@ void editor_component_combo() {
         "model",
         "camera",
         "script",
+        "lua script",
         "light",
         "skybox"
     };
 
     static i32 current_item = -1;
-    igCombo_Str_arr("component", &current_item, items, 6, 64);
+    igCombo_Str_arr("component", &current_item, items, 7, 64);
     if (igButton("add component", (ImVec2){ 0.0f, 0.0f })) {
         entity_add_component(editor_entity, (entity_component_t)current_item);
         current_item = -1;
@@ -121,6 +123,19 @@ void editor_script(entity_t* entity) {
     }
 }
 
+void editor_lua_script(entity_t* entity) {
+    if (igTreeNodeEx_Str("lua script", ImGuiTreeNodeFlags_DefaultOpen)) {
+        lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+
+        igCheckbox("run", &script->run);
+        if (igButton("restart script", (ImVec2){ 0.0f, 0.0f })) {
+            script->has_started = false;
+        }
+
+        igTreePop();
+    }
+}
+
 void editor_skybox(entity_t* entity) {
     if (igTreeNodeEx_Str("skybox", ImGuiTreeNodeFlags_DefaultOpen)) {
         skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
@@ -167,6 +182,10 @@ void editor_entity_inspector(bool* show) {
 
         if (entity_has_component(editor_entity, ENTITY_COMPONENT_SCRIPT)) {
             editor_script(editor_entity);
+        }
+
+        if (entity_has_component(editor_entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
+            editor_lua_script(editor_entity);
         }
 
         if (entity_has_component(editor_entity, ENTITY_COMPONENT_SKYBOX)) {
