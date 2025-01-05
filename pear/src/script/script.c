@@ -143,6 +143,9 @@ void script_on_start(script_t* script) {
     if (lua_isfunction(script->state, -1)) {
         PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
     }
+    else {
+        lua_pop(script->state, -1);
+    }
 }
 
 void script_on_update(script_t* script, f64 timestep) {
@@ -152,6 +155,9 @@ void script_on_update(script_t* script, f64 timestep) {
     if (lua_isfunction(script->state, -1)) {
         lua_pushnumber(script->state, script->timestep);
         PEAR_CALL_LUA(lua_pcall(script->state, 1, 0, 0));
+    }
+    else {
+        lua_pop(script->state, -1);
     }
 
     script_begin_table(script, "mouse");
@@ -164,6 +170,9 @@ void script_on_destroy(script_t* script) {
     lua_getglobal(script->state, "on_destroy");
     if (lua_isfunction(script->state, -1)) {
         PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+    }
+    else {
+        lua_pop(script->state, -1);
     }
 }
 
@@ -340,6 +349,9 @@ void script_on_editor(script_t* script) {
     lua_getglobal(script->state, "on_editor");
     if (lua_isfunction(script->state, -1)) {
         PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+    }
+    else {
+        lua_pop(script->state, -1);
     }
 }
 #endif
