@@ -3,6 +3,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/editor/editor.h>
+#include <graphics/editor/menu_bar.h>
 #include <graphics/editor/general_info.h>
 #include <graphics/editor/scene_inspector.h>
 #include <graphics/editor/entity_inspector.h>
@@ -17,6 +18,7 @@
 #include <graphics/editor/cimgui/cimconfig.h>
 #include <graphics/platform/opengl/editor/cimgui/cimgui_impl.h>
 
+static bool editor_show_menu_bar = true;
 static bool editor_show_general_info = true;
 static bool editor_show_scene_inspector = true;
 static bool editor_show_entity_inspector = true;
@@ -28,7 +30,7 @@ void editor_init() {
 
     // set docking
     ImGuiIO *ioptr = igGetIO();
-    ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
+    // ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
     //ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 
     ImGui_ImplGlfw_InitForOpenGL(window_get_glfw(app_get_window()), true);
@@ -50,6 +52,10 @@ void editor_clear() {
 }
 
 void editor_render() {
+    if (editor_show_menu_bar) {
+        editor_menu_bar(&editor_show_general_info);
+    }
+    
     if (editor_show_general_info) {
         editor_general_info(&editor_show_general_info);
     }
@@ -83,6 +89,10 @@ void editor_render() {
         glfwMakeContextCurrent(backup_current_window);
     }
 #endif
+}
+
+void editor_enable_menu_bar(bool enable) {
+    editor_show_menu_bar = enable;
 }
 
 void editor_enable_general_info(bool enable) {

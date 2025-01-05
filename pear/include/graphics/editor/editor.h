@@ -11,6 +11,7 @@ void editor_free();
 void editor_clear();
 void editor_render();
 
+void editor_enable_menu_bar(bool enable);
 void editor_enable_general_info(bool enable);
 void editor_enable_scene_inspector(bool enable);
 void editor_enable_entity_inspector(bool enable);
