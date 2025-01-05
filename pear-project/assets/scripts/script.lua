@@ -16,10 +16,6 @@ function on_update(timestep)
     pear.transform.pos.y = math.sin(time * 0.005)
     pear.transform.rotation.y = pear.transform.rotation.y + timestep * 0.005
 
-    if pear.key.PEAR_KEY_SPACE then
-        pear.transform.pos.z = pear.transform.pos.z + 0.01
-    end
-
     time = time + timestep
 end
 

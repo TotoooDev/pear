@@ -55,15 +55,38 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
     if (type == EVENT_TYPE_KEY_DOWN) {
         key_down_event_t* event = (key_down_event_t*)e;
         script_begin_table(script, "key");
-            script_set_bool(script, true, event_get_key_string(event->key));
+            script_set_string(script, event_get_key_string(event->key), event_get_key_string(event->key));
+            script_begin_table(script, "state");
+                script_set_bool(script, true, event_get_key_string(event->key));
+            script_end_table(script);
         script_end_table(script);
+
+        lua_getglobal(script->state, "on_key_press");
+        if (lua_isfunction(script->state, -1)) {
+            lua_pushstring(script->state, event_get_key_string(event->key));
+            PEAR_CALL_LUA(lua_pcall(script->state, 1, 0, 0));
+        }
+        else {
+            lua_pop(script->state, -1);
+        }
     }
 
     if (type == EVENT_TYPE_KEY_UP) {
         key_up_event_t* event = (key_up_event_t*)e;
         script_begin_table(script, "key");
-            script_set_bool(script, false, event_get_key_string(event->key));
+            script_begin_table(script, "state");
+                script_set_bool(script, false, event_get_key_string(event->key));
+            script_end_table(script);
         script_end_table(script);
+
+        lua_getglobal(script->state, "on_key_release");
+        if (lua_isfunction(script->state, -1)) {
+            lua_pushstring(script->state, event_get_key_string(event->key));
+            PEAR_CALL_LUA(lua_pcall(script->state, 1, 0, 0));
+        }
+        else {
+            lua_pop(script->state, -1);
+        }
     }
 
     if (type == EVENT_TYPE_MOUSE_MOVED) {
@@ -75,6 +98,14 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
             script_set_vec2(script, pos, "pos");
             script_set_vec2(script, relative, "relative");
         script_end_table(script);
+
+        lua_getglobal(script->state, "on_mouse_movement");
+        if (lua_isfunction(script->state, -1)) {
+            PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+        }
+        else {
+            lua_pop(script->state, -1);
+        }
     }
 }
 
