@@ -16,6 +16,10 @@ typedef struct app_t {
     window_t* window;
     renderer_t* renderer;
     scene_t* scene;
+
+    #ifdef PEAR_ENABLE_EDITOR
+        bool enable_editor;
+    #endif
 } app_t;
 
 static app_t* app = NULL;
@@ -41,6 +45,10 @@ void app_init() {
     app->window = window_new("pear", 1080, 720);
     app->renderer = renderer_new();
     app->scene = scene_new();
+
+    #ifdef PEAR_ENABLE_EDITOR
+        app->enable_editor = true;
+    #endif
 
     event_subscribe(app_on_event, NULL);
 
@@ -69,8 +77,10 @@ void app_run() {
         renderer_draw_scene(app->renderer, app->scene);
 
         #ifdef PEAR_ENABLE_EDITOR
-            editor_clear();
-            editor_render();
+            if (app->enable_editor) {
+                editor_clear();
+                editor_render();
+            }
         #endif
 
         window_update(app->window);
@@ -119,3 +129,9 @@ const char* app_get_version_string() {
         return "pear 0.0.1 (release)";
     #endif
 }
+
+#ifdef PEAR_ENABLE_EDITOR
+void app_disable_editor() {
+    app->enable_editor = false;
+}
+#endif

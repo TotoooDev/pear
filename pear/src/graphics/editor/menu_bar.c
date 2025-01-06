@@ -50,6 +50,12 @@ void editor_menu_bar(bool* show) {
                 editor_enable_menu_bar(menu_bar_selected);
             }
 
+            igSeparator();
+
+            if (igMenuItem_Bool("disable imgui", "", false, true)) {
+                app_disable_editor();
+            }
+
             igEndMenu();
         }
 

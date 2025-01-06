@@ -21,4 +21,8 @@ u32 app_get_version_minor();
 u32 app_get_version_patch();
 const char* app_get_version_string();
 
+#ifdef PEAR_ENABLE_EDITOR
+void app_disable_editor();
+#endif
+
 #endif
