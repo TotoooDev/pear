@@ -133,7 +133,9 @@ void editor_lua_script(entity_t* entity) {
             script->has_started = false;
         }
 
-        script_on_editor(script->script);
+        if (script->run) {
+            script_on_editor(script->script);
+        }
 
         igTreePop();
     }
