@@ -94,11 +94,11 @@ void editor_model(entity_t* entity) {
         igCheckbox("shadow caster", &model->shadow_caster);
 
         if (igTreeNode_Str("materials")) {
-            material_t* materials = model_get_materials(model->model);
+            material_t** materials = model_get_materials(model->model);
             for (u32 i = 0; i < model_get_num_materials(model->model); i++) {
-                if (igTreeNode_Ptr(&materials[i], materials[i].name)) {
-                    igCheckbox("use color", &materials[i].use_color);
-                    igColorEdit3("color", materials[i].color, ImGuiColorEditFlags_None);
+                if (igTreeNode_Ptr(&materials[i], materials[i]->name)) {
+                    igCheckbox("use color", &materials[i]->use_color);
+                    igColorEdit3("color", materials[i]->color, ImGuiColorEditFlags_None);
 
                     igTreePop();
                 }

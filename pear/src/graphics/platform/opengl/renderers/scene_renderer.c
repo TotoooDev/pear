@@ -66,22 +66,22 @@ void scenerenderer_set_matrices(scene_renderer_t* renderer, mat4 model_matrix) {
     ubo_set_mat4(renderer->ubo_matrices, 3, model_transpose_inverse);
 }
 
-void scenerenderer_set_material(shader_t* shader, material_t material) {
+void scenerenderer_set_material(shader_t* shader, material_t* material) {
     shader_use(shader);
     shader_set_i32(shader, RENDERER_DIFFUSE_TEXTURE_INDEX, "u_material.diffuse");
     shader_set_i32(shader, RENDERER_SPECULAR_TEXTURE_INDEX, "u_material.specular");
-    shader_set_vec3(shader, material.color, "u_material.color");
-    shader_set_f32(shader, material.shininess, "u_material.shininess");
+    shader_set_vec3(shader, material->color, "u_material.color");
+    shader_set_f32(shader, material->shininess, "u_material.shininess");
 
-    if (material.diffuse != NULL) {
-        texture_use(material.diffuse, RENDERER_DIFFUSE_TEXTURE_INDEX);
+    if (material->diffuse != NULL) {
+        texture_use(material->diffuse, RENDERER_DIFFUSE_TEXTURE_INDEX);
     }
-    if (material.specular != NULL) {
-        texture_use(material.specular, RENDERER_SPECULAR_TEXTURE_INDEX);
+    if (material->specular != NULL) {
+        texture_use(material->specular, RENDERER_SPECULAR_TEXTURE_INDEX);
     }
 }
 
-void scenerenderer_draw_mesh(scene_renderer_t* renderer, shader_t* shader, mesh_t* mesh, material_t material, mat4 model_matrix) {
+void scenerenderer_draw_mesh(scene_renderer_t* renderer, shader_t* shader, mesh_t* mesh, material_t* material, mat4 model_matrix) {
     scenerenderer_set_matrices(renderer, model_matrix);
     scenerenderer_set_material(shader, material);
     
@@ -149,10 +149,10 @@ void scenerenderer_draw_scene(scene_renderer_t* renderer, array_t* models, array
 
         for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
             mesh_t* mesh = model_get_meshes(model->model)[j];
-            material_t material = model_get_materials(model->model)[mesh_get_material_index(mesh)];
+            material_t* material = model_get_materials(model->model)[mesh_get_material_index(mesh)];
 
             shader_t* shader = NULL;
-            if (material.use_color || material.diffuse == NULL) {
+            if (material->use_color || material->diffuse == NULL) {
                 shader = renderer->shader_color;
             }
             else {
