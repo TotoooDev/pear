@@ -1,4 +1,5 @@
 #include <script/script.h>
+#include <script/vec3.h>
 #include <script/log.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
@@ -91,12 +92,12 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
 
     if (type == EVENT_TYPE_MOUSE_MOVED) {
         mouse_moved_event_t* event = (mouse_moved_event_t*)e;
-        vec2 relative = { event->rel_x, event->rel_y };
-        vec2 pos = { event->x, event->y };
+        vec3 relative = { event->rel_x, event->rel_y, 0.0f };
+        vec3 pos = { event->x, event->y, 0.0f };
 
         script_begin_table(script, "mouse");
-            script_set_vec2(script, pos, "pos");
-            script_set_vec2(script, relative, "relative");
+            script_set_vec3(script, pos, "pos");
+            script_set_vec3(script, relative, "relative");
         script_end_table(script);
 
         lua_getglobal(script->state, "on_mouse_movement");
@@ -105,6 +106,33 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
         }
         else {
             lua_pop(script->state, -1);
+        }
+    }
+}
+
+void script_dump_stack_state(lua_State* l) {
+    PEAR_INFO("stack dump!");
+
+    int i;
+    int top = lua_gettop(l);
+    for (i = 1; i <= top; i++) {  /* repeat for each level */
+        int t = lua_type(l, i);
+        switch (t) {
+        case LUA_TSTRING:  /* strings */
+            PEAR_INFO("  `%s'", lua_tostring(l, i));
+            break;
+    
+        case LUA_TBOOLEAN:  /* booleans */
+            PEAR_INFO("  %s", lua_toboolean(l, i) ? "true" : "false");
+            break;
+    
+        case LUA_TNUMBER:  /* numbers */
+            PEAR_INFO("  %g", lua_tonumber(l, i));
+            break;
+    
+        default:  /* other values */
+            PEAR_INFO("  %s", lua_typename(l, t));
+            break;
         }
     }
 }
@@ -120,6 +148,8 @@ script_t* script_new(const char* script_str) {
 
     script->state = luaL_newstate();
     luaL_openlibs(script->state);
+
+    script_init_vec3(script);
 
     if (luaL_dostring(script->state, script_str) != LUA_OK) {
         PEAR_ERROR_LUA();
@@ -140,8 +170,8 @@ script_t* script_new(const char* script_str) {
     script_end_table(script);
 
     script_begin_table(script, "mouse");
-        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "pos");
-        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "relative");
+        script_set_vec3(script, (vec3){ 0.0f, 0.0f, 0.0f }, "pos");
+        script_set_vec3(script, (vec3){ 0.0f, 0.0f, 0.0f }, "relative");
     script_end_table(script);
 
     #ifdef PEAR_ENABLE_EDITOR
@@ -192,8 +222,7 @@ void script_on_update(script_t* script, f64 timestep) {
     }
 
     script_begin_table(script, "mouse");
-        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "pos");
-        script_set_vec2(script, (vec2){ 0.0f, 0.0f }, "relative");
+        script_set_vec3(script, (vec3){ 0.0f, 0.0f, 0.0f }, "relative");
     script_end_table(script);
 }
 
@@ -223,19 +252,35 @@ void script_set_function(script_t* script, lua_CFunction function, const char* n
     PEAR_SET_VALUE(script, function, name, lua_pushcfunction);
 }
 
-void script_set_vec2(script_t* script, vec2 vec, const char* name) {
-    script_begin_table(script, name);
-        script_set_number(script, vec[0], "x");
-        script_set_number(script, vec[1], "y");
-    script_end_table(script);
-}
-
 void script_set_vec3(script_t* script, vec3 vec, const char* name) {
-    script_begin_table(script, name);
-        script_set_number(script, vec[0], "x");
-        script_set_number(script, vec[1], "y");
-        script_set_number(script, vec[2], "z");
-    script_end_table(script);
+    if (!script->in_table_creation) {
+        lua_getglobal(script->state, "pear");
+    }
+
+    lua_pushstring(script->state, name);
+
+    f32* udata;
+    
+    lua_getglobal(script->state, name);
+    if (!lua_isuserdata(script->state, -1)) {
+        lua_pop(script->state, 1);
+        udata = (f32*)lua_newuserdata(script->state, sizeof(vec3));
+        luaL_getmetatable(script->state, "pear.vec3");
+        lua_setmetatable(script->state, -2);
+    }
+    else {
+        udata = (f32*)lua_touserdata(script->state, -1);
+    }
+    
+    udata[0] = vec[0];
+    udata[1] = vec[1];
+    udata[2] = vec[2];
+    
+    lua_settable(script->state, -3);
+
+    if (!script->in_table_creation) {
+        lua_setglobal(script->state, "pear");
+    }
 }
 
 void script_begin_table(script_t* script, const char* name) {
@@ -275,19 +320,23 @@ bool script_get_bool(script_t* script, const char* name) {
     PEAR_GET_VALUE(script, name, bool, lua_toboolean);
 }
 
-void script_get_vec2(script_t* script, const char* name, vec2 dest) {
-    script_get_table(script, name);
-        dest[0] = script_get_number(script, "x");
-        dest[1] = script_get_number(script, "y");
-    script_end_table_read(script);
-}
-
 void script_get_vec3(script_t* script, const char* name, vec3 dest) {
-    script_get_table(script, name);
-        dest[0] = script_get_number(script, "x");
-        dest[1] = script_get_number(script, "y");
-        dest[2] = script_get_number(script, "z");
-    script_end_table_read(script);
+    if (!script->in_table_read) {
+        lua_getglobal(script->state, "pear");
+    }
+
+    lua_getfield(script->state, -1, name);
+    f32* value = luaL_checkudata(script->state, -1, "pear.vec3");
+    dest[0] = value[0];
+    dest[1] = value[1];
+    dest[2] = value[2];
+
+    if (script->in_table_read) {
+        lua_pop(script->state, 1);
+    }
+    else {
+        lua_pop(script->state, 2);
+    }
 }
 
 void script_get_table(script_t* script, const char* name) {
@@ -317,30 +366,11 @@ void script_end_table_read(script_t* script) {
 }
 
 void script_dump_stack(script_t* script) {
-    PEAR_INFO("stack dump!");
+    script_dump_stack_state(script->state);
+}
 
-    int i;
-    int top = lua_gettop(script->state);
-    for (i = 1; i <= top; i++) {  /* repeat for each level */
-        int t = lua_type(script->state, i);
-        switch (t) {
-        case LUA_TSTRING:  /* strings */
-            PEAR_INFO("  `%s'", lua_tostring(script->state, i));
-            break;
-    
-        case LUA_TBOOLEAN:  /* booleans */
-            PEAR_INFO("  %s", lua_toboolean(script->state, i) ? "true" : "false");
-            break;
-    
-        case LUA_TNUMBER:  /* numbers */
-            PEAR_INFO("  %g", lua_tonumber(script->state, i));
-            break;
-    
-        default:  /* other values */
-            PEAR_INFO("  %s", lua_typename(script->state, t));
-            break;
-        }
-    }
+lua_State* script_get_state(script_t* script) {
+    return script->state;
 }
 
 #ifdef PEAR_ENABLE_EDITOR

@@ -21,27 +21,19 @@ function on_update(timestep)
     end
 
     if keys.forward then
-        pear.transform.pos.x = pear.transform.pos.x + pear.camera.front.x * speed * timestep
-        pear.transform.pos.y = pear.transform.pos.y + pear.camera.front.y * speed * timestep
-        pear.transform.pos.z = pear.transform.pos.z + pear.camera.front.z * speed * timestep
+        pear.transform.pos = pear.transform.pos + pear.camera.front * speed * timestep
     end
 
     if keys.backward then
-        pear.transform.pos.x = pear.transform.pos.x - pear.camera.front.x * speed * timestep
-        pear.transform.pos.y = pear.transform.pos.y - pear.camera.front.y * speed * timestep
-        pear.transform.pos.z = pear.transform.pos.z - pear.camera.front.z * speed * timestep
+        pear.transform.pos = pear.transform.pos - pear.camera.front * speed * timestep
     end
 
     if keys.left then
-        pear.transform.pos.x = pear.transform.pos.x - pear.camera.right.x * speed * timestep
-        pear.transform.pos.y = pear.transform.pos.y - pear.camera.right.y * speed * timestep
-        pear.transform.pos.z = pear.transform.pos.z - pear.camera.right.z * speed * timestep
+        pear.transform.pos = pear.transform.pos - pear.camera.right * speed * timestep
     end
 
     if keys.right then
-        pear.transform.pos.x = pear.transform.pos.x + pear.camera.right.x * speed * timestep
-        pear.transform.pos.y = pear.transform.pos.y + pear.camera.right.y * speed * timestep
-        pear.transform.pos.z = pear.transform.pos.z + pear.camera.right.z * speed * timestep
+        pear.transform.pos = pear.transform.pos + pear.camera.right * speed * timestep
     end
 
     if keys.up then
