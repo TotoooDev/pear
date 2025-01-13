@@ -21,7 +21,8 @@ i32 script_vec3_index(lua_State* l) {
             lua_pushnumber(l, vec[2]);
         }
         else {
-            lua_pushnil(l);
+            luaL_getmetatable(l, "pear.vec3");
+            lua_getfield(l, -1, index_str);
         }
         break;
 
@@ -167,6 +168,16 @@ i32 script_vec3_dot(lua_State* l) {
     return 1;
 }
 
+i32 script_vec3_length(lua_State* l) {
+    f32* a = luaL_checkudata(l, 1, "pear.vec3");
+    luaL_argcheck(l, a != NULL, 1, "'vec3' expected");
+
+    f32 length = glm_vec3_norm(a);
+    lua_pushnumber(l, length);
+
+    return 1;
+}
+
 void script_vec3_set_metamethod(lua_State* l, const char* name, lua_CFunction func) {
     lua_pushstring(l, name);
     lua_pushcfunction(l, func);
@@ -185,6 +196,7 @@ void script_init_vec3(script_t* script) {
     script_vec3_set_metamethod(l, "__sub", script_vec3_sub);
     script_vec3_set_metamethod(l, "__mul", script_vec3_mul);
     script_vec3_set_metamethod(l, "dot", script_vec3_dot);
+    script_vec3_set_metamethod(l, "length", script_vec3_length);
 
     lua_setglobal(l, "vec3");
 }
