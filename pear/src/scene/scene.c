@@ -93,7 +93,7 @@ void scene_update_script_component(scene_t* scene, entity_t* entity, f32 timeste
 void scene_update_lua_script_component(scene_t* scene, entity_t* entity, f32 timestep) {
     lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
     
-    if (!script->run) {
+    if (!script->run || script->script == NULL) {
         return;
     }
 

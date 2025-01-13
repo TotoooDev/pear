@@ -1,6 +1,7 @@
 #ifdef PEAR_ENABLE_EDITOR
 
 #include <graphics/editor/entity_inspector.h>
+#include <graphics/editor/tinyfiledialogs/tinyfiledialogs.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
@@ -8,6 +9,7 @@
 #include <scene/components/script.h>
 #include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
+#include <loaders/model.h>
 #include <string.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
@@ -90,21 +92,39 @@ void editor_model(entity_t* entity) {
     if (igTreeNodeEx_Str("model", ImGuiTreeNodeFlags_DefaultOpen)) {
         model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
 
-        igCheckbox("draw", &model->draw);
-        igCheckbox("shadow caster", &model->shadow_caster);
+        if (model->model == NULL) {
+            igText("no model loaded");
+        }
 
-        if (igTreeNode_Str("materials")) {
-            material_t** materials = model_get_materials(model->model);
-            for (u32 i = 0; i < model_get_num_materials(model->model); i++) {
-                if (igTreeNode_Ptr(&materials[i], materials[i]->name)) {
-                    igCheckbox("use color", &materials[i]->use_color);
-                    igColorEdit3("color", materials[i]->color, ImGuiColorEditFlags_None);
-
-                    igTreePop();
-                }
+        if (igButton("choose model (gltf only)", (ImVec2){ 0.0f, 0.0f })) {
+            if (model->model != NULL) {
+                model_delete(model->model);
             }
 
-            igTreePop();
+            const char* filters[] = { "*.gltf", "*.glb" };
+            char* path = tinyfd_openFileDialog("choose model", "", 2, filters, "gltf files", 0);
+            model->model = loader_load_gltf(path);
+        }
+
+        igSeparator();
+
+        if (model->model != NULL) {
+            igCheckbox("draw", &model->draw);
+            igCheckbox("shadow caster", &model->shadow_caster);
+
+            if (igTreeNode_Str("materials")) {
+                material_t** materials = model_get_materials(model->model);
+                for (u32 i = 0; i < model_get_num_materials(model->model); i++) {
+                    if (igTreeNode_Ptr(&materials[i], materials[i]->name)) {
+                        igCheckbox("use color", &materials[i]->use_color);
+                        igColorEdit3("color", materials[i]->color, ImGuiColorEditFlags_None);
+
+                        igTreePop();
+                    }
+                }
+
+                igTreePop();
+            }
         }
 
         igTreePop();
@@ -128,13 +148,31 @@ void editor_lua_script(entity_t* entity) {
     if (igTreeNodeEx_Str("lua script", ImGuiTreeNodeFlags_DefaultOpen)) {
         lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
 
-        igCheckbox("run", &script->run);
-        if (igButton("restart script", (ImVec2){ 0.0f, 0.0f })) {
-            script->has_started = false;
+        if (script->script == NULL) {
+            igText("no script loaded");
         }
 
-        if (script->run) {
-            script_on_editor(script->script);
+        if (igButton("choose lua script", (ImVec2){ 0.0f ,0.0f })) {
+            if (script->script != NULL) {
+                script_delete(script->script);
+            }
+
+            const char* filters[] = { "*.lua" };
+            char* path = tinyfd_openFileDialog("choose lua script", "", 1, filters, "lua files", 0);
+            script->script = script_new_from_file(path);
+        }
+
+        igSeparator();
+
+        if (script->script != NULL) {
+            igCheckbox("run", &script->run);
+            if (igButton("restart script", (ImVec2){ 0.0f, 0.0f })) {
+                script->has_started = false;
+            }
+
+            if (script->run) {
+                script_on_editor(script->script);
+            }
         }
 
         igTreePop();

@@ -210,7 +210,7 @@ void renderer_handle_model(renderer_t* renderer, entity_t* entity) {
     transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
     model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
 
-    if (!model->draw) {
+    if (!model->draw || model->model == NULL) {
         return;
     }
 
