@@ -3,6 +3,8 @@
 #include <script/vendor/lauxlib.h>
 #include <string.h>
 
+#include <core/log.h>
+
 i32 script_vec3_index(lua_State* l) {
     f32* vec = luaL_checkudata(l, 1, "pear.vec3");
     luaL_argcheck(l, vec != NULL, 1, "'vec3' expected");
@@ -156,6 +158,34 @@ i32 script_vec3_mul(lua_State* l) {
     return 1;
 }
 
+i32 script_vec3_new(lua_State* l) {
+    vec3 init_value = { 0.0f, 0.0f, 0.0f };
+    if (lua_gettop(l) == 1) {
+        f32 value = luaL_checknumber(l, 1);
+        init_value[0] = value;
+        init_value[1] = value;
+        init_value[2] = value;
+    }
+    if (lua_gettop(l) == 3) {
+        f32 x = luaL_checknumber(l, 1);
+        f32 y = luaL_checknumber(l, 2);
+        f32 z = luaL_checknumber(l, 3);
+        init_value[0] = x;
+        init_value[1] = y;
+        init_value[2] = z;
+    }
+
+    f32* res = (f32*)lua_newuserdata(l, sizeof(vec3));
+    luaL_getmetatable(l, "pear.vec3");
+    lua_setmetatable(l, -2);
+
+    res[0] = init_value[0];
+    res[1] = init_value[1];
+    res[2] = init_value[2];
+
+    return 1;
+}
+
 i32 script_vec3_dot(lua_State* l) {
     f32* a = luaL_checkudata(l, 1, "pear.vec3");
     luaL_argcheck(l, a != NULL, 1, "'vec3' expected");
@@ -187,6 +217,9 @@ void script_vec3_set_metamethod(lua_State* l, const char* name, lua_CFunction fu
 void script_init_vec3(script_t* script) {
     lua_State* l = script_get_state(script);
 
+    lua_getglobal(l, "pear");
+    lua_pushstring(l, "vec3");
+
     luaL_newmetatable(l, "pear.vec3");
 
     script_vec3_set_metamethod(l, "__index", script_vec3_index);
@@ -195,8 +228,10 @@ void script_init_vec3(script_t* script) {
     script_vec3_set_metamethod(l, "__add", script_vec3_add);
     script_vec3_set_metamethod(l, "__sub", script_vec3_sub);
     script_vec3_set_metamethod(l, "__mul", script_vec3_mul);
+    script_vec3_set_metamethod(l, "new", script_vec3_new);
     script_vec3_set_metamethod(l, "dot", script_vec3_dot);
     script_vec3_set_metamethod(l, "length", script_vec3_length);
 
-    lua_setglobal(l, "vec3");
+    lua_settable(l, -3);
+    lua_setglobal(l, "pear");
 }

@@ -149,8 +149,6 @@ script_t* script_new(const char* script_str) {
     script->state = luaL_newstate();
     luaL_openlibs(script->state);
 
-    script_init_vec3(script);
-
     if (luaL_dostring(script->state, script_str) != LUA_OK) {
         PEAR_ERROR_LUA();
         script_delete(script);
@@ -159,6 +157,8 @@ script_t* script_new(const char* script_str) {
 
     lua_newtable(script->state);
     lua_setglobal(script->state, "pear");
+
+    script_init_vec3(script);
 
     script_begin_table(script, "log");
         script_set_function(script, script_log_info, "info");
