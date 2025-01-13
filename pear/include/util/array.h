@@ -15,6 +15,7 @@ void array_clear(array_t* array);
 
 void* array_get(array_t* array, u32 index);
 u32 array_get_index(array_t* array, void* data);
+void** array_get_data(array_t* array);
 
 u32 array_get_size(array_t* array);
 u32 array_get_length(array_t* array);

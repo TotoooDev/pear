@@ -67,6 +67,10 @@ u32 array_get_index(array_t* array, void* data) {
     return UINT32_MAX;
 }
 
+void** array_get_data(array_t* array) {
+    return array->data;
+}
+
 void* array_get(array_t* array, u32 index) {
     return array->data[index];
 }
