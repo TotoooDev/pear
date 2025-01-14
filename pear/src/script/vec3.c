@@ -304,6 +304,20 @@ i32 script_vec3_dot(lua_State* l) {
     return 1;
 }
 
+i32 script_vec3_cross(lua_State* l) {
+    f32* a = luaL_checkudata(l, 1, "pear.vec3");
+    luaL_argcheck(l, a != NULL, 1, "'vec3' expected");
+    f32* b = luaL_checkudata(l, 2, "pear.vec3");
+    luaL_argcheck(l, b != NULL, 2, "'vec3' expected");
+
+    f32* res = (f32*)lua_newuserdata(l, sizeof(vec3));
+    luaL_getmetatable(l, "pear.vec3");
+    lua_setmetatable(l, -2);
+    glm_vec3_cross(a, b, res);
+
+    return 1;
+}
+
 i32 script_vec3_length(lua_State* l) {
     f32* a = luaL_checkudata(l, 1, "pear.vec3");
     luaL_argcheck(l, a != NULL, 1, "'vec3' expected");
@@ -341,6 +355,7 @@ void script_init_vec3(script_t* script) {
     script_vec3_set_metamethod(l, "__eq", script_vec3_eq);
     script_vec3_set_metamethod(l, "new", script_vec3_new);
     script_vec3_set_metamethod(l, "dot", script_vec3_dot);
+    script_vec3_set_metamethod(l, "cross", script_vec3_cross);
     script_vec3_set_metamethod(l, "length", script_vec3_length);
 
     lua_settable(l, -3);
