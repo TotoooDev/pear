@@ -15,8 +15,8 @@
 #define CIMGUI_USE_GLFW
 #define CIMGUI_USE_OPENGL3
 #include <graphics/editor/vendor/cimgui/cimgui.h>
-#include <graphics/editor/cimgui/cimconfig.h>
-#include <graphics/platform/opengl/editor/cimgui/cimgui_impl.h>
+#include <graphics/editor/vendor/cimgui/cimconfig.h>
+#include <graphics/platform/opengl/editor/vendor/cimgui/cimgui_impl.h>
 
 static bool editor_show_menu_bar = true;
 static bool editor_show_general_info = true;
