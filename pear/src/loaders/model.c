@@ -169,7 +169,7 @@ mesh_t* loader_handle_mesh(cgltf_mesh* mesh, array_t* materials, array_t* loaded
     }
 }
 
-void loader_handle_node(cgltf_node* node, array_t* meshes, array_t* loaded_meshes, array_t* materials, array_t* loaded_materials, char* directory) {
+void loader_handle_node(cgltf_node* node, array_t* meshes, array_t* materials, array_t* loaded_materials, char* directory) {
     mat4 matrix;
     cgltf_float gltf_matrix[16];
     cgltf_node_transform_world(node, gltf_matrix);
@@ -211,13 +211,12 @@ model_t* loader_load_gltf(const char* filename) {
 
     array_t* meshes = array_new(10);
     array_t* materials = array_new(10);
-    array_t* loaded_meshes = array_new(10);
     array_t* loaded_materials = array_new(5);
 
     for (u32 i = 0; i < data->scenes_count; i++) {
         cgltf_scene scene = data->scenes[i];
         for (u32 j = 0; j < data->nodes_count; j++) {
-            loader_handle_node(&data->nodes[j], meshes, loaded_meshes, materials, loaded_materials, directory);
+            loader_handle_node(&data->nodes[j], meshes, materials, loaded_materials, directory);
         }
     }
 
