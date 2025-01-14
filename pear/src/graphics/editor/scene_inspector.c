@@ -4,7 +4,7 @@
 #include <graphics/editor/entity_inspector.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <graphics/editor/cimgui/cimgui.h>
+#include <graphics/editor/vendor/cimgui/cimgui.h>
 
 static scene_t* editor_scene = NULL;
 static entity_t* editor_selected_entity = NULL;

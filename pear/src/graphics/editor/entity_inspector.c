@@ -1,7 +1,7 @@
 #ifdef PEAR_ENABLE_EDITOR
 
 #include <graphics/editor/entity_inspector.h>
-#include <graphics/editor/tinyfiledialogs/tinyfiledialogs.h>
+#include <graphics/editor/vendor/tinyfiledialogs/tinyfiledialogs.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
@@ -13,7 +13,7 @@
 #include <string.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <graphics/editor/cimgui/cimgui.h>
+#include <graphics/editor/vendor/cimgui/cimgui.h>
 
 static entity_t* editor_entity = NULL;
 

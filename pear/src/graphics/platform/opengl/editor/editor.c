@@ -14,7 +14,7 @@
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #define CIMGUI_USE_GLFW
 #define CIMGUI_USE_OPENGL3
-#include <graphics/editor/cimgui/cimgui.h>
+#include <graphics/editor/vendor/cimgui/cimgui.h>
 #include <graphics/editor/cimgui/cimconfig.h>
 #include <graphics/platform/opengl/editor/cimgui/cimgui_impl.h>
 

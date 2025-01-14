@@ -6,7 +6,7 @@
 #include <core/app.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <graphics/editor/cimgui/cimgui.h>
+#include <graphics/editor/vendor/cimgui/cimgui.h>
 
 static texture_t* editor_shadow_map = NULL;
 
