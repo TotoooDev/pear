@@ -158,6 +158,86 @@ i32 script_vec3_mul(lua_State* l) {
     return 1;
 }
 
+i32 script_vec3_div(lua_State* l) {
+    f32* a = luaL_checkudata(l, 1, "pear.vec3");
+    luaL_argcheck(l, a != NULL, 1, "'vec3' expected");
+    f32 b = luaL_checknumber(l, 2);
+
+    f32* res = (f32*)lua_newuserdata(l, sizeof(vec3));
+    luaL_getmetatable(l, "pear.vec3");
+    lua_setmetatable(l, -2);
+    res[0] = a[0] / b;
+    res[1] = a[1] / b;
+    res[2] = a[2] / b;
+
+    return 1;
+}
+
+i32 script_vec3_unm(lua_State* l) {
+    f32* a = luaL_checkudata(l, 1, "pear.vec3");
+    luaL_argcheck(l, a != NULL, 1, "'vec3' expected");
+
+    f32* res = (f32*)lua_newuserdata(l, sizeof(vec3));
+    luaL_getmetatable(l, "pear.vec3");
+    lua_setmetatable(l, -2);
+    res[0] = -a[0];
+    res[1] = -a[1];
+    res[2] = -a[2];
+
+    return 1;
+}
+
+i32 script_vec3_concat(lua_State* l) {
+    f32* vec;
+
+    switch (lua_type(l, 1)) {
+    case LUA_TSTRING:
+        const char* str = luaL_checkstring(l, 1);
+        vec = luaL_checkudata(l, 2, "pear.vec3");
+        luaL_argcheck(l, vec != NULL, 2, "'vec3' expected");
+        lua_pushfstring(l, "%s{ %f, %f, %f }", str, vec[0], vec[1] ,vec[2]);
+        break;
+
+    case LUA_TNUMBER:
+        f32 number = luaL_checknumber(l, 1);
+        vec = luaL_checkudata(l, 2, "pear.vec3");
+        luaL_argcheck(l, vec != NULL, 2, "'vec3' expected");
+        lua_pushfstring(l, "%f{ %f, %f, %f }", number, vec[0], vec[1] ,vec[2]);
+        break;
+
+    case LUA_TUSERDATA:
+        vec = luaL_checkudata(l, 1, "pear.vec3");
+        luaL_argcheck(l, vec != NULL, 1, "'vec3' expected");
+
+        switch (lua_type(l, 2)) {
+        case LUA_TSTRING:
+            const char* str = luaL_checkstring(l, 2);
+            lua_pushfstring(l, "{ %f, %f, %f }%s", str, vec[0], vec[1] ,vec[2]);
+            break;
+
+        case LUA_TNUMBER:
+            f32 number = luaL_checknumber(l, 2);
+            lua_pushfstring(l, "{ %f, %f, %f }%f", vec[0], vec[1] ,vec[2], number);
+            break;
+        }
+        break;
+    }
+
+    return 1;
+}
+
+i32 script_vec3_eq(lua_State* l) {
+    f32* a = luaL_checkudata(l, 1, "pear.vec3");
+    luaL_argcheck(l, a != NULL, 1, "'vec3' expected");
+    f32* b = luaL_checkudata(l, 2, "pear.vec3");
+    luaL_argcheck(l, b != NULL, 2, "'vec3' expected");
+
+    bool eq = a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
+    lua_pushboolean(l, eq);
+
+    return 1;
+}
+
 i32 script_vec3_new(lua_State* l) {
     vec3 init_value = { 0.0f, 0.0f, 0.0f };
     if (lua_gettop(l) == 1) {
@@ -228,6 +308,11 @@ void script_init_vec3(script_t* script) {
     script_vec3_set_metamethod(l, "__add", script_vec3_add);
     script_vec3_set_metamethod(l, "__sub", script_vec3_sub);
     script_vec3_set_metamethod(l, "__mul", script_vec3_mul);
+    script_vec3_set_metamethod(l, "__div", script_vec3_div);
+    script_vec3_set_metamethod(l, "__unm", script_vec3_unm);
+    script_vec3_set_metamethod(l, "__concat", script_vec3_concat);
+    script_vec3_set_metamethod(l, "__len", script_vec3_length);
+    script_vec3_set_metamethod(l, "__eq", script_vec3_eq);
     script_vec3_set_metamethod(l, "new", script_vec3_new);
     script_vec3_set_metamethod(l, "dot", script_vec3_dot);
     script_vec3_set_metamethod(l, "length", script_vec3_length);
