@@ -209,18 +209,27 @@ model_t* loader_load_gltf(const char* filename) {
         directory[directory_index] = '\0';
     }
 
-    array_t* meshes = array_new(10);
-    array_t* materials = array_new(10);
-    array_t* loaded_materials = array_new(5);
+    array_t* meshes_array = array_new(10);
+    array_t* materials_array = array_new(10);
+    array_t* loaded_materials_array = array_new(5);
 
     for (u32 i = 0; i < data->scenes_count; i++) {
         cgltf_scene scene = data->scenes[i];
         for (u32 j = 0; j < data->nodes_count; j++) {
-            loader_handle_node(&data->nodes[j], meshes, materials, loaded_materials, directory);
+            loader_handle_node(&data->nodes[j], meshes_array, materials_array, loaded_materials_array, directory);
         }
     }
 
-    model_t* model = model_new((mesh_t**)array_get_data(meshes), (material_t**)array_get_data(materials), array_get_length(meshes), array_get_length(materials));
+    mesh_t** meshes = PEAR_MALLOC(sizeof(mesh_t*) * array_get_length(meshes_array));
+    material_t** materials = PEAR_MALLOC(sizeof(material_t*) * array_get_length(materials_array));
+    memcpy(meshes, array_get_data(meshes_array), sizeof(mesh_t*) * array_get_length(meshes_array));
+    memcpy(materials, array_get_data(materials_array), sizeof(material_t*) * array_get_length(materials_array));
+
+    model_t* model = model_new(meshes, materials, array_get_length(meshes_array), array_get_length(materials_array));
+
+    array_delete(meshes_array);
+    array_delete(materials_array);
+    array_delete(loaded_materials_array);
 
     cgltf_free(data);
 
