@@ -39,6 +39,8 @@ void app_update_timestep() {
 void app_init() {
     app = (app_t*)PEAR_MALLOC(sizeof(app_t));
 
+    event_init();
+
     app->is_running = true;
     app->timestep = 0.0f;
     app->last_time = 0.0f;
@@ -65,6 +67,7 @@ void app_stop() {
     renderer_delete(app->renderer);
     window_delete(app->window);
     scene_delete(app->scene);
+    event_free();
     PEAR_FREE(app);
 }
 
