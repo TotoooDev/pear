@@ -3,6 +3,7 @@ bin/
 bin-intermediate/
 **/assets/*
 !pear/assets/
+!pear/assets/shaders
 !pear-project/assets/scripts/
 
 Makefile
