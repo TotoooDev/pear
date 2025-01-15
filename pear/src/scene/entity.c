@@ -1,6 +1,7 @@
 #include <scene/entity.h>
 #include <scene/components/transform.h>
 #include <scene/components/model.h>
+#include <scene/components/billboard.h>
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
 #include <scene/components/script.h>
@@ -79,6 +80,15 @@ void* entity_add_component(entity_t* entity, entity_component_t component) {
         entity->components[(u32)component] = model;
         break;
 
+    case ENTITY_COMPONENT_BILLBOARD:
+        billboard_component_t* billboard = (billboard_component_t*)PEAR_MALLOC(sizeof(billboard_component_t));
+        billboard->texture = NULL;
+        billboard->on_top = false;
+        billboard->apply_perspective = false;
+        billboard->draw = true;
+        entity->components[(u32)component] = billboard;
+        break;
+
     case ENTITY_COMPONENT_CAMERA:
         camera_component_t* camera = (camera_component_t*)PEAR_MALLOC(sizeof(camera_component_t));
         camera->use = true;
@@ -128,6 +138,11 @@ void entity_remove_component(entity_t* entity, entity_component_t component) {
     case ENTITY_COMPONENT_MODEL:
         model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
         model_delete(model->model);
+        break;
+
+    case ENTITY_COMPONENT_BILLBOARD:
+        billboard_component_t* billboard = (billboard_component_t*)entity_get_component(entity, ENTITY_COMPONENT_BILLBOARD);
+        texture_delete(billboard->texture);
         break;
 
     case ENTITY_COMPONENT_LUA_SCRIPT:
