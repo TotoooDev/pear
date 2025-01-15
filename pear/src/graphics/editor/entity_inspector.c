@@ -21,6 +21,7 @@ void editor_component_combo() {
     const char* items[] = {
         "transform",
         "model",
+        "billboard",
         "camera",
         "script",
         "lua script",
@@ -29,7 +30,7 @@ void editor_component_combo() {
     };
 
     static i32 current_item = -1;
-    igCombo_Str_arr("component", &current_item, items, 7, 64);
+    igCombo_Str_arr("component", &current_item, items, 8, 64);
     if (igButton("add component", (ImVec2){ 0.0f, 0.0f })) {
         entity_add_component(editor_entity, (entity_component_t)current_item);
         current_item = -1;
@@ -159,7 +160,7 @@ void editor_lua_script(entity_t* entity) {
 
             const char* filters[] = { "*.lua" };
             char* path = tinyfd_openFileDialog("choose lua script", "", 1, filters, "lua files", 0);
-            script->script = script_new_from_file(path);
+            script->script = script_new_from_file(path, entity);
         }
 
         igSeparator();

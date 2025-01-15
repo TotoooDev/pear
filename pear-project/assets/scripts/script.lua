@@ -6,6 +6,8 @@ function on_start()
     pear.transform.scale.x = 50.0
     pear.transform.scale.y = 50.0
     pear.transform.scale.z = 50.0
+
+    pear.component.add(pear.component.LIGHT)
 end
 
 function on_update(timestep)
@@ -19,4 +21,10 @@ end
 
 function on_destroy()
     pear.log.info("on destroy!")
+end
+
+function on_editor()
+    if pear.editor.button("remove component") then
+        pear.component.remove(pear.component.LIGHT)
+    end
 end

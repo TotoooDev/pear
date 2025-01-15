@@ -1,6 +1,7 @@
 #include <script/script.h>
 #include <script/window.h>
 #include <script/vec3.h>
+#include <script/component.h>
 #include <script/log.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
@@ -138,7 +139,7 @@ void script_dump_stack_state(lua_State* l) {
     }
 }
 
-script_t* script_new(const char* script_str) {
+script_t* script_new(const char* script_str, entity_t* entity) {
     script_t* script = (script_t*)PEAR_MALLOC(sizeof(script_t));
 
     script->in_table_creation = false;
@@ -159,7 +160,10 @@ script_t* script_new(const char* script_str) {
     lua_newtable(script->state);
     lua_setglobal(script->state, "pear");
 
+    script_set_pointer(script, entity, "entity");
+
     script_init_vec3(script);
+    script_init_component(script);
 
     script_begin_table(script, "log");
         script_set_function(script, script_log_info, "info");
@@ -189,9 +193,9 @@ script_t* script_new(const char* script_str) {
     return script;
 }
 
-script_t* script_new_from_file(const char* filename) {
+script_t* script_new_from_file(const char* filename, entity_t* entity) {
     char* script_str = filesystem_read_file(filename);
-    script_t* script = script_new(script_str);
+    script_t* script = script_new(script_str, entity);
     PEAR_FREE(script_str);
     return script;
 }
@@ -253,6 +257,10 @@ void script_set_bool(script_t* script, bool boolean, const char* name) {
 
 void script_set_function(script_t* script, lua_CFunction function, const char* name) {
     PEAR_SET_VALUE(script, function, name, lua_pushcfunction);
+}
+
+void script_set_pointer(script_t* script, void* pointer, const char* name) {
+    PEAR_SET_VALUE(script, pointer, name, lua_pushlightuserdata);
 }
 
 void script_set_vec3(script_t* script, vec3 vec, const char* name) {
@@ -323,6 +331,10 @@ bool script_get_bool(script_t* script, const char* name) {
     PEAR_GET_VALUE(script, name, bool, lua_toboolean);
 }
 
+void* script_get_pointer(script_t* script, const char* name) {
+    PEAR_GET_VALUE(script, name, void*, lua_touserdata);
+}
+
 void script_get_vec3(script_t* script, const char* name, vec3 dest) {
     if (!script->in_table_read) {
         lua_getglobal(script->state, "pear");
@@ -380,6 +392,13 @@ lua_State* script_get_state(script_t* script) {
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <graphics/editor/vendor/cimgui/cimgui.h>
 
+i32 script_button_item(lua_State* l) {
+    const char* label = lua_tostring(l, 1);
+    bool pressed = igButton(label, (ImVec2){ 0.0f, 0.0f });
+    lua_pushboolean(l, pressed);
+    return 1;
+}
+
 i32 script_checkbox_item(lua_State* l) {
     const char* label = lua_tostring(l, 1);
     bool value = lua_toboolean(l, 2);
@@ -402,6 +421,7 @@ i32 script_drag_number_item(lua_State* l) {
 void script_init_editor(script_t* script) {
     script_begin_table(script, "editor");
         script_set_bool(script, true, "enabled");
+        script_set_function(script, script_button_item, "button");
         script_set_function(script, script_checkbox_item, "checkbox");
         script_set_function(script, script_drag_number_item, "drag_number");
     script_end_table(script);
