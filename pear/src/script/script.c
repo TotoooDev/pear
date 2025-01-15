@@ -202,7 +202,7 @@ script_t* script_new_from_file(const char* filename, entity_t* entity) {
 
 void script_delete(script_t* script) {
     lua_close(script->state);
-    event_unsubscribe(script_on_event);
+    event_unsubscribe(script_on_event, script);
     PEAR_FREE(script);
 }
 

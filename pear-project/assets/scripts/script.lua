@@ -6,8 +6,6 @@ function on_start()
     pear.transform.scale.x = 50.0
     pear.transform.scale.y = 50.0
     pear.transform.scale.z = 50.0
-
-    pear.component.add(pear.component.LIGHT)
 end
 
 function on_update(timestep)

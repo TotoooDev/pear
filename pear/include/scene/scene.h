@@ -16,4 +16,9 @@ void scene_update(scene_t* scene, f32 timestep);
 
 array_t* scene_get_entities(scene_t* scene);
 
+#ifdef PEAR_ENABLE_EDITOR
+void scene_setup_editor_scene(scene_t* scene);
+void scene_display_component_billboards(scene_t* scene, bool display);
+#endif
+
 #endif

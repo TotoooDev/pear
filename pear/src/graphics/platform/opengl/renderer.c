@@ -381,9 +381,11 @@ void renderer_delete(renderer_t* renderer) {
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
     array_clear(renderer->lights);
     array_clear(renderer->models);
+    array_clear(renderer->billboards);
     array_clear(renderer->skyboxes);
     array_clear(renderer->light_transforms);
     array_clear(renderer->model_transforms);
+    array_clear(renderer->billboard_transforms);
 
     framebuffer_use(renderer->shadow_framebuffer);
     shadowrenderer_clear(renderer->shadow_renderer);

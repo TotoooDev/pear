@@ -26,10 +26,13 @@ void event_subscribe(event_function_t function, void* user_data) {
     array_add(event_user_datas, user_data);
 }
 
-void event_unsubscribe(event_function_t function) {
-    u32 index = array_get_index(event_functions, function);
-    array_remove_index(event_functions, index);
-    array_remove_index(event_user_datas, index);
+void event_unsubscribe(event_function_t function, void* user_data) {
+    for (u32 i = 0; i < array_get_length(event_functions); i++) {
+        if (array_get(event_functions, i) == function && array_get(event_user_datas, i) == user_data) {
+            array_remove_index(event_functions, i);
+            array_remove_index(event_user_datas, i);
+        }
+    }
 }
 
 void event_send(event_type_t type, void* event) {
