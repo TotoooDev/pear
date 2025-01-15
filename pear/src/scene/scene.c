@@ -10,11 +10,6 @@
 #include <core/alloc.h>
 #include <stdarg.h>
 
-#ifdef PEAR_ENABLE_EDITOR
-#include <scene/components/billboard.h>
-#include <loaders/image.h>
-#endif
-
 #define SCENE_NUM_MAX_ENTITIES 512
 
 typedef struct scene_t {
@@ -140,21 +135,6 @@ entity_t* scene_add_entity(scene_t* scene, const char* name, ...) {
     scene->next_entity_id++;
     
     va_end(args);
-
-    #ifdef PEAR_ENABLE_EDITOR
-        if (!entity_has_component(entity, ENTITY_COMPONENT_BILLBOARD)) {
-            if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA)) {
-
-            }
-            if (entity_has_component(entity, ENTITY_COMPONENT_LIGHT)) {
-                image_t* image = loader_load_image("editor/light_bulb.png");
-                texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR);
-                image_delete(image);
-                billboard_component_t* billboard = entity_add_component(entity, ENTITY_COMPONENT_BILLBOARD);
-                billboard->texture = texture;
-            }
-        }
-    #endif
     
     array_add(scene->entities, entity);
     return entity;
