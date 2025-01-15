@@ -1,4 +1,5 @@
 #include <script/script.h>
+#include <script/window.h>
 #include <script/vec3.h>
 #include <script/log.h>
 #include <event/event_dispatcher.h>
@@ -166,7 +167,8 @@ script_t* script_new(const char* script_str) {
         script_set_function(script, script_log_error, "error");
     script_end_table(script);
 
-    script_begin_table(script, "key");
+    script_begin_table(script, "window");
+        script_set_function(script, script_window_lock_mouse, "lock_mouse");
     script_end_table(script);
 
     script_begin_table(script, "mouse");

@@ -97,6 +97,7 @@ function on_key_release(key)
 
     if key == "PEAR_KEY_LEFT_ALT" then
         move_camera = not move_camera
+        pear.window.lock_mouse(move_camera);
     end
 end
 

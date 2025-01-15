@@ -15,4 +15,6 @@ u32 window_get_height(window_t* window);
 f32 window_get_scale_x(window_t* window);
 f32 window_get_scale_y(window_t* window);
 
+void window_lock_mouse(window_t* window, bool lock);
+
 #endif
