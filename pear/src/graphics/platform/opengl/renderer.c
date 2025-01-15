@@ -5,6 +5,7 @@
 #include <graphics/mesh.h>
 #include <graphics/window.h>
 #include <graphics/camera.h>
+#include <graphics/platform/opengl/renderers/billboard_renderer.h>
 #include <graphics/platform/opengl/renderers/scene_renderer.h>
 #include <graphics/platform/opengl/renderers/screen_renderer.h>
 #include <graphics/platform/opengl/renderers/shadow_renderer.h>
@@ -15,6 +16,7 @@
 #include <graphics/platform/opengl/texture.h>
 #include <graphics/editor/renderer_inspector.h>
 #include <scene/components/transform.h>
+#include <scene/components/billboard.h>
 #include <scene/components/camera.h>
 #include <scene/components/model.h>
 #include <scene/components/light.h>
@@ -51,9 +53,11 @@ typedef struct renderer_t {
     vec3 camera_pos;
 
     array_t* models;
+    array_t* billboards;
     array_t* lights;
     array_t* skyboxes;
     array_t* model_transforms;
+    array_t* billboard_transforms;
     array_t* light_transforms;
 
     framebuffer_t* screen_framebuffer;
@@ -66,6 +70,7 @@ typedef struct renderer_t {
     ubo_t* ubo_matrices;
     ubo_t* ubo_lights;
 
+    billboard_renderer_t* billboard_renderer;
     scene_renderer_t* scene_renderer;
     screen_renderer_t* screen_renderer;
     shadow_renderer_t* shadow_renderer;
@@ -223,6 +228,18 @@ void renderer_handle_model(renderer_t* renderer, entity_t* entity) {
     array_add(renderer->model_transforms, transform);
 }
 
+void renderer_handle_billboard(renderer_t* renderer, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+    billboard_component_t* billboard = (billboard_component_t*)entity_get_component(entity, ENTITY_COMPONENT_BILLBOARD);
+
+    if (!billboard->draw || billboard->texture == NULL) {
+        return;
+    }
+
+    array_add(renderer->billboards, billboard);
+    array_add(renderer->billboard_transforms, transform);
+}
+
 void renderer_handle_camera(renderer_t* renderer, entity_t* entity) {
     transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
     camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
@@ -262,6 +279,9 @@ void renderer_handle_scene(renderer_t* renderer, scene_t* scene) {
 
         if (entity_has_component(entity, ENTITY_COMPONENT_MODEL) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
             renderer_handle_model(renderer, entity);
+        }
+        if (entity_has_component(entity, ENTITY_COMPONENT_BILLBOARD) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
+            renderer_handle_billboard(renderer, entity);
         }
         if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
             renderer_handle_camera(renderer, entity);
@@ -304,9 +324,11 @@ renderer_t* renderer_new() {
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
     renderer->models = array_new(10);
+    renderer->billboards = array_new(10);
     renderer->lights = array_new(10);
     renderer->skyboxes = array_new(10);
     renderer->model_transforms = array_new(10);
+    renderer->billboard_transforms = array_new(10);
     renderer->light_transforms = array_new(10);
     
     renderer_init_ubo_matrices(renderer);
@@ -314,6 +336,7 @@ renderer_t* renderer_new() {
     renderer_init_screen_framebuffer(renderer);
     renderer_init_shadow_framebuffer(renderer);
     
+    renderer->billboard_renderer = billboardrenderer_new(renderer->ubo_matrices);
     renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights, renderer->shadow_map);
     renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
     renderer->shadow_renderer = shadowrenderer_new(renderer->ubo_matrices, renderer->shadow_map);
@@ -335,6 +358,7 @@ void renderer_delete(renderer_t* renderer) {
     screenrenderer_delete(renderer->screen_renderer);
     shadowrenderer_delete(renderer->shadow_renderer);
     skyboxrenderer_delete(renderer->skybox_renderer);
+    billboardrenderer_delete(renderer->billboard_renderer);
 
     framebuffer_delete(renderer->screen_framebuffer);
     framebuffer_delete(renderer->shadow_framebuffer);
@@ -344,9 +368,11 @@ void renderer_delete(renderer_t* renderer) {
     ubo_delete(renderer->ubo_lights);
 
     array_delete(renderer->models);
+    array_delete(renderer->billboards);
     array_delete(renderer->lights);
     array_delete(renderer->skyboxes);
     array_delete(renderer->model_transforms);
+    array_delete(renderer->billboard_transforms);
     array_delete(renderer->light_transforms);
 
     PEAR_FREE(renderer);
@@ -385,6 +411,7 @@ void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
     framebuffer_use(renderer->screen_framebuffer);
     scenerenderer_draw_scene(renderer->scene_renderer, renderer->models, renderer->lights, renderer->model_transforms, renderer->light_transforms);
+    billboardrenderer_draw_scene(renderer->billboard_renderer, renderer->billboards, renderer->billboard_transforms, renderer->view);
 
     glDepthFunc(GL_LEQUAL);
     skyboxrenderer_draw_scene(renderer->skybox_renderer, renderer->skyboxes);
