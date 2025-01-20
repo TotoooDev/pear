@@ -1,21 +1,19 @@
 #ifdef PEAR_ENABLE_EDITOR
 
-#include <graphics/editor/renderer_inspector.h>
+#include <panels/renderer_inspector.h>
+#include <graphics/editor/editor.h>
 #include <graphics/renderer.h>
 #include <graphics/platform/opengl/texture.h>
 #include <core/app.h>
 
-#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <graphics/editor/vendor/cimgui/cimgui.h>
-
 static texture_t* editor_shadow_map = NULL;
 
-void editor_set_shadow_map(texture_t* shadow_map) {
+void panelrenderer_inspector_set_shadow_map(texture_t* shadow_map) {
     editor_shadow_map = shadow_map;
 }
 
-void editor_renderer_inspector(bool* show) {
-    if (igBegin("renderer inspector", show, ImGuiWindowFlags_None)) {
+void panel_renderer_inspector() {
+    if (igBegin("renderer inspector", NULL, ImGuiWindowFlags_None)) {
         #ifdef PEAR_PLATFORM_OPENGL
             igText("graphics api: opengl");
         #else

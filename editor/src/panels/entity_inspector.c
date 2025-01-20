@@ -1,7 +1,5 @@
-#ifdef PEAR_ENABLE_EDITOR
-
-#include <graphics/editor/entity_inspector.h>
-#include <graphics/editor/vendor/tinyfiledialogs/tinyfiledialogs.h>
+#include <panels/entity_inspector.h>
+#include <graphics/editor/editor.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
@@ -10,14 +8,15 @@
 #include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
 #include <loaders/model.h>
+#include <vendor/tinyfiledialogs/tinyfiledialogs.h>
 #include <string.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <graphics/editor/vendor/cimgui/cimgui.h>
 
-static entity_t* editor_entity = NULL;
+static entity_t* panel_entity = NULL;
 
-void editor_component_combo() {
+void panel_entity_inspector_component_combo() {
     const char* items[] = {
         "transform",
         "model",
@@ -32,17 +31,17 @@ void editor_component_combo() {
     static i32 current_item = -1;
     igCombo_Str_arr("component", &current_item, items, 8, 64);
     if (igButton("add component", (ImVec2){ 0.0f, 0.0f })) {
-        entity_add_component(editor_entity, (entity_component_t)current_item);
+        entity_add_component(panel_entity, (entity_component_t)current_item);
         current_item = -1;
     }
     igSameLine(0.0f, 8.0f);
     if (igButton("remove component", (ImVec2){ 0.0f, 0.0f })) {
-        entity_remove_component(editor_entity, (entity_component_t)current_item);
+        entity_remove_component(panel_entity, (entity_component_t)current_item);
         current_item = -1;
     }
 }
 
-void editor_transform(entity_t* entity) {
+void panel_entity_inspector_transform(entity_t* entity) {
     if (igTreeNodeEx_Str("transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
         igDragFloat3("position", transform->pos, 0.1f, -FLT_MAX, FLT_MAX, "%.3f", ImGuiSliderFlags_None);
@@ -53,7 +52,7 @@ void editor_transform(entity_t* entity) {
     }
 }
 
-void editor_camera(entity_t* entity) {
+void panel_entity_inspector_camera(entity_t* entity) {
     if (igTreeNodeEx_Str("camera", ImGuiTreeNodeFlags_DefaultOpen)) {
         camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
         igCheckbox("use", &camera->use);
@@ -62,7 +61,7 @@ void editor_camera(entity_t* entity) {
     }
 }
 
-void editor_light(entity_t* entity) {
+void panel_entity_inspector_light(entity_t* entity) {
     if (igTreeNodeEx_Str("light", ImGuiTreeNodeFlags_DefaultOpen)) {
         light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
 
@@ -89,7 +88,7 @@ void editor_light(entity_t* entity) {
     }
 }
 
-void editor_model(entity_t* entity) {
+void panel_entity_inspector_model(entity_t* entity) {
     if (igTreeNodeEx_Str("model", ImGuiTreeNodeFlags_DefaultOpen)) {
         model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
 
@@ -132,7 +131,7 @@ void editor_model(entity_t* entity) {
     }
 }
 
-void editor_script(entity_t* entity) {
+void panel_entity_inspector_script(entity_t* entity) {
     if (igTreeNodeEx_Str("script", ImGuiTreeNodeFlags_DefaultOpen)) {
         script_component_t* script = (script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SCRIPT);
 
@@ -145,7 +144,7 @@ void editor_script(entity_t* entity) {
     }
 }
 
-void editor_lua_script(entity_t* entity) {
+void panel_entity_inspector_lua_script(entity_t* entity) {
     if (igTreeNodeEx_Str("lua script", ImGuiTreeNodeFlags_DefaultOpen)) {
         lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
 
@@ -180,7 +179,7 @@ void editor_lua_script(entity_t* entity) {
     }
 }
 
-void editor_skybox(entity_t* entity) {
+void panel_entity_inspector_skybox(entity_t* entity) {
     if (igTreeNodeEx_Str("skybox", ImGuiTreeNodeFlags_DefaultOpen)) {
         skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
 
@@ -190,53 +189,51 @@ void editor_skybox(entity_t* entity) {
     }
 }
 
-void editor_set_entity(entity_t* entity) {
-    editor_entity = entity;
+void panel_entity_inspector_set_entity(entity_t* entity) {
+    panel_entity = entity;
 }
 
-void editor_entity_inspector(bool* show) {
-    if (editor_entity == NULL) {
+void panel_entity_inspector() {
+    if (panel_entity == NULL) {
         return;
     }
 
-    if (igBegin("entity inspector", show, ImGuiWindowFlags_None)) {
-        igInputText("name", entity_get_name(editor_entity), ENTITY_NAME_MAX_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL);
+    if (igBegin("entity inspector", NULL, ImGuiWindowFlags_None)) {
+        igInputText("name", entity_get_name(panel_entity), ENTITY_NAME_MAX_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL);
 
         igSeparator();
         
-        editor_component_combo();
+        panel_entity_inspector_component_combo();
 
         igSeparator();
 
-        if (entity_has_component(editor_entity, ENTITY_COMPONENT_TRANSFORM)) {
-            editor_transform(editor_entity);
+        if (entity_has_component(panel_entity, ENTITY_COMPONENT_TRANSFORM)) {
+            panel_entity_inspector_transform(panel_entity);
         }
 
-        if (entity_has_component(editor_entity, ENTITY_COMPONENT_CAMERA)) {
-            editor_camera(editor_entity);
+        if (entity_has_component(panel_entity, ENTITY_COMPONENT_CAMERA)) {
+            panel_entity_inspector_camera(panel_entity);
         }
 
-        if (entity_has_component(editor_entity, ENTITY_COMPONENT_LIGHT)) {
-            editor_light(editor_entity);
+        if (entity_has_component(panel_entity, ENTITY_COMPONENT_LIGHT)) {
+            panel_entity_inspector_light(panel_entity);
         }
 
-        if (entity_has_component(editor_entity, ENTITY_COMPONENT_MODEL)) {
-            editor_model(editor_entity);
+        if (entity_has_component(panel_entity, ENTITY_COMPONENT_MODEL)) {
+            panel_entity_inspector_model(panel_entity);
         }
 
-        if (entity_has_component(editor_entity, ENTITY_COMPONENT_SCRIPT)) {
-            editor_script(editor_entity);
+        if (entity_has_component(panel_entity, ENTITY_COMPONENT_SCRIPT)) {
+            panel_entity_inspector_script(panel_entity);
         }
 
-        if (entity_has_component(editor_entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
-            editor_lua_script(editor_entity);
+        if (entity_has_component(panel_entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
+            panel_entity_inspector_lua_script(panel_entity);
         }
 
-        if (entity_has_component(editor_entity, ENTITY_COMPONENT_SKYBOX)) {
-            editor_skybox(editor_entity);
+        if (entity_has_component(panel_entity, ENTITY_COMPONENT_SKYBOX)) {
+            panel_entity_inspector_skybox(panel_entity);
         }
     }
     igEnd();
 }
-
-#endif

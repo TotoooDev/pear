@@ -14,7 +14,6 @@
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
 #include <graphics/platform/opengl/texture.h>
-#include <graphics/editor/renderer_inspector.h>
 #include <scene/components/transform.h>
 #include <scene/components/billboard.h>
 #include <scene/components/camera.h>
@@ -345,10 +344,6 @@ renderer_t* renderer_new() {
     renderer_calculate_projection(renderer);
 
     event_subscribe(renderer_on_event, renderer);
-
-    #ifdef PEAR_ENABLE_EDITOR
-        editor_set_shadow_map(renderer->shadow_map);
-    #endif
 
     return renderer;
 }

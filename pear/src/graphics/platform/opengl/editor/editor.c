@@ -3,12 +3,8 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/editor/editor.h>
-#include <graphics/editor/menu_bar.h>
-#include <graphics/editor/general_info.h>
-#include <graphics/editor/scene_inspector.h>
-#include <graphics/editor/entity_inspector.h>
-#include <graphics/editor/renderer_inspector.h>
 #include <graphics/platform/opengl/window.h>
+#include <util/array.h>
 #include <core/app.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
@@ -18,12 +14,8 @@
 #include <graphics/editor/vendor/cimgui/cimconfig.h>
 #include <graphics/platform/opengl/editor/vendor/cimgui/cimgui_impl.h>
 
-static bool editor_show_menu_bar = true;
-static bool editor_show_general_info = true;
-static bool editor_show_scene_inspector = true;
-static bool editor_show_entity_inspector = true;
-static bool editor_show_renderer_inspector = true;
-static bool editor_show_demo = false;
+static array_t* editor_functions;
+static array_t* editor_user_datas;
 
 void editor_init() {
     igCreateContext(NULL);
@@ -37,9 +29,15 @@ void editor_init() {
     ImGui_ImplOpenGL3_Init("#version 130");
 
     igStyleColorsDark(NULL);
+
+    editor_functions = array_new(10);
+    editor_user_datas = array_new(10);
 }
 
 void editor_free() {
+    array_delete(editor_functions);
+    array_delete(editor_user_datas);
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     igDestroyContext(NULL);
@@ -52,28 +50,10 @@ void editor_clear() {
 }
 
 void editor_render() {
-    if (editor_show_menu_bar) {
-        editor_menu_bar(&editor_show_general_info);
-    }
-    
-    if (editor_show_general_info) {
-        editor_general_info(&editor_show_general_info);
-    }
-
-    if (editor_show_scene_inspector) {
-        editor_scene_inspector(&editor_show_scene_inspector);
-    }
-
-    if (editor_show_entity_inspector) {
-        editor_entity_inspector(&editor_show_entity_inspector);
-    }
-
-    if (editor_show_renderer_inspector) {
-        editor_renderer_inspector(&editor_show_renderer_inspector);
-    }
-
-    if (editor_show_demo) {
-        igShowDemoWindow(&editor_show_demo);
+    for (u32 i = 0; i < array_get_length(editor_functions); i++) {
+        editor_function_t function = array_get(editor_functions, i);
+        void* user_data = array_get(editor_user_datas, i);
+        function(user_data);
     }
 
     igRender();
@@ -91,28 +71,9 @@ void editor_render() {
 #endif
 }
 
-void editor_enable_menu_bar(bool enable) {
-    editor_show_menu_bar = enable;
-}
-
-void editor_enable_general_info(bool enable) {
-    editor_show_general_info = enable;
-}
-
-void editor_enable_scene_inspector(bool enable) {
-    editor_show_scene_inspector = enable;
-}
-
-void editor_enable_entity_inspector(bool enable) {
-    editor_show_entity_inspector = enable;
-}
-
-void editor_enable_renderer_inspector(bool enable) {
-    editor_show_renderer_inspector = enable;
-}
-
-void editor_enable_demo(bool enable) {
-    editor_show_demo = enable;
+void editor_add_function(editor_function_t function, void* user_data) {
+    array_add(editor_functions, function);
+    array_add(editor_user_datas, user_data);
 }
 
 #endif
