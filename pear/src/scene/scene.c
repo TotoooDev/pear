@@ -149,7 +149,7 @@ entity_t* scene_add_entity(scene_t* scene, const char* name, ...) {
 
             }
             if (entity_has_component(entity, ENTITY_COMPONENT_LIGHT)) {
-                image_t* image = loader_load_image("light_bulb.jpg");
+                image_t* image = loader_load_image("editor/light_bulb.png");
                 texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR);
                 image_delete(image);
                 billboard_component_t* billboard = entity_add_component(entity, ENTITY_COMPONENT_BILLBOARD);
