@@ -431,6 +431,10 @@ u32 renderer_get_num_vertices(renderer_t* renderer) {
     return renderer->num_vertices;
 }
 
+texture_t* renderer_get_screen_texture(renderer_t* renderer) {
+    return renderer->screen_texture;
+}
+
 void renderer_set_near(renderer_t* renderer, f32 near) {
     renderer->near = near;
     renderer_calculate_projection(renderer);
