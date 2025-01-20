@@ -24,6 +24,9 @@ void editor_init() {
     ImGuiIO *ioptr = igGetIO();
     // ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
     //ioptr->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    #ifdef IMGUI_HAS_DOCK
+        ioptr->ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
+    #endif
 
     ImGui_ImplGlfw_InitForOpenGL(window_get_glfw(app_get_window()), true);
     ImGui_ImplOpenGL3_Init("#version 130");
@@ -50,6 +53,8 @@ void editor_clear() {
 }
 
 void editor_render() {
+    igDockSpaceOverViewport(0, igGetMainViewport(), ImGuiDockNodeFlags_None, NULL);
+
     for (u32 i = 0; i < array_get_length(editor_functions); i++) {
         editor_function_t function = array_get(editor_functions, i);
         void* user_data = array_get(editor_user_datas, i);
@@ -60,15 +65,15 @@ void editor_render() {
     glfwMakeContextCurrent(window_get_glfw(app_get_window()));
     ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
 
-#ifdef IMGUI_HAS_DOCK
-    ImGuiIO *ioptr = igGetIO();
-    if (ioptr->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-        GLFWwindow *backup_current_window = glfwGetCurrentContext();
-        igUpdatePlatformWindows();
-        igRenderPlatformWindowsDefault(NULL, NULL);
-        glfwMakeContextCurrent(backup_current_window);
-    }
-#endif
+    #ifdef IMGUI_HAS_DOCK
+        ImGuiIO *ioptr = igGetIO();
+        if (ioptr->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            GLFWwindow *backup_current_window = glfwGetCurrentContext();
+            igUpdatePlatformWindows();
+            igRenderPlatformWindowsDefault(NULL, NULL);
+            glfwMakeContextCurrent(backup_current_window);
+        }
+    #endif
 }
 
 void editor_add_function(editor_function_t function, void* user_data) {
