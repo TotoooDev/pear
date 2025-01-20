@@ -20,14 +20,11 @@ project "pear"
 
     files {
 		"pear/include/**.h",
-		"pear/src/**.c",
-		"pear/src/vendor/**.c",
+		"pear/src/**.c"
 	}
 
     includedirs {
-		"pear/include",
-		"pear/include/vendor",
-		"pear-formats/include"
+		"pear/include"
 	}
 
     filter "system:linux"
@@ -52,8 +49,8 @@ project "pear"
 		optimize "On"
         symbols "On"
 
-project "pear-project"
-    location "pear-project"
+project "editor"
+    location "editor"
     kind "ConsoleApp"
     language "C"
 
@@ -64,16 +61,13 @@ project "pear-project"
     debugdir ("bin/" .. outputDir .. "/%{prj.name}")
 
     files {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.c",
+        "editor/src/**.h",
+        "editor/src/**.c",
     }
 
     includedirs {
-        "pear-project/include",
-        "pear-project/include/vendor",
-        "pear/include/vendor",
-        "pear/include",
-        "pear-formats/include"
+        "editor/include",
+        "pear/include"
     }
     
     links {
