@@ -194,11 +194,12 @@ void panel_entity_inspector_set_entity(entity_t* entity) {
 }
 
 void panel_entity_inspector() {
-    if (panel_entity == NULL) {
-        return;
-    }
-
     if (igBegin("entity inspector", NULL, ImGuiWindowFlags_None)) {
+        if (panel_entity == NULL) {
+            igEnd();
+            return;
+        }
+
         igInputText("name", entity_get_name(panel_entity), ENTITY_NAME_MAX_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL);
 
         igSeparator();

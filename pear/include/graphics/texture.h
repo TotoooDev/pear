@@ -30,6 +30,8 @@ texture_t* texture_new(u32 width, u32 height, texture_wrapping_t wrapping, textu
 texture_t* texture_new_from_image(image_t* image, texture_wrapping_t wrapping, texture_filtering_t filtering);
 void texture_delete(texture_t* texture);
 
+void texture_resize(texture_t* texture, u32 width, u32 height);
+
 u32 texture_get_width(texture_t* texture);
 u32 texture_get_height(texture_t* texture);
 

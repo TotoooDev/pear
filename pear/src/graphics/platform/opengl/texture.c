@@ -72,6 +72,11 @@ void texture_delete(texture_t* texture) {
     free(texture);
 }
 
+void texture_resize(texture_t* texture, u32 width, u32 height) {
+    glBindTexture(GL_TEXTURE_2D, texture->id);
+    glTexImage2D(GL_TEXTURE_2D, 0, texture_format_to_opengl(texture->format), width, height, 0, texture_format_to_opengl(texture->format), GL_UNSIGNED_BYTE, NULL);
+}
+
 u32 texture_get_width(texture_t* texture) {
     return texture->width;
 }

@@ -105,9 +105,13 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         renderer_calculate_projection(renderer);
 
         framebuffer_delete(renderer->screen_framebuffer);
-        texture_delete(renderer->screen_texture);
-        texture_delete(renderer->screen_depth_texture);
-        renderer_init_screen_framebuffer(renderer);
+
+        renderer->screen_framebuffer = framebuffer_new();
+        texture_resize(renderer->screen_texture, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
+        texture_resize(renderer->screen_depth_texture, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
+        framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_texture);
+        framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_depth_texture);
+
         screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->screen_texture);
     }
 
@@ -433,6 +437,10 @@ u32 renderer_get_num_vertices(renderer_t* renderer) {
 
 texture_t* renderer_get_screen_texture(renderer_t* renderer) {
     return renderer->screen_texture;
+}
+
+texture_t* renderer_get_screen_depth_texture(renderer_t* renderer) {
+    return renderer->screen_depth_texture;
 }
 
 void renderer_set_near(renderer_t* renderer, f32 near) {

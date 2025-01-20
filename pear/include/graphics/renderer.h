@@ -17,6 +17,7 @@ u32 renderer_get_num_meshes(renderer_t* renderer);
 u32 renderer_get_num_vertices(renderer_t* renderer);
 
 texture_t* renderer_get_screen_texture(renderer_t* renderer);
+texture_t* renderer_get_screen_depth_texture(renderer_t* renderer);
 
 void renderer_set_near(renderer_t* renderer, f32 near);
 void renderer_set_far(renderer_t* renderer, f32 far);
