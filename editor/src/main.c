@@ -13,9 +13,10 @@
 #include <scene/components/lua_script.h>
 #include <scene/components/light.h>
 #include <scene/components/skybox.h>
-#include <loaders/model.h>
 #include <graphics/editor/editor.h>
 #include <string.h>
+
+#include <loaders/scene.h>
 
 scene_t* editor_scene = NULL;
 
@@ -141,7 +142,7 @@ int main(int argc, char* argv[]) {
 
     scene_t* viewport_scene = app_get_scene();
 
-    editor_scene = scene_new();
+    editor_scene = loader_load_scene("scene.pear");
 
     entity_t* editor_script = entity_new(SCENE_EDITOR_SCRIPT_ID, "[EDITOR] script", ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
     entity_t* viewport_camera = entity_new(SCENE_EDITOR_CAMERA_ID, "[EDITOR] camera", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
