@@ -1,3 +1,4 @@
+#include <editor.h>
 #include <core/app.h>
 #include <core/log.h>
 #include <panels/menu_bar.h>
@@ -18,8 +19,6 @@
 
 #include <loaders/scene.h>
 
-scene_t* editor_scene = NULL;
-
 void editor_script_on_update(entity_t* entity, f32 timestep) {
     size_t component_sizes[] = {
         sizeof(transform_component_t),
@@ -32,6 +31,7 @@ void editor_script_on_update(entity_t* entity, f32 timestep) {
         sizeof(skybox_component_t)
     };
 
+    scene_t* editor_scene = editor_get_scene();
     scene_t* viewport_scene = app_get_scene();
     
     array_t* editor_entities = scene_get_entities(editor_scene);
@@ -135,14 +135,8 @@ void editor_script_on_update(entity_t* entity, f32 timestep) {
     }
 }
 
-int main(int argc, char* argv[]) {
-    PEAR_INFO("hello editor!");
-
-    app_init();
-
+void init_viewport_scene() {
     scene_t* viewport_scene = app_get_scene();
-
-    editor_scene = loader_load_scene("scene.pear");
 
     entity_t* editor_script = entity_new(SCENE_EDITOR_SCRIPT_ID, "[EDITOR] script", ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
     entity_t* viewport_camera = entity_new(SCENE_EDITOR_CAMERA_ID, "[EDITOR] camera", ENTITY_COMPONENT_TRANSFORM, ENTITY_COMPONENT_CAMERA, ENTITY_COMPONENT_SCRIPT, ENTITY_COMPONENT_END);
@@ -152,8 +146,14 @@ int main(int argc, char* argv[]) {
 
     scene_add_entity_ptr(viewport_scene, editor_script);
     scene_add_entity_ptr(viewport_scene, viewport_camera);
+}
 
-    panel_scene_inspector_set_scene(editor_scene);
+int main(int argc, char* argv[]) {
+    app_init();
+    init_viewport_scene();
+
+    scene_t* editor_scene = scene_new();
+    editor_set_scene(editor_scene);
 
     editor_add_function(panel_menu_bar, NULL);
     editor_add_function(panel_general_info, NULL);
