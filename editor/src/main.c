@@ -52,6 +52,23 @@ void editor_script_on_update(entity_t* entity, f32 timestep) {
                 for (u32 k = 0; k < (u32)ENTITY_COMPONENT_END; k++) {
                     if (!entity_has_component(editor_entity, (entity_component_t)k)) {
                         if (entity_has_component(viewport_entity, (entity_component_t)k)) {
+                            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_MODEL)) {
+                                model_component_t* model_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_MODEL);
+                                model_comp->model = NULL;
+                            }
+                            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_BILLBOARD)) {
+                                billboard_component_t* billboard_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_BILLBOARD);
+                                billboard_comp->texture = NULL;
+                            }
+                            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
+                                lua_script_component_t* script_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_LUA_SCRIPT);
+                                script_comp->script = NULL;
+                            }
+                            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_SKYBOX)) {
+                                skybox_component_t* skybox_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_SKYBOX);
+                                skybox_comp->cubemap = NULL;
+                            }
+                            
                             entity_remove_component(viewport_entity, (entity_component_t)k);
                         }
                         continue;
@@ -72,7 +89,6 @@ void editor_script_on_update(entity_t* entity, f32 timestep) {
         }
 
         if (add_entity_to_viewport) {
-            PEAR_INFO("adding a new entity to the viewport scene!");
             entity_t* new_entity = entity_new(entity_get_id(editor_entity), entity_get_name(editor_entity), ENTITY_COMPONENT_END);
             scene_add_entity_ptr(viewport_scene, new_entity);
         }
@@ -96,7 +112,23 @@ void editor_script_on_update(entity_t* entity, f32 timestep) {
         }
 
         if (remove_entity_from_viewport) {
-            PEAR_INFO("removing a new entity from the viewport scene!");
+            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_MODEL)) {
+                model_component_t* model_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_MODEL);
+                model_comp->model = NULL;
+            }
+            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_BILLBOARD)) {
+                billboard_component_t* billboard_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_BILLBOARD);
+                billboard_comp->texture = NULL;
+            }
+            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
+                lua_script_component_t* script_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_LUA_SCRIPT);
+                script_comp->script = NULL;
+            }
+            if (entity_has_component(viewport_entity, ENTITY_COMPONENT_SKYBOX)) {
+                skybox_component_t* skybox_comp = entity_get_component(viewport_entity, ENTITY_COMPONENT_SKYBOX);
+                skybox_comp->cubemap = NULL;
+            }
+
             scene_remove_entity(viewport_scene, viewport_entity);
         }
     }

@@ -201,6 +201,7 @@ void panel_entity_inspector() {
         }
 
         igInputText("name", entity_get_name(panel_entity), ENTITY_NAME_MAX_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL);
+        igText("id: %d", entity_get_id(panel_entity));
 
         igSeparator();
         
