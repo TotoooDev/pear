@@ -13,25 +13,27 @@
 #include <stdarg.h>
 
 typedef struct entity_t {
+    u32 id;
     char* name;
     u32 components_bitmask;
     void** components;
 } entity_t;
 
-entity_t* entity_new(const char* name, ...) {
+entity_t* entity_new(u32 id, const char* name, ...) {
     va_list args;
     va_start(args, name);
 
-    entity_t* entity = entity_new_from_va_list(name, args);
+    entity_t* entity = entity_new_from_va_list(id, name, args);
 
     va_end(args);
 
     return entity;
 }
 
-entity_t* entity_new_from_va_list(const char* name, va_list args) {
+entity_t* entity_new_from_va_list(u32 id, const char* name, va_list args) {
     entity_t* entity = (entity_t*)PEAR_MALLOC(sizeof(entity_t));
 
+    entity->id = id;
     entity->name = PEAR_MALLOC(sizeof(char) * ENTITY_NAME_MAX_LENGTH);
     strcpy(entity->name, name);
     
@@ -137,22 +139,30 @@ void entity_remove_component(entity_t* entity, entity_component_t component) {
     switch (component) {
     case ENTITY_COMPONENT_MODEL:
         model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
-        model_delete(model->model);
+        if (model->model != NULL) {
+            model_delete(model->model);
+        }
         break;
 
     case ENTITY_COMPONENT_BILLBOARD:
         billboard_component_t* billboard = (billboard_component_t*)entity_get_component(entity, ENTITY_COMPONENT_BILLBOARD);
-        texture_delete(billboard->texture);
+        if (billboard->texture != NULL) {
+            texture_delete(billboard->texture);
+        }
         break;
 
     case ENTITY_COMPONENT_LUA_SCRIPT:
         lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
-        script_delete(script->script);
+        if (script->script != NULL) {
+            script_delete(script->script);
+        }
         break;
 
     case ENTITY_COMPONENT_SKYBOX:
         skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
-        cubemap_delete(skybox->cubemap);
+        if (skybox->cubemap != NULL) {
+            cubemap_delete(skybox->cubemap);
+        }
         break;
 
     default:
@@ -162,6 +172,10 @@ void entity_remove_component(entity_t* entity, entity_component_t component) {
     PEAR_FREE(entity->components[(u32)component]);
 
     entity->components_bitmask ^= 1 << (u32)component;
+}
+
+u32 entity_get_id(entity_t* entity) {
+    return entity->id;
 }
 
 char* entity_get_name(entity_t* entity) {

@@ -19,6 +19,7 @@
 
 typedef struct scene_t {
     array_t* entities;
+    u32 next_entity_id;
 } scene_t;
 
 void scene_set_lua_script_values(entity_t* entity) {
@@ -117,11 +118,7 @@ void scene_update_lua_script_component(scene_t* scene, entity_t* entity, f32 tim
 scene_t* scene_new() {
     scene_t* scene = (scene_t*)PEAR_MALLOC(sizeof(scene_t));
     scene->entities = array_new(SCENE_NUM_MAX_ENTITIES);
-
-    #ifdef PEAR_ENABLE_EDITOR
-        scene_setup_editor_scene(scene);
-    #endif
-
+    scene->next_entity_id = 0;
     return scene;
 }
 
@@ -139,7 +136,8 @@ entity_t* scene_add_entity(scene_t* scene, const char* name, ...) {
     va_list args;
     va_start(args, name);
 
-    entity_t* entity = entity_new_from_va_list(name, args);
+    entity_t* entity = entity_new_from_va_list(scene->next_entity_id, name, args);
+    scene->next_entity_id++;
     
     va_end(args);
 
@@ -160,6 +158,11 @@ entity_t* scene_add_entity(scene_t* scene, const char* name, ...) {
     
     array_add(scene->entities, entity);
     return entity;
+}
+
+void scene_add_entity_ptr(scene_t* scene, entity_t* entity) {
+    array_add(scene->entities, entity);
+    scene->next_entity_id++;
 }
 
 void scene_remove_entity(scene_t* scene, entity_t* entity) {
@@ -199,72 +202,6 @@ array_t* scene_get_entities(scene_t* scene) {
     return scene->entities;
 }
 
-#ifdef PEAR_ENABLE_EDITOR
-void scene_setup_editor_scene(scene_t* scene) {
-    entity_t* editor_cam = scene_add_entity(
-        scene,
-        "editor camera",
-        ENTITY_COMPONENT_TRANSFORM,
-        ENTITY_COMPONENT_BILLBOARD,
-        ENTITY_COMPONENT_CAMERA,
-        ENTITY_COMPONENT_LUA_SCRIPT,
-        ENTITY_COMPONENT_END
-    );
-    
-    // bruh
-    const char* cam_script_str =
-"local move_camera = false \n"
-"local speed = 0.01 \n"
-"local keys = { forward = false, backward = false, left = false, right = false, up = false, down = false } \n"
-"function on_update(timestep) \n"
-"    if not move_camera then return end \n"
-"    if keys.forward then pear.transform.pos = pear.transform.pos + pear.camera.front * speed * timestep end \n"
-"    if keys.backward then pear.transform.pos = pear.transform.pos - pear.camera.front * speed * timestep end \n"
-"    if keys.left then pear.transform.pos = pear.transform.pos - pear.camera.right * speed * timestep end \n"
-"    if keys.right then pear.transform.pos = pear.transform.pos + pear.camera.right * speed * timestep end \n"
-"    if keys.up then pear.transform.pos.y = pear.transform.pos.y + speed * timestep end \n"
-"    if keys.down then pear.transform.pos.y = pear.transform.pos.y - speed * timestep end \n"
-"    pear.transform.rotation.x = pear.transform.rotation.x + pear.mouse.relative.x \n"
-"    pear.transform.rotation.y = pear.transform.rotation.y - pear.mouse.relative.y \n"
-"    if pear.transform.rotation.y > 89.0 then \n"
-"        pear.transform.rotation.y = 89.0 \n"
-"    end \n"
-"    if pear.transform.rotation.y < -89.0 then \n"
-"        pear.transform.rotation.y = -89.0 \n"
-"    end \n"
-"end \n"
-"function on_key_press(key) \n"
-"    if key == \"PEAR_KEY_W\" then keys.forward = true end \n"
-"    if key == \"PEAR_KEY_S\" then keys.backward = true end \n"
-"    if key == \"PEAR_KEY_A\" then keys.left = true end \n"
-"    if key == \"PEAR_KEY_D\" then keys.right = true end \n"
-"    if key == \"PEAR_KEY_SPACE\" then keys.up = true end \n"
-"    if key == \"PEAR_KEY_LEFT_CONTROL\" then keys.down = true end \n"
-"end \n"
-"function on_key_release(key) \n"
-"    if key == \"PEAR_KEY_W\" then keys.forward = false end \n"
-"    if key == \"PEAR_KEY_S\" then keys.backward = false end \n"
-"    if key == \"PEAR_KEY_A\" then keys.left = false end \n"
-"    if key == \"PEAR_KEY_D\" then keys.right = false end \n"
-"    if key == \"PEAR_KEY_SPACE\" then keys.up = false end \n"
-"    if key == \"PEAR_KEY_LEFT_CONTROL\" then keys.down = false end \n"
-"    if key == \"PEAR_KEY_LEFT_ALT\" then \n"
-"        move_camera = not move_camera \n"
-"        pear.window.lock_mouse(move_camera) \n"
-"    end \n"
-"end \n"
-"function on_editor() \n"
-"    speed = pear.editor.drag_number(\"speed\", speed, 0.001, 0.0, math.huge) \n"
-"    move_camera = pear.editor.checkbox(\"move camera\", move_camera) \n"
-"end \n";
-    script_t* cam_script = script_new(cam_script_str, editor_cam);
-    lua_script_component_t* cam_script_comp = entity_get_component(editor_cam, ENTITY_COMPONENT_LUA_SCRIPT);
-    cam_script_comp->script = cam_script;
-    camera_component_t* cam_comp = entity_get_component(editor_cam, ENTITY_COMPONENT_CAMERA);
-    cam_comp->use = true;
+u32 scene_get_next_entity_id(scene_t* scene) {
+    return scene->next_entity_id;
 }
-
-void scene_display_component_billboards(scene_t* scene, bool display) {
-
-}
-#endif

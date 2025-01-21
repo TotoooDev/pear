@@ -20,13 +20,14 @@ typedef enum entity_component_t {
 
 typedef struct entity_t entity_t;
 
-entity_t* entity_new(const char* name, ...);
-entity_t* entity_new_from_va_list(const char* name, va_list args);
+entity_t* entity_new(u32 id, const char* name, ...);
+entity_t* entity_new_from_va_list(u32 id, const char* name, va_list args);
 void entity_delete(entity_t* entity);
 
 void* entity_add_component(entity_t* entity, entity_component_t component);
 void entity_remove_component(entity_t* entity, entity_component_t component);
 
+u32 entity_get_id(entity_t* entity);
 char* entity_get_name(entity_t* entity);
 void* entity_get_component(entity_t* entity, entity_component_t component);
 bool entity_has_component(entity_t* entity, entity_component_t component);
