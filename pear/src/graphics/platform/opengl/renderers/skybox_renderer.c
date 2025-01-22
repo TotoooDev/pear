@@ -99,5 +99,4 @@ void skyboxrenderer_draw_scene(skybox_renderer_t* renderer, array_t* skyboxes) {
     }
 }
 
-
 #endif

@@ -6,6 +6,7 @@
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/texture.h>
 #include <scene/scene.h>
+#include <util/array.h>
 
 typedef struct scene_renderer_t scene_renderer_t;
 

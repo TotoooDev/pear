@@ -1,7 +1,8 @@
 #ifdef PEAR_ENABLE_EDITOR
 
 #include <panels/menu_bar.h>
-#include <editor.h>
+#include <panels/scene_inspector.h>
+#include <panels/entity_inspector.h>
 #include <graphics/editor/editor.h>
 #include <event/event_dispatcher.h>
 #include <loaders/scene.h>
@@ -14,7 +15,11 @@ void panel_menu_bar() {
             if (igMenuItem_Bool("load scene...", "", false, true)) {
                 const char* filters[] = { "*.pear" };
                 char* path = tinyfd_openFileDialog("choose scene", "", 1, filters, "pear scene files", 0);
-                editor_set_scene(loader_load_scene(path));
+                scene_t* scene = loader_load_scene(path);
+                app_set_scene(scene);
+                panel_scene_inspector_set_scene(scene);
+                panel_entity_inspector_set_scene(scene);
+                panel_entity_inspector_set_entity(NULL);
             }
 
             igSeparator();

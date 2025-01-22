@@ -23,7 +23,7 @@ void panel_scene_inspector() {
         igText("%d entities", array_get_length(entities));
 
         if (igButton("add entity", (ImVec2){ 0.0f, 0.0f })) {
-            scene_add_entity(panel_scene, "new entity", ENTITY_COMPONENT_END);
+            scene_add_entity(panel_scene, "new entity");
         }
         igSameLine(0.0f, 8.0f);
         if (igButton("remove entity", (ImVec2){ 0.0f, 0.0f })) {

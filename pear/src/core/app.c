@@ -44,9 +44,9 @@ void app_init() {
     app->is_running = true;
     app->timestep = 0.0f;
     app->last_time = 0.0f;
+    app->scene = scene_new();
     app->window = window_new("pear", 1080, 720);
     app->renderer = renderer_new();
-    app->scene = scene_new();
 
     #ifdef PEAR_ENABLE_EDITOR
         app->enable_editor = true;
@@ -74,9 +74,9 @@ void app_stop() {
 void app_run() {
     while (app->is_running) {
         app_update_timestep();
-        scene_update(app->scene, app->timestep);
+        renderer_clear(app->renderer, 0.2f, 0.2f, 0.2f);
 
-        renderer_clear(app->renderer, 0.5f, 0.5f, 0.5f);
+        scene_update(app->scene, app->timestep);
         renderer_draw_scene(app->renderer, app->scene);
 
         #ifdef PEAR_ENABLE_EDITOR
@@ -97,6 +97,9 @@ scene_t* app_get_scene() {
 }
 
 void app_set_scene(scene_t* scene) {
+    if (app->scene != NULL) {
+        scene_delete(app->scene);
+    }
     app->scene = scene;
 }
 

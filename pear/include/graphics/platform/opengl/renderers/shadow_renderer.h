@@ -5,6 +5,7 @@
 
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/texture.h>
+#include <util/array.h>
 #include <scene/scene.h>
 
 typedef struct shadow_renderer_t shadow_renderer_t;

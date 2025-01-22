@@ -1,24 +1,24 @@
 #include <scene/components/light.h>
-#include <core/alloc.h>
 
-light_component_t* lightcomponent_new() {
-    light_component_t* light = (light_component_t*)PEAR_MALLOC(sizeof(light_component_t));
-
+void lightcomponent_constructor(void* data, entity_t* entity) {
+    light_component_t* light = (light_component_t*)data;
+    
     light->cast = true;
     light->shadow_caster = true;
-
     light->light.type = LIGHT_TYPE_DIRECTIONAL;
-
-    glm_vec3_copy((vec3){ 0.1f, 0.1f, 0.1f }, light->light.ambient);
-    glm_vec3_copy((vec3){ 0.6f, 0.6f, 0.6f }, light->light.diffuse);
-    glm_vec3_copy((vec3){ 1.0f, 1.0f, 1.0f }, light->light.specular);
-
+    glm_vec3_fill(light->light.ambient, 0.2f);
+    glm_vec3_fill(light->light.diffuse, 0.6f);
+    glm_vec3_fill(light->light.specular, 1.0f);
     light->light.constant = 1.0f;
-    light->light.linear = 0.14f;
-    light->light.quadratic = 0.07f;
-
+    light->light.linear = 0.22f;
+    light->light.quadratic = 0.21f;
     light->light.cutoff = 12.5f;
     light->light.outer_cutoff = 17.5f;
-    
-    return light;
+}
+
+component_attachment_t lightcomponent_get_attachment() {
+    return (component_attachment_t){
+        .creator = lightcomponent_constructor,
+        .destructor = NULL
+    };
 }

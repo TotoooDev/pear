@@ -1,14 +1,17 @@
 #include <scene/components/transform.h>
-#include <core/alloc.h>
 
-transform_component_t* transformcomponent_new() {
-    transform_component_t* transform = (transform_component_t*)PEAR_MALLOC(sizeof(transform_component_t));
-    
+void transformcomponent_constructor(void* data, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)data;
     glm_vec3_zero(transform->pos);
     glm_vec3_zero(transform->rotation);
     glm_vec3_one(transform->scale);
+}
 
-    return transform;
+component_attachment_t transformcomponent_get_attachment() {
+    return (component_attachment_t){
+        .creator = transformcomponent_constructor,
+        .destructor = NULL
+    };
 }
 
 void transformcomponent_get_model_matrix(transform_component_t* transform, mat4 dest) {

@@ -38,12 +38,12 @@ scene_t* loader_load_scene(const char* filename) {
     cJSON* json_entity;
     cJSON_ArrayForEach(json_entity, json_entities) {
         char* name = cJSON_GetStringValue(cJSON_GetObjectItem(json_entity, "name"));
-        entity_t* entity = scene_add_entity(scene, name, ENTITY_COMPONENT_END);
+        entity_t* entity = scene_add_entity(scene, name);
 
         cJSON* json_components = cJSON_GetObjectItem(json_entity, "components");
 
         if (cJSON_HasObjectItem(json_components, "transform")) {
-            transform_component_t* transform = entity_add_component(entity, ENTITY_COMPONENT_TRANSFORM);
+            transform_component_t* transform = scene_add_component(scene, entity, "transform");
 
             cJSON* json_transform = cJSON_GetObjectItem(json_components, "transform");
             cJSON* json_pos = cJSON_GetObjectItem(json_transform, "pos");
@@ -56,7 +56,7 @@ scene_t* loader_load_scene(const char* filename) {
         }
 
         if (cJSON_HasObjectItem(json_components, "model")) {
-            model_component_t* model = entity_add_component(entity, ENTITY_COMPONENT_MODEL);
+            model_component_t* model = scene_add_component(scene, entity, "model");
 
             cJSON* json_model = cJSON_GetObjectItem(json_components, "model");
             model->draw = cJSON_IsTrue(cJSON_GetObjectItem(json_model, "draw"));
@@ -67,14 +67,14 @@ scene_t* loader_load_scene(const char* filename) {
         }
 
         if (cJSON_HasObjectItem(json_components, "camera")) {
-            camera_component_t* camera = entity_add_component(entity, ENTITY_COMPONENT_CAMERA);
+            camera_component_t* camera = scene_add_component(scene, entity, "camera");
 
             cJSON* json_cam = cJSON_GetObjectItem(json_components, "camera");
             camera->use = cJSON_IsTrue(cJSON_GetObjectItem(json_cam, "use"));
         }
 
         if (cJSON_HasObjectItem(json_components, "lua_script")) {
-            lua_script_component_t* script = entity_add_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+            lua_script_component_t* script = scene_add_component(scene, entity, "lua_script");
 
             cJSON* json_script = cJSON_GetObjectItem(json_components, "lua_script");
             script->run = cJSON_IsTrue(cJSON_GetObjectItem(json_script, "run"));
@@ -84,7 +84,7 @@ scene_t* loader_load_scene(const char* filename) {
         }
 
         if (cJSON_HasObjectItem(json_components, "light")) {
-            light_component_t* light_comp = entity_add_component(entity, ENTITY_COMPONENT_LIGHT);
+            light_component_t* light_comp = scene_add_component(scene, entity, "light");
             light_t light;
 
             cJSON* json_light = cJSON_GetObjectItem(json_components, "light");

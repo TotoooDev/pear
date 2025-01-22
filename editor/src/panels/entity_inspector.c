@@ -4,7 +4,6 @@
 #include <scene/components/camera.h>
 #include <scene/components/light.h>
 #include <scene/components/model.h>
-#include <scene/components/script.h>
 #include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
 #include <loaders/model.h>
@@ -14,6 +13,7 @@
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <graphics/editor/vendor/cimgui/cimgui.h>
 
+static scene_t* panel_scene = NULL;
 static entity_t* panel_entity = NULL;
 
 void panel_entity_inspector_component_combo() {
@@ -22,28 +22,27 @@ void panel_entity_inspector_component_combo() {
         "model",
         "billboard",
         "camera",
-        "script",
-        "lua script",
+        "lua_script",
         "light",
         "skybox"
     };
 
     static i32 current_item = -1;
-    igCombo_Str_arr("component", &current_item, items, 8, 64);
-    if (igButton("add component", (ImVec2){ 0.0f, 0.0f })) {
-        entity_add_component(panel_entity, (entity_component_t)current_item);
+    igCombo_Str_arr("component", &current_item, items, 7, 64);
+    if (igButton("add component", (ImVec2){ 0.0f, 0.0f }) && current_item > -1) {
+        scene_add_component(panel_scene, panel_entity, items[current_item]);
         current_item = -1;
     }
     igSameLine(0.0f, 8.0f);
-    if (igButton("remove component", (ImVec2){ 0.0f, 0.0f })) {
-        entity_remove_component(panel_entity, (entity_component_t)current_item);
+    if (igButton("remove component", (ImVec2){ 0.0f, 0.0f }) && current_item > -1) {
+        scene_remove_component(panel_scene, panel_entity, items[current_item]);
         current_item = -1;
     }
 }
 
 void panel_entity_inspector_transform(entity_t* entity) {
     if (igTreeNodeEx_Str("transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-        transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
+        transform_component_t* transform = (transform_component_t*)scene_get_component(panel_scene, entity, "transform");
         igDragFloat3("position", transform->pos, 0.1f, -FLT_MAX, FLT_MAX, "%.3f", ImGuiSliderFlags_None);
         igDragFloat3("rotation", transform->rotation, 0.1f, -FLT_MAX, FLT_MAX, "%.3f", ImGuiSliderFlags_None);
         igDragFloat3("scale", transform->scale, 0.1f, -FLT_MAX, FLT_MAX, "%.3f", ImGuiSliderFlags_None);
@@ -54,7 +53,7 @@ void panel_entity_inspector_transform(entity_t* entity) {
 
 void panel_entity_inspector_camera(entity_t* entity) {
     if (igTreeNodeEx_Str("camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-        camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
+        camera_component_t* camera = (camera_component_t*)scene_get_component(panel_scene, entity, "camera");
         igCheckbox("use", &camera->use);
 
         igTreePop();
@@ -63,9 +62,20 @@ void panel_entity_inspector_camera(entity_t* entity) {
 
 void panel_entity_inspector_light(entity_t* entity) {
     if (igTreeNodeEx_Str("light", ImGuiTreeNodeFlags_DefaultOpen)) {
-        light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
+        light_component_t* light = (light_component_t*)scene_get_component(panel_scene, entity, "light");
 
-        igCombo_Str("type", (i32*)(&light->light.type), "directional\0point\0spot\0", 64);
+        i32 current_item = -1;
+        const char* light_types[] = {
+            "directional",
+            "point",
+            "spot"
+        };
+
+        igCombo_Str_arr("type", &current_item, light_types, 3, 64);
+        if (current_item > -1) {
+            light->light.type = (light_type_t)current_item;
+        }
+
         igCheckbox("cast", &light->cast);
         igCheckbox("shadow caster", &light->shadow_caster);
 
@@ -90,7 +100,7 @@ void panel_entity_inspector_light(entity_t* entity) {
 
 void panel_entity_inspector_model(entity_t* entity) {
     if (igTreeNodeEx_Str("model", ImGuiTreeNodeFlags_DefaultOpen)) {
-        model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+        model_component_t* model = (model_component_t*)scene_get_component(panel_scene, entity, "model");
 
         if (model->model == NULL) {
             igText("no model loaded");
@@ -131,22 +141,9 @@ void panel_entity_inspector_model(entity_t* entity) {
     }
 }
 
-void panel_entity_inspector_script(entity_t* entity) {
-    if (igTreeNodeEx_Str("script", ImGuiTreeNodeFlags_DefaultOpen)) {
-        script_component_t* script = (script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SCRIPT);
-
-        igCheckbox("run", &script->run);
-        if (igButton("restart script", (ImVec2){ 0.0f, 0.0f })) {
-            script->has_started = false;
-        }
-
-        igTreePop();
-    }
-}
-
 void panel_entity_inspector_lua_script(entity_t* entity) {
     if (igTreeNodeEx_Str("lua script", ImGuiTreeNodeFlags_DefaultOpen)) {
-        lua_script_component_t* script = (lua_script_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LUA_SCRIPT);
+        lua_script_component_t* script = (lua_script_component_t*)scene_get_component(panel_scene, entity, "lua_script");
 
         if (script->script == NULL) {
             igText("no script loaded");
@@ -181,7 +178,7 @@ void panel_entity_inspector_lua_script(entity_t* entity) {
 
 void panel_entity_inspector_skybox(entity_t* entity) {
     if (igTreeNodeEx_Str("skybox", ImGuiTreeNodeFlags_DefaultOpen)) {
-        skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
+        skybox_component_t* skybox = (skybox_component_t*)scene_get_component(panel_scene, entity, "skybox");
 
         igCheckbox("draw", &skybox->draw);
 
@@ -191,6 +188,10 @@ void panel_entity_inspector_skybox(entity_t* entity) {
 
 void panel_entity_inspector_set_entity(entity_t* entity) {
     panel_entity = entity;
+}
+
+void panel_entity_inspector_set_scene(scene_t* scene) {
+    panel_scene = scene;
 }
 
 void panel_entity_inspector() {
@@ -209,31 +210,27 @@ void panel_entity_inspector() {
 
         igSeparator();
 
-        if (entity_has_component(panel_entity, ENTITY_COMPONENT_TRANSFORM)) {
+        if (scene_has_component(panel_scene, panel_entity, "transform")) {
             panel_entity_inspector_transform(panel_entity);
         }
 
-        if (entity_has_component(panel_entity, ENTITY_COMPONENT_CAMERA)) {
+        if (scene_has_component(panel_scene, panel_entity, "camera")) {
             panel_entity_inspector_camera(panel_entity);
         }
 
-        if (entity_has_component(panel_entity, ENTITY_COMPONENT_LIGHT)) {
+        if (scene_has_component(panel_scene, panel_entity, "light")) {
             panel_entity_inspector_light(panel_entity);
         }
 
-        if (entity_has_component(panel_entity, ENTITY_COMPONENT_MODEL)) {
+        if (scene_has_component(panel_scene, panel_entity, "model")) {
             panel_entity_inspector_model(panel_entity);
         }
 
-        if (entity_has_component(panel_entity, ENTITY_COMPONENT_SCRIPT)) {
-            panel_entity_inspector_script(panel_entity);
-        }
-
-        if (entity_has_component(panel_entity, ENTITY_COMPONENT_LUA_SCRIPT)) {
+        if (scene_has_component(panel_scene, panel_entity, "lua_script")) {
             panel_entity_inspector_lua_script(panel_entity);
         }
 
-        if (entity_has_component(panel_entity, ENTITY_COMPONENT_SKYBOX)) {
+        if (scene_has_component(panel_scene, panel_entity, "skybox")) {
             panel_entity_inspector_skybox(panel_entity);
         }
     }

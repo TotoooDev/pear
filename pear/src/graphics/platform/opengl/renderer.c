@@ -15,11 +15,11 @@
 #include <graphics/platform/opengl/ubo_info.h>
 #include <graphics/platform/opengl/texture.h>
 #include <scene/components/transform.h>
-#include <scene/components/billboard.h>
 #include <scene/components/camera.h>
 #include <scene/components/model.h>
-#include <scene/components/light.h>
 #include <scene/components/skybox.h>
+#include <scene/components/billboard.h>
+#include <scene/components/light.h>
 #include <event/event_dispatcher.h>
 #include <core/app.h>
 #include <core/log.h>
@@ -214,9 +214,9 @@ void renderer_init_shadow_framebuffer(renderer_t* renderer) {
     framebuffer_set_depth_only(renderer->shadow_framebuffer);
 }
 
-void renderer_handle_model(renderer_t* renderer, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    model_component_t* model = (model_component_t*)entity_get_component(entity, ENTITY_COMPONENT_MODEL);
+void renderer_handle_model(renderer_t* renderer, scene_t* scene, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
+    model_component_t* model = (model_component_t*)scene_get_component(scene, entity, "model");
 
     if (!model->draw || model->model == NULL) {
         return;
@@ -231,9 +231,9 @@ void renderer_handle_model(renderer_t* renderer, entity_t* entity) {
     array_add(renderer->model_transforms, transform);
 }
 
-void renderer_handle_billboard(renderer_t* renderer, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    billboard_component_t* billboard = (billboard_component_t*)entity_get_component(entity, ENTITY_COMPONENT_BILLBOARD);
+void renderer_handle_billboard(renderer_t* renderer, scene_t* scene, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
+    billboard_component_t* billboard = (billboard_component_t*)scene_get_component(scene, entity, "billboard");
 
     if (!billboard->draw || billboard->texture == NULL) {
         return;
@@ -243,9 +243,9 @@ void renderer_handle_billboard(renderer_t* renderer, entity_t* entity) {
     array_add(renderer->billboard_transforms, transform);
 }
 
-void renderer_handle_camera(renderer_t* renderer, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    camera_component_t* camera = (camera_component_t*)entity_get_component(entity, ENTITY_COMPONENT_CAMERA);
+void renderer_handle_camera(renderer_t* renderer, scene_t* scene, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
+    camera_component_t* camera = (camera_component_t*)scene_get_component(scene, entity, "camera");
 
     if (camera->use) {
         camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view);
@@ -253,9 +253,9 @@ void renderer_handle_camera(renderer_t* renderer, entity_t* entity) {
     }
 }
 
-void renderer_handle_light(renderer_t* renderer, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)entity_get_component(entity, ENTITY_COMPONENT_TRANSFORM);
-    light_component_t* light = (light_component_t*)entity_get_component(entity, ENTITY_COMPONENT_LIGHT);
+void renderer_handle_light(renderer_t* renderer, scene_t* scene, entity_t* entity) {
+    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
+    light_component_t* light = (light_component_t*)scene_get_component(scene, entity, "light");
 
     if (!light->cast) {
         return;
@@ -265,8 +265,8 @@ void renderer_handle_light(renderer_t* renderer, entity_t* entity) {
     array_add(renderer->light_transforms, transform);
 }
 
-void renderer_handle_skybox(renderer_t* renderer, entity_t* entity) {
-    skybox_component_t* skybox = (skybox_component_t*)entity_get_component(entity, ENTITY_COMPONENT_SKYBOX);
+void renderer_handle_skybox(renderer_t* renderer, scene_t* scene, entity_t* entity) {
+    skybox_component_t* skybox = (skybox_component_t*)scene_get_component(scene, entity, "skybox");
 
     if (!skybox->draw) {
         return;
@@ -275,34 +275,24 @@ void renderer_handle_skybox(renderer_t* renderer, entity_t* entity) {
     array_add(renderer->skyboxes, skybox);
 }
 
-void renderer_handle_scene(renderer_t* renderer, scene_t* scene) {
-    array_t* entities = scene_get_entities(scene);
-    for (u32 i = 0; i < array_get_length(entities); i++) {
-        entity_t* entity = array_get(entities, i);
+void renderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
+    renderer_t* renderer = (renderer_t*)user_data;
 
-        if (entity_has_component(entity, ENTITY_COMPONENT_MODEL) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            renderer_handle_model(renderer, entity);
-        }
-        if (entity_has_component(entity, ENTITY_COMPONENT_BILLBOARD) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            renderer_handle_billboard(renderer, entity);
-        }
-        if (entity_has_component(entity, ENTITY_COMPONENT_CAMERA) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            renderer_handle_camera(renderer, entity);
-        }
-        if (entity_has_component(entity, ENTITY_COMPONENT_LIGHT) && entity_has_component(entity, ENTITY_COMPONENT_TRANSFORM)) {
-            renderer_handle_light(renderer, entity);
-        }
-        if (entity_has_component(entity, ENTITY_COMPONENT_SKYBOX)) {
-            renderer_handle_skybox(renderer, entity);
-        }
+    if (scene_has_component(scene, entity, "model") && scene_has_component(scene, entity, "transform")) {
+        renderer_handle_model(renderer, scene, entity);
     }
-
-    ubo_use(renderer->ubo_matrices);
-    ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view);
-
-    ubo_use(renderer->ubo_lights);
-    ubo_set_u32(renderer->ubo_lights, 0, array_get_length(renderer->lights));
-    ubo_set_vec3(renderer->ubo_lights, 1, renderer->camera_pos);
+    if (scene_has_component(scene, entity, "billboard") && scene_has_component(scene, entity, "transform")) {
+        renderer_handle_billboard(renderer, scene, entity);
+    }
+    if (scene_has_component(scene, entity, "camera") && scene_has_component(scene, entity, "transform")) {
+        renderer_handle_camera(renderer, scene, entity);
+    }
+    if (scene_has_component(scene, entity, "light") && scene_has_component(scene, entity, "transform")) {
+        renderer_handle_light(renderer, scene, entity);
+    }
+    if (scene_has_component(scene, entity, "skybox")) {
+        renderer_handle_skybox(renderer, scene, entity);
+    }
 }
 
 renderer_t* renderer_new() {
@@ -347,6 +337,7 @@ renderer_t* renderer_new() {
 
     renderer_calculate_projection(renderer);
 
+    scene_register_system(app_get_scene(), renderer_system, renderer);
     event_subscribe(renderer_on_event, renderer);
 
     return renderer;
@@ -397,7 +388,12 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 }
 
 void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
-    renderer_handle_scene(renderer, scene);
+    ubo_use(renderer->ubo_matrices);
+    ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view);
+
+    ubo_use(renderer->ubo_lights);
+    ubo_set_u32(renderer->ubo_lights, 0, array_get_length(renderer->lights));
+    ubo_set_vec3(renderer->ubo_lights, 1, renderer->camera_pos);
 
     glViewport(0, 0, RENDERER_SHADOW_MAP_SIZE, RENDERER_SHADOW_MAP_SIZE);
     glEnable(GL_DEPTH_TEST);

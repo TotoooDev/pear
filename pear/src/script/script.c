@@ -161,6 +161,7 @@ script_t* script_new(const char* script_str, entity_t* entity) {
     lua_setglobal(script->state, "pear");
 
     script_set_pointer(script, entity, "entity");
+    script_set_pointer(script, app_get_scene(), "scene");
 
     script_init_vec3(script);
     script_init_component(script);

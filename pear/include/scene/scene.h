@@ -2,30 +2,29 @@
 #define PEAR_SCENE_H_
 
 #include <scene/entity.h>
+#include <scene/component_attachment.h>
 #include <util/array.h>
-
-#ifdef PEAR_ENABLE_EDITOR
-    #define SCENE_EDITOR_CAMERA_ID 0xFFFF
-    #define SCENE_EDITOR_SCRIPT_ID 0xFFFE
-#endif
+#include <core/types.h>
 
 typedef struct scene_t scene_t;
+
+typedef void(*scene_system_t)(scene_t*, entity_t*, f32, void*);
 
 scene_t* scene_new();
 void scene_delete(scene_t* scene);
 
-entity_t* scene_add_entity(scene_t* scene, const char* name, ...);
-void scene_add_entity_ptr(scene_t* scene, entity_t* entity);
+void scene_register_component(scene_t* scene, const char* name, component_attachment_t attachment, u32 component_data_size);
+void scene_register_system(scene_t* scene, scene_system_t system, void* user_data);
+
+entity_t* scene_add_entity(scene_t* scene, const char* name);
 void scene_remove_entity(scene_t* scene, entity_t* entity);
+array_t* scene_get_entities(scene_t* scene);
+
+void* scene_add_component(scene_t* scene, entity_t* entity, const char* name);
+void* scene_get_component(scene_t* scene, entity_t* entity, const char* name);
+void scene_remove_component(scene_t* scene, entity_t* entity, const char* name);
+bool scene_has_component(scene_t* scene, entity_t* entity, const char* name);
 
 void scene_update(scene_t* scene, f32 timestep);
-
-array_t* scene_get_entities(scene_t* scene);
-u32 scene_get_next_entity_id(scene_t* scene);
-
-#ifdef PEAR_ENABLE_EDITOR
-void scene_setup_editor_scene(scene_t* scene);
-void scene_display_component_billboards(scene_t* scene, bool display);
-#endif
 
 #endif
