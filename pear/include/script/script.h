@@ -37,6 +37,7 @@ void script_get_vec3(script_t* script, const char* name, vec3 dest);
 void script_get_table(script_t* script, const char* name);
 void script_end_table_read(script_t* script);
 
+void script_dump_stack_state(lua_State* l);
 void script_dump_stack(script_t* script);
 
 lua_State* script_get_state(script_t* script);

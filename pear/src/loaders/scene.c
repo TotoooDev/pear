@@ -156,7 +156,7 @@ void loader_write_scene(scene_t* scene, const char* filename) {
             lua_script_component_t* script = (lua_script_component_t*)scene_get_component(scene, entity, "lua_script");
             cJSON* json_script = cJSON_AddObjectToObject(json_components, "lua_script");
             cJSON_AddStringToObject(json_script, "script_path", script_get_path(script->script));
-            cJSON_AddBoolToObject(json_script, "use", script->run);
+            cJSON_AddBoolToObject(json_script, "run", script->run);
         }
 
         if (scene_has_component(scene, entity, "light")) {

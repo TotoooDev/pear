@@ -3,6 +3,7 @@
 #include <panels/scene_inspector.h>
 #include <panels/entity_inspector.h>
 #include <graphics/editor/editor.h>
+#include <string.h>
 
 static scene_t* panel_scene = NULL;
 static entity_t* panel_selected_entity = NULL;
@@ -41,7 +42,16 @@ void panel_scene_inspector() {
                 flags |= ImGuiTreeNodeFlags_Selected;
             }
             
-            if (igTreeNodeEx_Str(entity_get_name(entity), flags)) {
+            bool ret;
+            const char* entity_name = entity_get_name(entity);
+            if (strlen(entity_name) == 0) {
+                ret = igTreeNodeEx_Ptr(entity, flags, "unnamed entity %d", entity_get_id(entity));
+            }
+            else {
+                ret = igTreeNodeEx_Str(entity_get_name(entity), flags);
+            }
+
+            if (ret) {
                 if (igIsItemClicked(ImGuiMouseButton_Left)) {
                     panel_entity_inspector_set_entity(entity);
                     panel_selected_entity = entity;

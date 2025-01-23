@@ -4,6 +4,7 @@
 #include <script/component.h>
 #include <script/log.h>
 #include <scene/components/lua_script.h>
+#include <scene/components/transform.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <util/filesystem.h>
@@ -115,33 +116,6 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
     }
 }
 
-void script_dump_stack_state(lua_State* l) {
-    PEAR_INFO("stack dump!");
-
-    int i;
-    int top = lua_gettop(l);
-    for (i = 1; i <= top; i++) {  /* repeat for each level */
-        int t = lua_type(l, i);
-        switch (t) {
-        case LUA_TSTRING:  /* strings */
-            PEAR_INFO("  `%s'", lua_tostring(l, i));
-            break;
-    
-        case LUA_TBOOLEAN:  /* booleans */
-            PEAR_INFO("  %s", lua_toboolean(l, i) ? "true" : "false");
-            break;
-    
-        case LUA_TNUMBER:  /* numbers */
-            PEAR_INFO("  %g", lua_tonumber(l, i));
-            break;
-    
-        default:  /* other values */
-            PEAR_INFO("  %s", lua_typename(l, t));
-            break;
-        }
-    }
-}
-
 void script_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
     if (!scene_has_component(scene, entity, "lua_script")) {
         return;
@@ -152,6 +126,15 @@ void script_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_da
         return;
     }
 
+    if (scene_has_component(scene, entity, "transform")) {
+        transform_component_t* transform = scene_get_component(scene, entity, "transform");
+        script_begin_table(script->script, "transform");
+            script_set_vec3(script->script, transform->pos, "pos");
+            script_set_vec3(script->script, transform->rotation, "rotation");
+            script_set_vec3(script->script, transform->scale, "scale");
+        script_end_table(script->script);
+    }
+
     if (!script->has_started) {
         script_on_start(script->script);
         script->has_started = true;
@@ -159,6 +142,15 @@ void script_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_da
 
     if (script->run) {
         script_on_update(script->script, timestep);
+    }
+
+    if (scene_has_component(scene, entity, "transform")) {
+        transform_component_t* transform = scene_get_component(scene, entity, "transform");
+        script_get_table(script->script, "transform");
+            script_get_vec3(script->script, "pos", transform->pos);
+            script_get_vec3(script->script, "rotation", transform->rotation);
+            script_get_vec3(script->script, "scale", transform->scale);
+        script_end_table_read(script->script);
     }
 }
 
@@ -412,6 +404,33 @@ void script_end_table_read(script_t* script) {
     }
 
     script->in_table_read = script->table_read_depth > 0;
+}
+
+void script_dump_stack_state(lua_State* l) {
+    PEAR_INFO("stack dump!");
+
+    int i;
+    int top = lua_gettop(l);
+    for (i = 1; i <= top; i++) {  /* repeat for each level */
+        int t = lua_type(l, i);
+        switch (t) {
+        case LUA_TSTRING:  /* strings */
+            PEAR_INFO("  `%s'", lua_tostring(l, i));
+            break;
+    
+        case LUA_TBOOLEAN:  /* booleans */
+            PEAR_INFO("  %s", lua_toboolean(l, i) ? "true" : "false");
+            break;
+    
+        case LUA_TNUMBER:  /* numbers */
+            PEAR_INFO("  %g", lua_tonumber(l, i));
+            break;
+    
+        default:  /* other values */
+            PEAR_INFO("  %s", lua_typename(l, t));
+            break;
+        }
+    }
 }
 
 void script_dump_stack(script_t* script) {

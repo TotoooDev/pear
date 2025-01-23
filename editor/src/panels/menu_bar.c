@@ -12,7 +12,7 @@
 void panel_menu_bar() {
     if (igBeginMainMenuBar()) {
         if (igBeginMenu("file", true)) {
-            if (igMenuItem_Bool("save scene", "", false, true)) {
+            if (igMenuItem_Bool("save scene", "", false, false)) {
                 loader_write_scene(app_get_scene(), "scene_write.pear");
             }
             
