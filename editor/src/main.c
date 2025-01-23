@@ -21,6 +21,12 @@ void on_event(event_type_t type, void* e, void* user_data) {
     scene_add_component(scene, editor_camera, "camera");
     lua_script_component_t* script = scene_add_component(scene, editor_camera, "lua_script");
     script->script = script_new_from_file("scripts/editor_camera.lua", editor_camera);
+
+    panel_scene_inspector_clear_excluded_entities();
+    panel_menu_bar_clear_excluded_entities();
+
+    panel_scene_inspector_exclude_entity(editor_camera);
+    panel_menu_bar_exclude_entity(editor_camera);
 }
 
 int main(int argc, char* argv[]) {
@@ -36,7 +42,9 @@ int main(int argc, char* argv[]) {
     script->script = script_new_from_file("scripts/editor_camera.lua", editor_camera);
 
     panel_scene_inspector_init();
-    // panel_scene_inspector_exclude_entity(editor_camera);
+    panel_scene_inspector_exclude_entity(editor_camera);
+    panel_menu_bar_init();
+    panel_menu_bar_exclude_entity(editor_camera);
 
     panel_scene_inspector_set_scene(scene);
     panel_entity_inspector_set_scene(scene);

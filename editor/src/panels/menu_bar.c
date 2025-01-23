@@ -9,11 +9,29 @@
 #include <vendor/tinyfiledialogs/tinyfiledialogs.h>
 #include <core/app.h>
 
+array_t* panel_excluded_entities = NULL;
+
+void panel_menu_bar_init() {
+    panel_excluded_entities = array_new(5);
+}
+
+void panel_menu_bar_free() {
+    array_delete(panel_excluded_entities);
+}
+
+void panel_menu_bar_exclude_entity(entity_t* entity) {
+    array_add(panel_excluded_entities, entity);
+}
+
+void panel_menu_bar_clear_excluded_entities() {
+    array_clear(panel_excluded_entities);
+}
+
 void panel_menu_bar() {
     if (igBeginMainMenuBar()) {
         if (igBeginMenu("file", true)) {
             if (igMenuItem_Bool("save scene", "", false, true)) {
-                loader_write_scene(app_get_scene(), "scene_write.pear");
+                loader_write_scene(app_get_scene(), "scene_write.pear", panel_excluded_entities);
             }
             
             igSeparator();

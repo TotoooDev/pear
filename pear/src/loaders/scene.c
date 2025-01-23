@@ -125,7 +125,7 @@ scene_t* loader_load_scene(const char* filename) {
     return scene;
 }
 
-void loader_write_scene(scene_t* scene, const char* filename) {
+void loader_write_scene(scene_t* scene, const char* filename, array_t* excluded_entities) {
     cJSON* json = cJSON_CreateObject();
     cJSON* json_scene = cJSON_AddObjectToObject(json, "scene");
     cJSON* json_entities = cJSON_AddArrayToObject(json_scene, "entities");
@@ -133,6 +133,16 @@ void loader_write_scene(scene_t* scene, const char* filename) {
     array_t* entities = scene_get_entities(scene);
     for (u32 i = 0; i < array_get_length(entities); i++) {
         entity_t* entity = array_get(entities, i);
+
+        bool excluded = false;
+        for (u32 j = 0; j < array_get_length(excluded_entities); j++) {
+            if (array_get(excluded_entities, j) == entity) {
+                excluded = true;
+            }
+        }
+        if (excluded) {
+            continue;
+        }
 
         cJSON* json_entity = cJSON_CreateObject();
         cJSON_AddStringToObject(json_entity, "name", entity_get_name(entity));

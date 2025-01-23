@@ -25,6 +25,10 @@ void panel_scene_inspector_exclude_entity(entity_t* entity) {
     array_add(panel_excluded_entities, entity);
 }
 
+void panel_scene_inspector_clear_excluded_entities() {
+    array_clear(panel_excluded_entities);
+}
+
 void panel_scene_inspector() {
     if (igBegin("scene inspector", NULL, ImGuiWindowFlags_None)) {
         if (panel_scene == NULL) {
