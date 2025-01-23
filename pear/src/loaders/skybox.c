@@ -36,6 +36,6 @@ cubemap_t* loader_load_skybox(const char* directory) {
     strcat(back_path, "/back.jpg");
     images[5] = loader_load_image(back_path);
 
-    cubemap_t* cubemap = cubemap_new_from_images(images, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_LINEAR);
+    cubemap_t* cubemap = cubemap_new_from_images(images, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_LINEAR);
     return cubemap;
 }
