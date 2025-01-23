@@ -13,6 +13,7 @@ typedef enum event_type_t {
     EVENT_TYPE_BUTTON_DOWN,
     EVENT_TYPE_BUTTON_UP,
     EVENT_TYPE_MOUSE_MOVED,
+    EVENT_TYPE_MOUSE_SCROLL,
     EVENT_TYPE_SCENE_NEW
 } event_type_t;
 
@@ -48,6 +49,11 @@ typedef struct mouse_moved_event_t {
     f32 rel_x;
     f32 rel_y;
 } mouse_moved_event_t;
+
+typedef struct mouse_scrolled_event_t {
+    f32 x;
+    f32 y;
+} mouse_scrolled_event_t;
 
 typedef struct scene_new_event_t {
     scene_t* old_scene;

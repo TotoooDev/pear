@@ -64,6 +64,15 @@ void window_mouse_movement_callback(GLFWwindow* window, f64 x, f64 y) {
     event_send(EVENT_TYPE_MOUSE_MOVED, &event);
 }
 
+void window_scroll_callback(GLFWwindow* window, f64 x, f64 y) {
+    mouse_scrolled_event_t event = {
+        .x = x,
+        .y = y
+    };
+
+    event_send(EVENT_TYPE_MOUSE_SCROLL, &event);
+}
+
 void window_mouse_button_callback(GLFWwindow* window, i32 button, i32 action, i32 mods) {
     if (action == GLFW_PRESS) {
         button_down_event_t event = {
