@@ -7,6 +7,8 @@
 
 typedef struct script_t script_t;
 
+void script_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data);
+
 script_t* script_new(const char* script_str, entity_t* entity);
 script_t* script_new_from_file(const char* filename, entity_t* entity);
 void script_delete(script_t* script);

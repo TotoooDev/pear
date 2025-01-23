@@ -3,6 +3,7 @@
 #include <script/vec3.h>
 #include <script/component.h>
 #include <script/log.h>
+#include <scene/components/lua_script.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
 #include <util/filesystem.h>
@@ -138,6 +139,26 @@ void script_dump_stack_state(lua_State* l) {
             PEAR_INFO("  %s", lua_typename(l, t));
             break;
         }
+    }
+}
+
+void script_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
+    if (!scene_has_component(scene, entity, "lua_script")) {
+        return;
+    }
+
+    lua_script_component_t* script = scene_get_component(scene, entity, "lua_script");
+    if (script->script == NULL) {
+        return;
+    }
+
+    if (!script->has_started) {
+        script_on_start(script->script);
+        script->has_started = true;
+    }
+
+    if (script->run) {
+        script_on_update(script->script, timestep);
     }
 }
 

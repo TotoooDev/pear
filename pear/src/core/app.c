@@ -3,6 +3,7 @@
 #include <graphics/window.h>
 #include <graphics/renderer.h>
 #include <graphics/editor/editor.h>
+#include <script/script.h>
 #include <event/event_dispatcher.h>
 #include <core/types.h>
 #include <core/log.h>
@@ -52,6 +53,7 @@ void app_init() {
         app->enable_editor = true;
     #endif
 
+    scene_register_system(app->scene, script_system, NULL);
     scene_register_system(app->scene, renderer_system, app->renderer);
     event_subscribe(app_on_event, NULL);
 
@@ -102,6 +104,8 @@ void app_set_scene(scene_t* scene) {
         scene_delete(app->scene);
     }
     app->scene = scene;
+
+    scene_register_system(app->scene, script_system, NULL);
     scene_register_system(app->scene, renderer_system, app->renderer);
 }
 

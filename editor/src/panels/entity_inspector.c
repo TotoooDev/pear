@@ -64,7 +64,7 @@ void panel_entity_inspector_light(entity_t* entity) {
     if (igTreeNodeEx_Str("light", ImGuiTreeNodeFlags_DefaultOpen)) {
         light_component_t* light = (light_component_t*)scene_get_component(panel_scene, entity, "light");
 
-        i32 current_item = -1;
+        i32 current_item = light->light.type;
         const char* light_types[] = {
             "directional",
             "point",
