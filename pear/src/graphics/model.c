@@ -9,6 +9,8 @@ typedef struct model_t {
 
     u32 num_meshes;
     u32 num_materials;
+
+    char path[1024];
 } model_t;
 
 model_t* model_new(mesh_t** meshes, material_t** materials, u32 num_meshes, u32 num_materials) {
@@ -18,6 +20,7 @@ model_t* model_new(mesh_t** meshes, material_t** materials, u32 num_meshes, u32 
     model->materials = materials;
     model->num_meshes = num_meshes;
     model->num_materials = num_materials;
+    model->path[0] = '\0';
 
     return model;
 }
@@ -60,4 +63,12 @@ mesh_t** model_get_meshes(model_t* model) {
 
 material_t** model_get_materials(model_t* model) {
     return model->materials;
+}
+
+void model_set_path(model_t* model, const char* path) {
+    strncpy(model->path, path, 1024);
+}
+
+char* model_get_path(model_t* model) {
+    return model->path;
 }

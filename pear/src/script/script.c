@@ -50,6 +50,8 @@ typedef struct script_t {
     u32 table_creation_depth;
     u32 table_read_depth;
     f64 timestep;
+
+    char path[1024];
 } script_t;
 
 void script_on_event(event_type_t type, void* e, void* user_data) {
@@ -147,6 +149,7 @@ script_t* script_new(const char* script_str, entity_t* entity) {
     script->table_creation_depth = 0;
     script->table_read_depth = 0;
     script->timestep = 0.0f;
+    script->path[0] = '\0';
 
     script->state = luaL_newstate();
     luaL_openlibs(script->state);
@@ -197,6 +200,7 @@ script_t* script_new(const char* script_str, entity_t* entity) {
 script_t* script_new_from_file(const char* filename, entity_t* entity) {
     char* script_str = filesystem_read_file(filename);
     script_t* script = script_new(script_str, entity);
+    script_set_path(script, filename);
     PEAR_FREE(script_str);
     return script;
 }
@@ -205,6 +209,14 @@ void script_delete(script_t* script) {
     lua_close(script->state);
     event_unsubscribe(script_on_event, script);
     PEAR_FREE(script);
+}
+
+void script_set_path(script_t* script, const char* path) {
+    strncpy(script->path, path, 1024);
+}
+
+char* script_get_path(script_t* script) {
+    return script->path;
 }
 
 void script_on_start(script_t* script) {

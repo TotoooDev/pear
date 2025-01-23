@@ -14,4 +14,7 @@ u32 model_get_num_materials(model_t* model);
 mesh_t** model_get_meshes(model_t* model);
 material_t** model_get_materials(model_t* model);
 
+void model_set_path(model_t* model, const char* path);
+char* model_get_path(model_t* model);
+
 #endif

@@ -12,6 +12,12 @@
 void panel_menu_bar() {
     if (igBeginMainMenuBar()) {
         if (igBeginMenu("file", true)) {
+            if (igMenuItem_Bool("save scene", "", false, true)) {
+                loader_write_scene(app_get_scene(), "scene_write.pear");
+            }
+            
+            igSeparator();
+
             if (igMenuItem_Bool("load scene...", "", false, true)) {
                 const char* filters[] = { "*.pear" };
                 char* path = tinyfd_openFileDialog("choose scene", "", 1, filters, "pear scene files", 0);

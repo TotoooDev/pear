@@ -233,5 +233,7 @@ model_t* loader_load_gltf(const char* filename) {
 
     cgltf_free(data);
 
+    model_set_path(model, filename);
+
     return model;
 }

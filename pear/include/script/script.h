@@ -11,6 +11,9 @@ script_t* script_new(const char* script_str, entity_t* entity);
 script_t* script_new_from_file(const char* filename, entity_t* entity);
 void script_delete(script_t* script);
 
+void script_set_path(script_t* script, const char* path);
+char* script_get_path(script_t* script);
+
 void script_on_start(script_t* script);
 void script_on_update(script_t* script, f64 timestep);
 void script_on_destroy(script_t* script);

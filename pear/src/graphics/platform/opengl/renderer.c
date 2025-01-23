@@ -337,7 +337,6 @@ renderer_t* renderer_new() {
 
     renderer_calculate_projection(renderer);
 
-    scene_register_system(app_get_scene(), renderer_system, renderer);
     event_subscribe(renderer_on_event, renderer);
 
     return renderer;

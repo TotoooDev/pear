@@ -7,6 +7,8 @@
 
 typedef struct renderer_t renderer_t;
 
+void renderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data);
+
 renderer_t* renderer_new();
 void renderer_delete(renderer_t* renderer);
 

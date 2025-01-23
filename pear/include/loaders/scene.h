@@ -4,5 +4,6 @@
 #include <scene/scene.h>
 
 scene_t* loader_load_scene(const char* filename);
+void loader_write_scene(scene_t* scene, const char* filename);
 
 #endif

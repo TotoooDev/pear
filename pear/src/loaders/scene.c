@@ -11,13 +11,15 @@
 #include <core/alloc.h>
 
 void loader_parse_vec3(cJSON* json, vec3 dest) {
-    f32 x = cJSON_GetNumberValue(cJSON_GetObjectItem(json, "x"));
-    f32 y = cJSON_GetNumberValue(cJSON_GetObjectItem(json, "y"));
-    f32 z = cJSON_GetNumberValue(cJSON_GetObjectItem(json, "z"));
+    dest[0] = cJSON_GetNumberValue(cJSON_GetObjectItem(json, "x"));
+    dest[1] = cJSON_GetNumberValue(cJSON_GetObjectItem(json, "y"));
+    dest[2] = cJSON_GetNumberValue(cJSON_GetObjectItem(json, "z"));
+}
 
-    dest[0] = x;
-    dest[1] = y;
-    dest[2] = z;
+void loader_write_vec3(cJSON* json, vec3 vec) {
+    cJSON_AddNumberToObject(json, "x", vec[0]);
+    cJSON_AddNumberToObject(json, "y", vec[1]);
+    cJSON_AddNumberToObject(json, "z", vec[2]);
 }
 
 scene_t* loader_load_scene(const char* filename) {
@@ -108,4 +110,86 @@ scene_t* loader_load_scene(const char* filename) {
     cJSON_Delete(json);
 
     return scene;
+}
+
+void loader_write_scene(scene_t* scene, const char* filename) {
+    cJSON* json = cJSON_CreateObject();
+    cJSON* json_scene = cJSON_AddObjectToObject(json, "scene");
+    cJSON* json_entities = cJSON_AddArrayToObject(json_scene, "entities");
+
+    array_t* entities = scene_get_entities(scene);
+    for (u32 i = 0; i < array_get_length(entities); i++) {
+        entity_t* entity = array_get(entities, i);
+
+        cJSON* json_entity = cJSON_CreateObject();
+        cJSON_AddStringToObject(json_entity, "name", entity_get_name(entity));
+
+        cJSON* json_components = cJSON_AddObjectToObject(json_entity, "components");
+
+        if (scene_has_component(scene, entity, "transform")) {
+            transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
+            cJSON* json_transform = cJSON_AddObjectToObject(json_components, "transform");
+            cJSON* json_pos = cJSON_AddObjectToObject(json_transform, "pos");
+            cJSON* json_rotation = cJSON_AddObjectToObject(json_transform, "rotation");
+            cJSON* json_scale = cJSON_AddObjectToObject(json_transform, "scale");
+
+            loader_write_vec3(json_pos, transform->pos);
+            loader_write_vec3(json_rotation, transform->rotation);
+            loader_write_vec3(json_scale, transform->scale);
+        }
+
+        if (scene_has_component(scene, entity, "model")) {
+            model_component_t* model = (model_component_t*)scene_get_component(scene, entity, "model");
+            cJSON* json_model = cJSON_AddObjectToObject(json_components, "model");
+            cJSON_AddStringToObject(json_model, "model_path", model_get_path(model->model));
+            cJSON_AddBoolToObject(json_model, "draw", model->draw);
+            cJSON_AddBoolToObject(json_model, "shadow_caster", model->shadow_caster);
+        }
+
+        if (scene_has_component(scene, entity, "camera")) {
+            camera_component_t* camera = (camera_component_t*)scene_get_component(scene, entity, "camera");
+            cJSON* json_camera = cJSON_AddObjectToObject(json_components, "camera");
+            cJSON_AddBoolToObject(json_camera, "use", camera->use);
+        }
+
+        if (scene_has_component(scene, entity, "lua_script")) {
+            lua_script_component_t* script = (lua_script_component_t*)scene_get_component(scene, entity, "lua_script");
+            cJSON* json_script = cJSON_AddObjectToObject(json_components, "lua_script");
+            cJSON_AddStringToObject(json_script, "script_path", script_get_path(script->script));
+            cJSON_AddBoolToObject(json_script, "use", script->run);
+        }
+
+        if (scene_has_component(scene, entity, "light")) {
+            light_component_t* light = (light_component_t*)scene_get_component(scene, entity, "light");
+            cJSON* json_light = cJSON_AddObjectToObject(json_components, "light");
+
+            cJSON_AddNumberToObject(json_light, "type", light->light.type);
+            loader_write_vec3(cJSON_AddObjectToObject(json_light, "ambient"), light->light.ambient);
+            loader_write_vec3(cJSON_AddObjectToObject(json_light, "diffuse"), light->light.diffuse);
+            loader_write_vec3(cJSON_AddObjectToObject(json_light, "specular"), light->light.specular);
+            cJSON_AddNumberToObject(json_light, "constant", light->light.constant);
+            cJSON_AddNumberToObject(json_light, "linear", light->light.linear);
+            cJSON_AddNumberToObject(json_light, "quadratic", light->light.quadratic);
+            cJSON_AddNumberToObject(json_light, "cutoff", light->light.cutoff);
+            cJSON_AddNumberToObject(json_light, "outer_cutoff", light->light.outer_cutoff);
+            cJSON_AddBoolToObject(json_light, "cast", light->cast);
+            cJSON_AddBoolToObject(json_light, "shadow_caster", light->shadow_caster);
+        }
+
+        cJSON_AddItemToArray(json_entities, json_entity);
+    }
+
+    char* json_str = cJSON_PrintUnformatted(json);
+    if (json_str == NULL) {
+        const char* error = cJSON_GetErrorPtr();
+        PEAR_ERROR("failed to write scene file %s! %s", filename, error);
+        cJSON_Delete(json);
+        return;
+    }
+    
+    FILE* file = fopen(filename, "w");
+    fprintf(file, json_str);
+    fclose(file);
+
+    cJSON_Delete(json);
 }
