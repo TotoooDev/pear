@@ -167,6 +167,20 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
             lua_pop(script->state, -1);
         }
     }
+
+    if (type == EVENT_TYPE_MOUSE_SCROLL) {
+        mouse_scrolled_event_t* event = (mouse_scrolled_event_t*)e;
+
+        lua_getglobal(script->state, "on_scroll");
+        if (lua_isfunction(script->state, -1)) {
+            lua_pushnumber(script->state, event->x);
+            lua_pushnumber(script->state, event->y);
+            PEAR_CALL_LUA(lua_pcall(script->state, 2, 0, 0));
+        }
+        else {
+            lua_pop(script->state, -1);
+        }
+    }
 }
 
 void script_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {

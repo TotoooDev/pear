@@ -131,6 +131,7 @@ window_t* window_new(const char* title, u32 width, u32 height) {
     glfwSetKeyCallback(window->window, window_key_callback);
     glfwSetMouseButtonCallback(window->window, window_mouse_button_callback);
     glfwSetCursorPosCallback(window->window, window_mouse_movement_callback);
+    glfwSetScrollCallback(window->window, window_scroll_callback);
 
     return window;
 }

@@ -45,6 +45,10 @@ function on_button_up()
     end
 end
 
+function on_scroll(x, y)
+    pear.log.info("scroll: " .. x .. " " .. y)
+end
+
 function on_editor()
     radius = pear.editor.drag_number("radius", radius, 0.01, 0.0, math.huge)
     azimuth = pear.editor.drag_number("azimuth", azimuth, 1.0, -math.huge, math.huge)
