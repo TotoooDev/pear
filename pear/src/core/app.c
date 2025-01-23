@@ -61,6 +61,8 @@ void app_init() {
         editor_init();
     #endif
     timer_init();
+
+    event_send(EVENT_TYPE_SCENE_NEW, &(scene_new_event_t){ .old_scene = NULL, .new_scene = app->scene });
 }
 
 void app_stop() {
@@ -100,6 +102,8 @@ scene_t* app_get_scene() {
 }
 
 void app_set_scene(scene_t* scene) {
+    event_send(EVENT_TYPE_SCENE_NEW, &(scene_new_event_t){ .old_scene = app->scene, .new_scene = scene });
+
     if (app->scene != NULL) {
         scene_delete(app->scene);
     }

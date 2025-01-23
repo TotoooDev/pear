@@ -18,6 +18,7 @@ void scene_register_system(scene_t* scene, scene_system_t system, void* user_dat
 
 entity_t* scene_add_entity(scene_t* scene, const char* name);
 void scene_remove_entity(scene_t* scene, entity_t* entity);
+bool scene_entity_exists(scene_t* scene, entity_t* entity);
 array_t* scene_get_entities(scene_t* scene);
 
 void* scene_add_component(scene_t* scene, entity_t* entity, const char* name);

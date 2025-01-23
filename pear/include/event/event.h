@@ -1,6 +1,7 @@
 #ifndef PEAR_EVENT_H_
 #define PEAR_EVENT_H_
 
+#include <scene/scene.h>
 #include <core/types.h>
 
 typedef enum event_type_t {
@@ -12,6 +13,7 @@ typedef enum event_type_t {
     EVENT_TYPE_BUTTON_DOWN,
     EVENT_TYPE_BUTTON_UP,
     EVENT_TYPE_MOUSE_MOVED,
+    EVENT_TYPE_SCENE_NEW
 } event_type_t;
 
 typedef struct window_resized_event_t {
@@ -46,5 +48,10 @@ typedef struct mouse_moved_event_t {
     f32 rel_x;
     f32 rel_y;
 } mouse_moved_event_t;
+
+typedef struct scene_new_event_t {
+    scene_t* old_scene;
+    scene_t* new_scene;
+} scene_new_event_t;
 
 #endif

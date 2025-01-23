@@ -7,9 +7,22 @@
 
 static scene_t* panel_scene = NULL;
 static entity_t* panel_selected_entity = NULL;
+static array_t* panel_excluded_entities = NULL;
+
+void panel_scene_inspector_init() {
+    panel_excluded_entities = array_new(3);
+}
+
+void panel_scene_inspector_free() {
+    array_delete(panel_excluded_entities);
+}
 
 void panel_scene_inspector_set_scene(scene_t* scene) {
     panel_scene = scene;
+}
+
+void panel_scene_inspector_exclude_entity(entity_t* entity) {
+    array_add(panel_excluded_entities, entity);
 }
 
 void panel_scene_inspector() {
@@ -36,6 +49,16 @@ void panel_scene_inspector() {
         igSeparator();
         for (u32 i = 0; i < array_get_length(entities); i++) {
             entity_t* entity = (entity_t*)array_get(entities, i);
+
+            bool excluded = false;
+            for (u32 j = 0; j < array_get_length(panel_excluded_entities); j++) {
+                if (array_get(panel_excluded_entities, j) == entity) {
+                    excluded = true;
+                }
+            }
+            if (excluded) {
+                continue;
+            }
 
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_FramePadding;
             if (entity == panel_selected_entity) {

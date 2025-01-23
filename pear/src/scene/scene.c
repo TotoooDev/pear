@@ -80,6 +80,16 @@ void scene_remove_entity(scene_t* scene, entity_t* entity) {
     entity_delete(entity);
 }
 
+bool scene_entity_exists(scene_t* scene, entity_t* entity) {
+    for (u32 i = 0; i < array_get_length(scene->entities); i++) {
+        if (entity_get_id(entity) == entity_get_id(array_get(scene->entities, i))) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 array_t* scene_get_entities(scene_t* scene) {
     return scene->entities;
 }
