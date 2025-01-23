@@ -4,6 +4,7 @@
 #include <core/log.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 
 char* filesystem_read_file(const char* filename) {
@@ -24,6 +25,10 @@ char* filesystem_read_file(const char* filename) {
     fclose(file);
 
     return buffer;
+}
+
+bool filesystem_file_exists(const char* filename) {
+    return access(filename, F_OK) == 0;
 }
 
 #endif
