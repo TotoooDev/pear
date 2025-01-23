@@ -16,8 +16,7 @@ void panel_viewport() {
         texture_t* texture_depth = renderer_get_screen_depth_texture(app_get_renderer());
 
         if (texture_get_width(texture) != size.x || texture_get_height(texture) != size.y) {
-            texture_resize(texture, size.x, size.y);
-            texture_resize(texture_depth, size.x, size.y);
+            renderer_set_viewport_size(app_get_renderer(), size.x, size.y , 1.0f, 1.0f);
         }
 
         #ifdef PEAR_PLATFORM_OPENGL

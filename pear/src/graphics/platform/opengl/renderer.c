@@ -438,6 +438,21 @@ texture_t* renderer_get_screen_depth_texture(renderer_t* renderer) {
     return renderer->screen_depth_texture;
 }
 
+void renderer_set_viewport_size(renderer_t* renderer, f32 width, f32 height, f32 width_scale, f32 height_scale) {
+    renderer->viewport_width = width;
+    renderer->viewport_height = height;
+    renderer->viewport_scale_x = width_scale;
+    renderer->viewport_scale_y = height_scale;
+    renderer->viewport_width_scaled = renderer->viewport_width;
+    renderer->viewport_height_scaled = renderer->viewport_height;
+    renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
+
+    texture_resize(renderer->screen_texture, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
+    texture_resize(renderer->screen_depth_texture, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
+
+    renderer_calculate_projection(renderer);
+}
+
 void renderer_set_near(renderer_t* renderer, f32 near) {
     renderer->near = near;
     renderer_calculate_projection(renderer);

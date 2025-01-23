@@ -21,6 +21,7 @@ u32 renderer_get_num_vertices(renderer_t* renderer);
 texture_t* renderer_get_screen_texture(renderer_t* renderer);
 texture_t* renderer_get_screen_depth_texture(renderer_t* renderer);
 
+void renderer_set_viewport_size(renderer_t* renderer, f32 width, f32 height, f32 width_scale, f32 height_scale);
 void renderer_set_near(renderer_t* renderer, f32 near);
 void renderer_set_far(renderer_t* renderer, f32 far);
 void renderer_set_fov(renderer_t* renderer, f32 fov);
