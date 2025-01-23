@@ -471,12 +471,30 @@ i32 script_drag_number_item(lua_State* l) {
     return 1;
 }
 
+i32 script_drag_vec3_item(lua_State* l) {
+    const char* label = lua_tostring(l, 1);
+    f32* value = (f32*)lua_touserdata(l, 2);
+    f64 speed = lua_tonumber(l, 3);
+    f32 min = lua_tonumber(l, 4);
+    f32 max = lua_tonumber(l, 5);
+
+    f32* res = (f32*)lua_newuserdata(l, sizeof(vec3));
+    luaL_getmetatable(l, "pear.vec3");
+    lua_setmetatable(l, -2);
+    glm_vec3_copy(value, res);
+
+    igDragFloat3(label, res, speed, min, max, "%.3f", ImGuiSliderFlags_None);
+    
+    return 1;
+}
+
 void script_init_editor(script_t* script) {
     script_begin_table(script, "editor");
         script_set_bool(script, true, "enabled");
         script_set_function(script, script_button_item, "button");
         script_set_function(script, script_checkbox_item, "checkbox");
         script_set_function(script, script_drag_number_item, "drag_number");
+        script_set_function(script, script_drag_vec3_item, "drag_vec3");
     script_end_table(script);
 }
 
