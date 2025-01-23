@@ -7,6 +7,7 @@
 #include <scene/components/transform.h>
 #include <event/event_dispatcher.h>
 #include <event/keyboard.h>
+#include <event/mouse.h>
 #include <util/filesystem.h>
 #include <core/log.h>
 #include <core/alloc.h>
@@ -114,6 +115,58 @@ void script_on_event(event_type_t type, void* e, void* user_data) {
             lua_pop(script->state, -1);
         }
     }
+
+    if (type == EVENT_TYPE_BUTTON_DOWN) {
+        button_down_event_t* event = (button_down_event_t*)e;
+
+        script_begin_table(script, "mouse");
+            script_begin_table(script, "button");
+                if (event->button == PEAR_MOUSE_BUTTON_LEFT) {
+                    script_set_bool(script, true, "left");
+                }
+                if (event->button == PEAR_MOUSE_BUTTON_RIGHT) {
+                    script_set_bool(script, true, "right");
+                }
+                if (event->button == PEAR_MOUSE_BUTTON_MIDDLE) {
+                    script_set_bool(script, true, "middle");
+                }
+            script_end_table(script);
+        script_end_table(script);
+
+        lua_getglobal(script->state, "on_button_down");
+        if (lua_isfunction(script->state, -1)) {
+            PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+        }
+        else {
+            lua_pop(script->state, -1);
+        }
+    }
+
+    if (type == EVENT_TYPE_BUTTON_UP) {
+        button_up_event_t* event = (button_up_event_t*)e;
+
+        script_begin_table(script, "mouse");
+            script_begin_table(script, "button");
+                if (event->button == PEAR_MOUSE_BUTTON_LEFT) {
+                    script_set_bool(script, false, "left");
+                }
+                if (event->button == PEAR_MOUSE_BUTTON_RIGHT) {
+                    script_set_bool(script, false, "right");
+                }
+                if (event->button == PEAR_MOUSE_BUTTON_MIDDLE) {
+                    script_set_bool(script, false, "middle");
+                }
+            script_end_table(script);
+        script_end_table(script);
+
+        lua_getglobal(script->state, "on_button_up");
+        if (lua_isfunction(script->state, -1)) {
+            PEAR_CALL_LUA(lua_pcall(script->state, 0, 0, 0));
+        }
+        else {
+            lua_pop(script->state, -1);
+        }
+    }
 }
 
 void script_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
@@ -195,6 +248,11 @@ script_t* script_new(const char* script_str, entity_t* entity) {
     script_begin_table(script, "mouse");
         script_set_vec3(script, (vec3){ 0.0f, 0.0f, 0.0f }, "pos");
         script_set_vec3(script, (vec3){ 0.0f, 0.0f, 0.0f }, "relative");
+        script_begin_table(script, "button");
+            script_set_bool(script, false, "left");
+            script_set_bool(script, false, "right");
+            script_set_bool(script, false, "middle");
+        script_end_table(script);
     script_end_table(script);
 
     #ifdef PEAR_ENABLE_EDITOR
