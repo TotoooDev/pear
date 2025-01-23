@@ -1,11 +1,13 @@
 #include <loaders/scene.h>
 #include <loaders/model.h>
+#include <loaders/skybox.h>
 #include <loaders/vendor/cJSON.h>
 #include <scene/components/transform.h>
 #include <scene/components/model.h>
 #include <scene/components/camera.h>
 #include <scene/components/lua_script.h>
 #include <scene/components/light.h>
+#include <scene/components/skybox.h>
 #include <util/filesystem.h>
 #include <core/log.h>
 #include <core/alloc.h>
@@ -105,6 +107,17 @@ scene_t* loader_load_scene(const char* filename) {
             light_comp->shadow_caster = cJSON_IsTrue(cJSON_GetObjectItem(json_light, "shadow_caster"));
             light_comp->light = light;
         }
+
+        if (cJSON_HasObjectItem(json_components, "skybox")) {
+            skybox_component_t* skybox = scene_add_component(scene, entity, "skybox");
+
+            cJSON* json_script = cJSON_GetObjectItem(json_components, "skybox");
+            skybox->draw = cJSON_IsTrue(cJSON_GetObjectItem(json_script, "draw"));
+
+            char* path = cJSON_GetStringValue(cJSON_GetObjectItem(json_script, "cubemap_path"));
+            skybox->cubemap = loader_load_skybox(path);
+            cubemap_set_path(skybox->cubemap, path);
+        }
     }
 
     cJSON_Delete(json);
@@ -174,6 +187,13 @@ void loader_write_scene(scene_t* scene, const char* filename) {
             cJSON_AddNumberToObject(json_light, "outer_cutoff", light->light.outer_cutoff);
             cJSON_AddBoolToObject(json_light, "cast", light->cast);
             cJSON_AddBoolToObject(json_light, "shadow_caster", light->shadow_caster);
+        }
+
+        if (scene_has_component(scene, entity, "skybox")) {
+            skybox_component_t* skybox = (skybox_component_t*)scene_get_component(scene, entity, "skybox");
+            cJSON* json_skybox = cJSON_AddObjectToObject(json_components, "skybox");
+            cJSON_AddStringToObject(json_skybox, "cubemap_path", cubemap_get_path(skybox->cubemap));
+            cJSON_AddBoolToObject(json_skybox, "draw", skybox->draw);
         }
 
         cJSON_AddItemToArray(json_entities, json_entity);

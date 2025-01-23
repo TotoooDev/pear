@@ -7,6 +7,7 @@
 #include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
 #include <loaders/model.h>
+#include <loaders/skybox.h>
 #include <vendor/tinyfiledialogs/tinyfiledialogs.h>
 #include <string.h>
 
@@ -113,7 +114,9 @@ void panel_entity_inspector_model(entity_t* entity) {
 
             const char* filters[] = { "*.gltf", "*.glb" };
             char* path = tinyfd_openFileDialog("choose model", "", 2, filters, "gltf files", 0);
-            model->model = loader_load_gltf(path);
+            if (path != NULL) {
+                model->model = loader_load_gltf(path);
+            }
         }
 
         igSeparator();
@@ -156,7 +159,9 @@ void panel_entity_inspector_lua_script(entity_t* entity) {
 
             const char* filters[] = { "*.lua" };
             char* path = tinyfd_openFileDialog("choose lua script", "", 1, filters, "lua files", 0);
-            script->script = script_new_from_file(path, entity);
+            if (path != NULL) {
+                script->script = script_new_from_file(path, entity);
+            }
         }
 
         igSeparator();
@@ -179,6 +184,22 @@ void panel_entity_inspector_lua_script(entity_t* entity) {
 void panel_entity_inspector_skybox(entity_t* entity) {
     if (igTreeNodeEx_Str("skybox", ImGuiTreeNodeFlags_DefaultOpen)) {
         skybox_component_t* skybox = (skybox_component_t*)scene_get_component(panel_scene, entity, "skybox");
+
+        if (skybox->cubemap == NULL) {
+            igText("no skybox loaded");
+        }
+
+        if (igButton("choose skybox", (ImVec2){ 0.0f ,0.0f })) {
+            if (skybox->cubemap != NULL) {
+                cubemap_delete(skybox->cubemap);
+            }
+
+            char* path = tinyfd_selectFolderDialog("choose skybox directory", ".");
+            if (path != NULL) {
+                skybox->cubemap = loader_load_skybox(path);
+                cubemap_set_path(skybox->cubemap, path);
+            }
+        }
 
         igCheckbox("draw", &skybox->draw);
 

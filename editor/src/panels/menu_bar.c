@@ -12,7 +12,7 @@
 void panel_menu_bar() {
     if (igBeginMainMenuBar()) {
         if (igBeginMenu("file", true)) {
-            if (igMenuItem_Bool("save scene", "", false, false)) {
+            if (igMenuItem_Bool("save scene", "", false, true)) {
                 loader_write_scene(app_get_scene(), "scene_write.pear");
             }
             
@@ -21,11 +21,13 @@ void panel_menu_bar() {
             if (igMenuItem_Bool("load scene...", "", false, true)) {
                 const char* filters[] = { "*.pear" };
                 char* path = tinyfd_openFileDialog("choose scene", "", 1, filters, "pear scene files", 0);
-                scene_t* scene = loader_load_scene(path);
-                app_set_scene(scene);
-                panel_scene_inspector_set_scene(scene);
-                panel_entity_inspector_set_scene(scene);
-                panel_entity_inspector_set_entity(NULL);
+                if (path != NULL) {
+                    scene_t* scene = loader_load_scene(path);
+                    app_set_scene(scene);
+                    panel_scene_inspector_set_scene(scene);
+                    panel_entity_inspector_set_scene(scene);
+                    panel_entity_inspector_set_entity(NULL);
+                }
             }
 
             igSeparator();

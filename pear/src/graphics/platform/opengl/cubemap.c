@@ -5,9 +5,11 @@
 #include <graphics/platform/opengl/texture.h>
 #include <core/alloc.h>
 #include <GL/glew.h>
+#include <string.h>
 
 typedef struct cubemap_t {
     u32 id;
+    char path[1024];
 } cubemap_t;
 
 cubemap_t* cubemap_create(texture_wrapping_t wrapping, texture_filtering_t filtering) {
@@ -57,6 +59,14 @@ void cubemap_delete(cubemap_t* cubemap) {
 void cubemap_use(cubemap_t* cubemap, u32 index) {
     glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->id);
+}
+
+void cubemap_set_path(cubemap_t* cubemap, const char* path) {
+    strncpy(cubemap->path, path, 1024);
+}
+
+char* cubemap_get_path(cubemap_t* cubemap) {
+    return cubemap->path;
 }
 
 #endif

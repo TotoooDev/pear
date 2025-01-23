@@ -9,4 +9,7 @@ cubemap_t* cubemap_new(u32 width, u32 height, texture_wrapping_t wrapping, textu
 cubemap_t* cubemap_new_from_images(image_t** images, texture_wrapping_t wrapping, texture_filtering_t filtering);
 void cubemap_delete(cubemap_t* cubemap);
 
+void cubemap_set_path(cubemap_t* cubemap, const char* path);
+char* cubemap_get_path(cubemap_t* cubemap);
+
 #endif

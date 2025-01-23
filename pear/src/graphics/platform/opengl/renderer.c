@@ -268,7 +268,7 @@ void renderer_handle_light(renderer_t* renderer, scene_t* scene, entity_t* entit
 void renderer_handle_skybox(renderer_t* renderer, scene_t* scene, entity_t* entity) {
     skybox_component_t* skybox = (skybox_component_t*)scene_get_component(scene, entity, "skybox");
 
-    if (!skybox->draw) {
+    if (!skybox->draw || skybox->cubemap == NULL) {
         return;
     }
 
