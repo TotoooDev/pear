@@ -46,7 +46,7 @@ function on_button_up()
 end
 
 function on_scroll(x, y)
-    pear.log.info("scroll: " .. x .. " " .. y)
+    radius = radius - y * 0.5
 end
 
 function on_editor()
