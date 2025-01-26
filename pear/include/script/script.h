@@ -28,6 +28,7 @@ void script_set_pointer(script_t* script, void* ptr, const char* name);
 void script_set_vec3(script_t* script, vec3 vec, const char* name);
 void script_begin_table(script_t* script, const char* name);
 void script_end_table(script_t* script);
+void script_set_nil(script_t* script, const char* name);
 
 f64 script_get_number(script_t* script, const char* name);
 const char* script_get_string(script_t* script, const char* name);
