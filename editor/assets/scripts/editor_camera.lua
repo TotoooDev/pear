@@ -1,6 +1,7 @@
 -- from https://www.mbsoftworks.sk/tutorials/opengl4/026-camera-pt3-orbit-camera/
 
 local move_camera = false
+local move_target = false
 
 local sensitivity = 0.1
 local azimuth = 0.0
@@ -31,17 +32,30 @@ function on_mouse_movement()
         azimuth = azimuth + pear.mouse.relative.x * sensitivity
         polar = polar + pear.mouse.relative.y * sensitivity
     end
+    if move_target then
+        local up = pear.camera.up
+        local right = pear.camera.right
+
+        target = target - right * pear.mouse.relative.x * sensitivity * radius * 0.01
+        target = target + up * pear.mouse.relative.y * sensitivity * radius * 0.01
+    end
 end
 
 function on_button_down()
     if pear.mouse.button.middle then
         move_camera = true
     end
+    if pear.mouse.button.right then
+        move_target = true
+    end
 end
 
 function on_button_up()
     if not pear.mouse.button.middle then
         move_camera = false
+    end
+    if not pear.mouse.button.right then
+        move_target = false
     end
 end
 
