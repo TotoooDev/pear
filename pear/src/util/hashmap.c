@@ -1,9 +1,11 @@
 #include <util/hashmap.h>
 #include <util/array.h>
 #include <core/alloc.h>
+#include <string.h>
 
 typedef struct pair_t {
     u64 hash;
+    char* key;
     void* value;
 } pair_t;
 
@@ -47,6 +49,12 @@ void hashmap_set(hashmap_t* hashmap, const char* str, void* ptr) {
     pair_t* pair = (pair_t*)PEAR_MALLOC(sizeof(pair_t));
     pair->hash = hash;
     pair->value = ptr;
+    
+    u32 str_length = strlen(str);
+    pair->key = (char*)PEAR_MALLOC(sizeof(char) * str_length + 1);
+    strcpy(pair->key, str);
+    pair->key[str_length] = '\0';
+
     array_add(hashmap->pairs, pair);
 }
 
@@ -83,4 +91,11 @@ bool hashmap_exists(hashmap_t* hashmap, const char* str) {
     }
 
     return false;
+}
+
+void hashmap_iterate(hashmap_t* hashmap, hashmap_iterator_t iterator, void* user_pointer) {
+    for (u32 i = 0; i < array_get_length(hashmap->pairs); i++) {
+        pair_t* pair = array_get(hashmap->pairs, i);
+        iterator(pair->key, pair->value, user_pointer);
+    }
 }

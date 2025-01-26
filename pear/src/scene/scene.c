@@ -28,6 +28,19 @@ typedef struct component_t {
     u32 component_data_size;
 } component_t;
 
+// i should stop trying to make up names this is is stupid
+typedef struct entity_delete_iterator_data_t {
+    scene_t* scene;
+    entity_t* entity;
+} entity_delete_iterator_data_t;
+
+void scene_entity_delete_iterator(char* key, void* ptr, void* user_pointer) {
+    entity_delete_iterator_data_t* data = (entity_delete_iterator_data_t*)user_pointer;
+    if (scene_has_component(data->scene, data->entity, key)) {
+        scene_remove_component(data->scene, data->entity, key);
+    }
+}
+
 scene_t* scene_new() {
     scene_t* scene = (scene_t*)PEAR_MALLOC(sizeof(scene_t));
 
@@ -49,6 +62,10 @@ scene_t* scene_new() {
 }
 
 void scene_delete(scene_t* scene) {
+    for (u32 i = 0; i < array_get_length(scene->entities); i++) {
+        scene_remove_entity(scene, array_get(scene->entities, i));
+    }
+
     hashmap_delete(scene->components);
     array_delete(scene->systems);
     array_delete(scene->user_datas);
@@ -76,6 +93,7 @@ entity_t* scene_add_entity(scene_t* scene, const char* name) {
 }
 
 void scene_remove_entity(scene_t* scene, entity_t* entity) {
+    hashmap_iterate(scene->components, scene_entity_delete_iterator, &(entity_delete_iterator_data_t){ .scene = scene, .entity = entity });
     array_remove(scene->entities, entity);
     entity_delete(entity);
 }
@@ -122,7 +140,8 @@ void* scene_get_component(scene_t* scene, entity_t* entity, const char* name) {
 void scene_remove_component(scene_t* scene, entity_t* entity, const char* name) {
     component_t* component = hashmap_get(scene->components, name);
     if (component->attachment.destructor != NULL) {
-        component->attachment.destructor(entity_get_hashmap(entity), entity);
+        component->attachment.destructor(hashmap_get(entity_get_hashmap(entity), name), entity);
+        PEAR_FREE(hashmap_get(entity_get_hashmap(entity), name));
     }
     hashmap_remove(entity_get_hashmap(entity), name);
 }
