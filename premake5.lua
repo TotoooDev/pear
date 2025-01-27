@@ -71,7 +71,7 @@ project "editor"
     }
     
     links {
-        "cimgui",
+        "cimgui_glfw",
         "lua",
         "pear",
     }
@@ -93,7 +93,8 @@ project "editor"
         }
         postbuildcommands {
             "cp -R assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
-            "cp -R ../pear/assets/* ../bin/" .. outputDir .. "/%{prj.name}/"
+            "cp -R ../pear/assets/* ../bin/" .. outputDir .. "/%{prj.name}/",
+            "cp ../pear/lib/libcimgui_glfw.so ../bin/" .. outputDir .. "/%{prj.name}/"
         }
 
     filter "configurations:Debug"
