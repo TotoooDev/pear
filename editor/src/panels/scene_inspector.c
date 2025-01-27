@@ -2,31 +2,15 @@
 
 #include <panels/scene_inspector.h>
 #include <panels/entity_inspector.h>
+#include <editor.h>
 #include <graphics/editor/editor.h>
 #include <string.h>
 
 static scene_t* panel_scene = NULL;
 static entity_t* panel_selected_entity = NULL;
-static array_t* panel_excluded_entities = NULL;
-
-void panel_scene_inspector_init() {
-    panel_excluded_entities = array_new(3);
-}
-
-void panel_scene_inspector_free() {
-    array_delete(panel_excluded_entities);
-}
 
 void panel_scene_inspector_set_scene(scene_t* scene) {
     panel_scene = scene;
-}
-
-void panel_scene_inspector_exclude_entity(entity_t* entity) {
-    array_add(panel_excluded_entities, entity);
-}
-
-void panel_scene_inspector_clear_excluded_entities() {
-    array_clear(panel_excluded_entities);
 }
 
 void panel_scene_inspector() {
@@ -55,8 +39,9 @@ void panel_scene_inspector() {
             entity_t* entity = (entity_t*)array_get(entities, i);
 
             bool excluded = false;
-            for (u32 j = 0; j < array_get_length(panel_excluded_entities); j++) {
-                if (array_get(panel_excluded_entities, j) == entity) {
+            array_t* excluded_entities = editor_get_excluded_entities();
+            for (u32 j = 0; j < array_get_length(excluded_entities); j++) {
+                if (array_get(excluded_entities, j) == entity) {
                     excluded = true;
                 }
             }
