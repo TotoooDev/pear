@@ -14,6 +14,7 @@
 static array_t* editor_excluded_entities = NULL;
 static char editor_scene_path[1024];
 static bool editor_viewport_hovered = false;
+static entity_t* editor_selected_entity = NULL;
 
 void editor_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
     if (!scene_has_component(scene, entity, "lua_script")) {
@@ -43,10 +44,6 @@ void editor_on_event(event_type_t type, void* e, void* user_data) {
 
     array_clear(editor_excluded_entities);
     array_add(editor_excluded_entities, editor_camera);
-
-    panel_scene_inspector_set_scene(scene);
-    panel_entity_inspector_set_scene(scene);
-    panel_entity_inspector_set_entity(NULL);
 }
 
 void editor_initialize() {
@@ -65,9 +62,6 @@ void editor_initialize() {
     script->script = script_new_from_file("scripts/editor_camera.lua", editor_camera);
 
     array_add(editor_excluded_entities, editor_camera);
-
-    panel_scene_inspector_set_scene(scene);
-    panel_entity_inspector_set_scene(scene);
 
     editor_add_function(panel_menu_bar, NULL);
     editor_add_function(panel_general_info, NULL);
@@ -88,14 +82,22 @@ void editor_set_viewport_hovered(bool hovered) {
     editor_viewport_hovered = hovered;
 }
 
-bool editor_is_viewport_hovered() {
-    return editor_viewport_hovered;
-}
-
 void editor_set_scene_path(const char* path) {
     strncpy(editor_scene_path, path, 1024);
 }
 
+void editor_set_selected_entity(entity_t* entity) {
+    editor_selected_entity = entity;
+}
+
+bool editor_is_viewport_hovered() {
+    return editor_viewport_hovered;
+}
+
 char* editor_get_scene_path() {
     return editor_scene_path;
+}
+
+entity_t* editor_get_selected_entity() {
+    return editor_selected_entity;
 }

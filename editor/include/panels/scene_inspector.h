@@ -3,7 +3,6 @@
 
 #include <scene/scene.h>
 
-void panel_scene_inspector_set_scene(scene_t* scene);
 void panel_scene_inspector();
 
 #endif

@@ -1,4 +1,5 @@
 #include <panels/entity_inspector.h>
+#include <editor.h>
 #include <graphics/editor/editor.h>
 #include <scene/components/transform.h>
 #include <scene/components/camera.h>
@@ -8,14 +9,12 @@
 #include <scene/components/skybox.h>
 #include <loaders/model.h>
 #include <loaders/skybox.h>
+#include <core/app.h>
 #include <vendor/tinyfiledialogs/tinyfiledialogs.h>
 #include <string.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <graphics/editor/vendor/cimgui/cimgui.h>
-
-static scene_t* panel_scene = NULL;
-static entity_t* panel_entity = NULL;
 
 void panel_entity_inspector_component_combo() {
     const char* items[] = {
@@ -31,19 +30,19 @@ void panel_entity_inspector_component_combo() {
     static i32 current_item = -1;
     igCombo_Str_arr("component", &current_item, items, 7, 64);
     if (igButton("add component", (ImVec2){ 0.0f, 0.0f }) && current_item > -1) {
-        scene_add_component(panel_scene, panel_entity, items[current_item]);
+        scene_add_component(app_get_scene(), editor_get_selected_entity(), items[current_item]);
         current_item = -1;
     }
     igSameLine(0.0f, 8.0f);
     if (igButton("remove component", (ImVec2){ 0.0f, 0.0f }) && current_item > -1) {
-        scene_remove_component(panel_scene, panel_entity, items[current_item]);
+        scene_remove_component(app_get_scene(), editor_get_selected_entity(), items[current_item]);
         current_item = -1;
     }
 }
 
 void panel_entity_inspector_transform(entity_t* entity) {
     if (igTreeNodeEx_Str("transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-        transform_component_t* transform = (transform_component_t*)scene_get_component(panel_scene, entity, "transform");
+        transform_component_t* transform = (transform_component_t*)scene_get_component(app_get_scene(), entity, "transform");
         igDragFloat3("position", transform->pos, 0.1f, -FLT_MAX, FLT_MAX, "%.3f", ImGuiSliderFlags_None);
         igDragFloat3("rotation", transform->rotation, 0.1f, -FLT_MAX, FLT_MAX, "%.3f", ImGuiSliderFlags_None);
         igDragFloat3("scale", transform->scale, 0.1f, -FLT_MAX, FLT_MAX, "%.3f", ImGuiSliderFlags_None);
@@ -54,7 +53,7 @@ void panel_entity_inspector_transform(entity_t* entity) {
 
 void panel_entity_inspector_camera(entity_t* entity) {
     if (igTreeNodeEx_Str("camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-        camera_component_t* camera = (camera_component_t*)scene_get_component(panel_scene, entity, "camera");
+        camera_component_t* camera = (camera_component_t*)scene_get_component(app_get_scene(), entity, "camera");
         igCheckbox("use", &camera->use);
 
         igTreePop();
@@ -63,7 +62,7 @@ void panel_entity_inspector_camera(entity_t* entity) {
 
 void panel_entity_inspector_light(entity_t* entity) {
     if (igTreeNodeEx_Str("light", ImGuiTreeNodeFlags_DefaultOpen)) {
-        light_component_t* light = (light_component_t*)scene_get_component(panel_scene, entity, "light");
+        light_component_t* light = (light_component_t*)scene_get_component(app_get_scene(), entity, "light");
 
         i32 current_item = light->light.type;
         const char* light_types[] = {
@@ -101,7 +100,7 @@ void panel_entity_inspector_light(entity_t* entity) {
 
 void panel_entity_inspector_model(entity_t* entity) {
     if (igTreeNodeEx_Str("model", ImGuiTreeNodeFlags_DefaultOpen)) {
-        model_component_t* model = (model_component_t*)scene_get_component(panel_scene, entity, "model");
+        model_component_t* model = (model_component_t*)scene_get_component(app_get_scene(), entity, "model");
 
         if (model->model == NULL) {
             igText("no model loaded");
@@ -146,7 +145,7 @@ void panel_entity_inspector_model(entity_t* entity) {
 
 void panel_entity_inspector_lua_script(entity_t* entity) {
     if (igTreeNodeEx_Str("lua script", ImGuiTreeNodeFlags_DefaultOpen)) {
-        lua_script_component_t* script = (lua_script_component_t*)scene_get_component(panel_scene, entity, "lua_script");
+        lua_script_component_t* script = (lua_script_component_t*)scene_get_component(app_get_scene(), entity, "lua_script");
 
         if (script->script == NULL) {
             igText("no script loaded");
@@ -183,7 +182,7 @@ void panel_entity_inspector_lua_script(entity_t* entity) {
 
 void panel_entity_inspector_skybox(entity_t* entity) {
     if (igTreeNodeEx_Str("skybox", ImGuiTreeNodeFlags_DefaultOpen)) {
-        skybox_component_t* skybox = (skybox_component_t*)scene_get_component(panel_scene, entity, "skybox");
+        skybox_component_t* skybox = (skybox_component_t*)scene_get_component(app_get_scene(), entity, "skybox");
 
         if (skybox->cubemap == NULL) {
             igText("no skybox loaded");
@@ -207,23 +206,15 @@ void panel_entity_inspector_skybox(entity_t* entity) {
     }
 }
 
-void panel_entity_inspector_set_entity(entity_t* entity) {
-    panel_entity = entity;
-}
-
-void panel_entity_inspector_set_scene(scene_t* scene) {
-    panel_scene = scene;
-}
-
 void panel_entity_inspector() {
     if (igBegin("entity inspector", NULL, ImGuiWindowFlags_None)) {
-        if (panel_entity == NULL) {
+        if (editor_get_selected_entity() == NULL) {
             igEnd();
             return;
         }
 
-        igInputText("name", entity_get_name(panel_entity), ENTITY_NAME_MAX_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL);
-        igText("id: %d", entity_get_id(panel_entity));
+        igInputText("name", entity_get_name(editor_get_selected_entity()), ENTITY_NAME_MAX_LENGTH, ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL);
+        igText("id: %d", entity_get_id(editor_get_selected_entity()));
 
         igSeparator();
         
@@ -231,28 +222,28 @@ void panel_entity_inspector() {
 
         igSeparator();
 
-        if (scene_has_component(panel_scene, panel_entity, "transform")) {
-            panel_entity_inspector_transform(panel_entity);
+        if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "transform")) {
+            panel_entity_inspector_transform(editor_get_selected_entity());
         }
 
-        if (scene_has_component(panel_scene, panel_entity, "camera")) {
-            panel_entity_inspector_camera(panel_entity);
+        if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "camera")) {
+            panel_entity_inspector_camera(editor_get_selected_entity());
         }
 
-        if (scene_has_component(panel_scene, panel_entity, "light")) {
-            panel_entity_inspector_light(panel_entity);
+        if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "light")) {
+            panel_entity_inspector_light(editor_get_selected_entity());
         }
 
-        if (scene_has_component(panel_scene, panel_entity, "model")) {
-            panel_entity_inspector_model(panel_entity);
+        if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "model")) {
+            panel_entity_inspector_model(editor_get_selected_entity());
         }
 
-        if (scene_has_component(panel_scene, panel_entity, "lua_script")) {
-            panel_entity_inspector_lua_script(panel_entity);
+        if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "lua_script")) {
+            panel_entity_inspector_lua_script(editor_get_selected_entity());
         }
 
-        if (scene_has_component(panel_scene, panel_entity, "skybox")) {
-            panel_entity_inspector_skybox(panel_entity);
+        if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "skybox")) {
+            panel_entity_inspector_skybox(editor_get_selected_entity());
         }
     }
     igEnd();
