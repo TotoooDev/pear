@@ -9,8 +9,10 @@
 #include <graphics/editor/editor.h>
 #include <util/array.h>
 #include <core/app.h>
+#include <string.h>
 
 static array_t* editor_excluded_entities = NULL;
+static char editor_scene_path[1024];
 
 void editor_on_event(event_type_t type, void* e, void* user_data) {
     if (type != EVENT_TYPE_SCENE_NEW) {
@@ -28,11 +30,16 @@ void editor_on_event(event_type_t type, void* e, void* user_data) {
 
     array_clear(editor_excluded_entities);
     array_add(editor_excluded_entities, editor_camera);
+
+    panel_scene_inspector_set_scene(scene);
+    panel_entity_inspector_set_scene(scene);
+    panel_entity_inspector_set_entity(NULL);
 }
 
 void editor_initialize() {
     event_subscribe(editor_on_event, NULL);
 
+    editor_scene_path[0] = '\0';
     editor_excluded_entities = array_new(5);
 
     scene_t* scene = app_get_scene();
@@ -60,4 +67,12 @@ void editor_delete() {
 
 array_t* editor_get_excluded_entities() {
     return editor_excluded_entities;
+}
+
+void editor_set_scene_path(const char* path) {
+    strncpy(editor_scene_path, path, 1024);
+}
+
+char* editor_get_scene_path() {
+    return editor_scene_path;
 }

@@ -10,25 +10,58 @@
 #include <vendor/tinyfiledialogs/tinyfiledialogs.h>
 #include <core/app.h>
 
+void panel_menu_bar_new() {
+    app_set_scene(scene_new());
+    editor_set_scene_path("");
+}
+
+void panel_menu_bar_save_as() {
+    const char* filters[] = { "*.pear" };
+    char* path = tinyfd_saveFileDialog("save scene as", ".", 1, filters, "pear scene file");
+    if (path == NULL) {
+        return;
+    }
+
+    loader_write_scene(app_get_scene(), path, editor_get_excluded_entities());
+    editor_set_scene_path(path);
+}
+
+void panel_menu_bar_open() {
+    const char* filters[] = { "*.pear" };
+    char* path = tinyfd_openFileDialog("choose scene", "", 1, filters, "pear scene files", 0);
+    if (path != NULL) {
+        scene_t* scene = loader_load_scene(path);
+        app_set_scene(scene);
+    }
+
+    editor_set_scene_path(path);
+}
+
 void panel_menu_bar() {
     if (igBeginMainMenuBar()) {
         if (igBeginMenu("file", true)) {
+            if (igMenuItem_Bool("new scene", "", false, true)) {
+                panel_menu_bar_new();
+            }
+
+            igSeparator();
+
             if (igMenuItem_Bool("save scene", "", false, true)) {
-                loader_write_scene(app_get_scene(), "scene_write.pear", editor_get_excluded_entities());
+                if (editor_get_scene_path()[0] == '\0') {
+                    panel_menu_bar_save_as();
+                }
+                else {
+                    loader_write_scene(app_get_scene(), editor_get_scene_path(), editor_get_excluded_entities());
+                }
+            }
+            if (igMenuItem_Bool("save scene as...", "", false, true)) {
+                panel_menu_bar_save_as();
             }
             
             igSeparator();
 
-            if (igMenuItem_Bool("load scene...", "", false, true)) {
-                const char* filters[] = { "*.pear" };
-                char* path = tinyfd_openFileDialog("choose scene", "", 1, filters, "pear scene files", 0);
-                if (path != NULL) {
-                    scene_t* scene = loader_load_scene(path);
-                    app_set_scene(scene);
-                    panel_scene_inspector_set_scene(scene);
-                    panel_entity_inspector_set_scene(scene);
-                    panel_entity_inspector_set_entity(NULL);
-                }
+            if (igMenuItem_Bool("open scene...", "", false, true)) {
+                panel_menu_bar_open();
             }
 
             igSeparator();
