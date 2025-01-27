@@ -1,5 +1,6 @@
 #include <panels/viewport.h>
 #include <editor.h>
+#include <scene/components/transform.h>
 #include <graphics/renderer.h>
 #include <graphics/editor/editor.h>
 #include <core/app.h>
@@ -7,6 +8,33 @@
 #ifdef PEAR_PLATFORM_OPENGL
 #include <graphics/platform/opengl/texture.h>
 #endif
+
+void panel_viewport_gizmo(ImVec2 pos, ImVec2 size) {
+    entity_t* entity = editor_get_selected_entity();
+    if (entity == NULL) {
+        return;
+    }
+    if (!scene_has_component(app_get_scene(), entity, "transform")) {
+        return;
+    }
+
+    transform_component_t* transform = scene_get_component(app_get_scene(), entity, "transform");
+
+    mat4 model_matrix;
+    transformcomponent_get_model_matrix(transform, model_matrix);
+
+    mat4 view;
+    mat4 projection;
+    renderer_get_view_matrix(app_get_renderer(), view);
+    renderer_get_projection_matrix(app_get_renderer(), projection);
+
+    ImGuizmo_SetOrthographic(false);
+    ImGuizmo_SetDrawlist(NULL);
+    ImGuizmo_SetRect(pos.x, pos.y, size.x, size.y);
+    if (ImGuizmo_Manipulate((f32*)view, (f32*)projection, UNIVERSAL, WORLD, (f32*)model_matrix, NULL, NULL, NULL, NULL)) {
+        ImGuizmo_DecomposeMatrixToComponents((f32*)model_matrix, transform->pos, transform->rotation, transform->scale);
+    }
+}
 
 void panel_viewport() {
     igPushStyleVar_Vec2(ImGuiStyleVar_WindowPadding, (ImVec2){ 0.0f, 0.0f });
@@ -28,16 +56,7 @@ void panel_viewport() {
             igImage(texture_get_id(texture), size, (ImVec2){ 0.0f, 1.0f }, (ImVec2){ 1.0f, 0.0f }, (ImVec4){ 1.0f, 1.0f, 1.0f, 1.0f }, (ImVec4){ 0.0f, 0.0f, 0.0f, 0.0f });
         #endif
 
-        static mat4 matrix = GLM_MAT4_IDENTITY;
-        mat4 view;
-        mat4 projection;
-        renderer_get_view_matrix(app_get_renderer(), view);
-        renderer_get_projection_matrix(app_get_renderer(), projection);
-
-        ImGuizmo_SetOrthographic(false);
-        ImGuizmo_SetDrawlist(NULL);
-        ImGuizmo_SetRect(pos.x, pos.y, size.x, size.y);
-        ImGuizmo_Manipulate((f32*)view, (f32*)projection, TRANSLATE, WORLD, (f32*)matrix, NULL, NULL, NULL, NULL);
+        panel_viewport_gizmo(pos, size);
     }
     igEnd();
     igPopStyleVar(1);
