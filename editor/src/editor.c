@@ -15,6 +15,17 @@ static array_t* editor_excluded_entities = NULL;
 static char editor_scene_path[1024];
 static bool editor_viewport_hovered = false;
 
+void editor_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
+    if (!scene_has_component(scene, entity, "lua_script")) {
+        return;
+    }
+
+    lua_script_component_t* script = scene_get_component(scene, entity, "lua_script");
+    script_begin_table(script->script, "editor");
+        script_set_bool(script->script, editor_is_viewport_hovered(), "is_viewport_hovered");
+    script_end_table(script->script);
+}
+
 void editor_on_event(event_type_t type, void* e, void* user_data) {
     if (type != EVENT_TYPE_SCENE_NEW) {
         return;
@@ -22,6 +33,7 @@ void editor_on_event(event_type_t type, void* e, void* user_data) {
 
     scene_new_event_t* event = (scene_new_event_t*)e;
     scene_t* scene = event->new_scene;
+    scene_register_system(scene, editor_system, NULL);
 
     entity_t* editor_camera = scene_add_entity(scene, "[editor] editor camera");
     scene_add_component(scene, editor_camera, "transform");
@@ -44,6 +56,8 @@ void editor_initialize() {
     editor_excluded_entities = array_new(5);
 
     scene_t* scene = app_get_scene();
+    scene_register_system(scene, editor_system, NULL);
+
     entity_t* editor_camera = scene_add_entity(scene, "[editor] editor camera");
     scene_add_component(scene, editor_camera, "transform");
     scene_add_component(scene, editor_camera, "camera");

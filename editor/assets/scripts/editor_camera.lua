@@ -42,6 +42,10 @@ function on_mouse_movement()
 end
 
 function on_button_down()
+    if not pear.editor.is_viewport_hovered then
+        return
+    end
+    
     if pear.mouse.button.middle then
         move_camera = true
     end
@@ -51,6 +55,10 @@ function on_button_down()
 end
 
 function on_button_up()
+    if not pear.editor.is_viewport_hovered then
+        return
+    end
+
     if not pear.mouse.button.middle then
         move_camera = false
     end
