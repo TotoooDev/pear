@@ -13,6 +13,7 @@
 
 static array_t* editor_excluded_entities = NULL;
 static char editor_scene_path[1024];
+static bool editor_viewport_hovered = false;
 
 void editor_on_event(event_type_t type, void* e, void* user_data) {
     if (type != EVENT_TYPE_SCENE_NEW) {
@@ -67,6 +68,14 @@ void editor_delete() {
 
 array_t* editor_get_excluded_entities() {
     return editor_excluded_entities;
+}
+
+void editor_set_viewport_hovered(bool hovered) {
+    editor_viewport_hovered = hovered;
+}
+
+bool editor_is_viewport_hovered() {
+    return editor_viewport_hovered;
 }
 
 void editor_set_scene_path(const char* path) {
