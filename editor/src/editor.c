@@ -42,12 +42,15 @@ void editor_on_event(event_type_t type, void* e, void* user_data) {
     lua_script_component_t* script = scene_add_component(scene, editor_camera, "lua_script");
     script->script = script_new_from_file("scripts/editor_camera.lua", editor_camera);
 
+    editor_selected_entity = NULL;
+
     array_clear(editor_excluded_entities);
     array_add(editor_excluded_entities, editor_camera);
 }
 
 void editor_initialize() {
     event_subscribe(editor_on_event, NULL);
+    event_subscribe(panel_menu_bar_on_event, NULL);
 
     editor_scene_path[0] = '\0';
     editor_excluded_entities = array_new(5);
