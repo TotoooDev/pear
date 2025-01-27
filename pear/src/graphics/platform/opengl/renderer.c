@@ -438,6 +438,14 @@ texture_t* renderer_get_screen_depth_texture(renderer_t* renderer) {
     return renderer->screen_depth_texture;
 }
 
+void renderer_get_view_matrix(renderer_t* renderer, mat4 dest) {
+    glm_mat4_copy(renderer->view, dest);
+}
+
+void renderer_get_projection_matrix(renderer_t* renderer, mat4 dest) {
+    glm_mat4_copy(renderer->projection, dest);
+}
+
 void renderer_set_viewport_size(renderer_t* renderer, f32 width, f32 height, f32 width_scale, f32 height_scale) {
     renderer->viewport_width = width;
     renderer->viewport_height = height;
