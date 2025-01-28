@@ -3,6 +3,7 @@
 #include <panels/general_info.h>
 #include <panels/scene_inspector.h>
 #include <panels/entity_inspector.h>
+#include <panels/renderer_inspector.h>
 #include <panels/viewport.h>
 #include <scene/components/lua_script.h>
 #include <event/event_dispatcher.h>
@@ -70,6 +71,7 @@ void editor_initialize() {
     editor_add_function(panel_general_info, NULL);
     editor_add_function(panel_scene_inspector, NULL);
     editor_add_function(panel_entity_inspector, NULL);
+    editor_add_function(panel_renderer_inspector, NULL);
     editor_add_function(panel_viewport, NULL);
 }
 

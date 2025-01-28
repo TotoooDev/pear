@@ -67,8 +67,8 @@ void modelrenderer_set_material(shader_t* shader, material_t* material) {
     }
 }
 
-void modelrenderer_draw_mesh(mesh_t* mesh, mat4 model_matrix, shader_t* shader) {
-    // texture_use(renderer->shadow_map, RENDERER_SHADOW_MAP_INDEX);
+void modelrenderer_draw_mesh(renderer_t* renderer, mesh_t* mesh, mat4 model_matrix, shader_t* shader) {
+    texture_use(renderer_get_shadow_map(renderer), RENDERER_SHADOW_MAP_INDEX);
     mesh_use(mesh);
     glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
 }
@@ -146,12 +146,12 @@ void modelrenderer_draw(renderer_interface_t* interface, renderer_t* renderer) {
 
             modelrenderer_set_matrices(renderer, model_matrix);
             modelrenderer_set_material(shader, material);
-            modelrenderer_draw_mesh(mesh, model_matrix, shader);
+            modelrenderer_draw_mesh(renderer, mesh, model_matrix, shader);
         }
     }
 }
 
-void modelrenderer_clear(renderer_interface_t* interface, f32 r, f32 g, f32 b) {
+void modelrenderer_clear(renderer_interface_t* interface, renderer_t* renderer, f32 r, f32 g, f32 b) {
     model_renderer_t* model_renderer = (model_renderer_t*)interface->renderer;
     array_clear(model_renderer->models);
     array_clear(model_renderer->lights);

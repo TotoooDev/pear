@@ -1,21 +1,23 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
 #include <graphics/platform/opengl/renderers/shadow_renderer.h>
+#include <graphics/platform/opengl/renderer.h>
 #include <graphics/platform/opengl/shader.h>
+#include <graphics/platform/opengl/texture.h>
 #include <graphics/platform/opengl/mesh.h>
-#include <graphics/camera.h>
-#include <scene/components/model.h>
 #include <scene/components/transform.h>
-#include <scene/components/camera.h>
+#include <scene/components/model.h>
 #include <scene/components/light.h>
-#include <core/log.h>
-#include <GL/glew.h>
+#include <util/array.h>
 #include <core/alloc.h>
+#include <GL/glew.h>
 
 typedef struct shadow_renderer_t {
-    ubo_t* ubo_matrices;
     shader_t* shader;
-    texture_t* screen_texture;
+    array_t* models;
+    array_t* lights;
+    array_t* model_transforms;
+    array_t* light_transforms;
 } shadow_renderer_t;
 
 void shadowrenderer_get_frustum_corners(vec4* corners, mat4 projection, mat4 view) {
@@ -91,42 +93,55 @@ void shadowrenderer_get_light_projection(vec4* corners, mat4 light_view, mat4 de
     glm_ortho(x_min, x_max, y_min, y_max, z_min, z_max, dest);
 }
 
-shadow_renderer_t* shadowrenderer_new(ubo_t* ubo_matrices, texture_t* screen_texture) {
-    shadow_renderer_t* renderer = (shadow_renderer_t*)PEAR_MALLOC(sizeof(shadow_renderer_t));
+void shadowrenderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_pointer) {
+    if (!scene_has_component(scene, entity, "transform")) {
+        return;
+    }
 
-    renderer->ubo_matrices = ubo_matrices;
-    renderer->screen_texture = screen_texture;
-    renderer->shader = shader_new_from_file("shaders/shadow.vert", "shaders/shadow.frag");
+    renderer_interface_t* interface = (renderer_interface_t*)user_pointer;
+    shadow_renderer_t* shadow_renderer = (shadow_renderer_t*)interface->renderer;
+    transform_component_t* transform = scene_get_component(scene, entity, "transform");
 
-    shader_use(renderer->shader);
-    shader_set_ubo(renderer->shader, renderer->ubo_matrices, "ubo_matrices");
+    if (scene_has_component(scene, entity, "model")) {
+        model_component_t* model = scene_get_component(scene, entity, "model");
+        if (model->draw && model->shadow_caster && model->model != NULL) {
+            array_add(shadow_renderer->models, model->model);
+            array_add(shadow_renderer->model_transforms, transform);
+        }
+    }
 
-    return renderer;
+    if (scene_has_component(scene, entity, "light")) {
+        light_component_t* light = scene_get_component(scene, entity, "light");
+        if (light->cast && light->shadow_caster) {
+            array_add(shadow_renderer->lights, &light->light);
+            array_add(shadow_renderer->light_transforms, transform);
+        }
+    }
 }
 
-void shadowrenderer_delete(shadow_renderer_t* renderer) {
-    shader_delete(renderer->shader);
-    PEAR_FREE(renderer);
-}
+void shadowrenderer_draw(renderer_interface_t* interface, renderer_t* renderer) {
+    shadow_renderer_t* shadow_renderer = (shadow_renderer_t*)interface->renderer;
 
-void shadowrenderer_clear(shadow_renderer_t* renderer) {
-    glClear(GL_DEPTH_BUFFER_BIT);
-}
+    glViewport(0, 0, RENDERER_SHADOW_MAP_SIZE, RENDERER_SHADOW_MAP_SIZE);
+    framebuffer_use(renderer_get_shadow_framebuffer(renderer));
 
-void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, array_t* lights, array_t* model_transforms, array_t* light_transforms, mat4 projection, mat4 view) {
     u32 num_light_casters = 0;
     vec4 frustum_corners[8];
     mat4 light_view = GLM_MAT4_IDENTITY_INIT;
     mat4 light_projection = GLM_MAT4_IDENTITY_INIT;
     mat4 light_space_transform = GLM_MAT4_IDENTITY_INIT;
 
+    mat4 projection;
+    mat4 view;
+    renderer_get_projection_matrix(renderer, projection);
+    renderer_get_view_matrix(renderer, view);
     shadowrenderer_get_frustum_corners(frustum_corners, projection, view);
 
-    for (u32 i = 0; i < array_get_length(light_transforms); i++) {
-        transform_component_t* transform = array_get(light_transforms, i);
-        light_component_t* light = array_get(lights, i);
+    for (u32 i = 0; i < array_get_length(shadow_renderer->light_transforms); i++) {
+        transform_component_t* transform = array_get(shadow_renderer->light_transforms, i);
+        light_t* light = array_get(shadow_renderer->lights, i);
 
-        if (!light->cast || !light->shadow_caster || light->light.type != LIGHT_TYPE_DIRECTIONAL) {
+        if (light->type != LIGHT_TYPE_DIRECTIONAL) {
             continue;
         }
 
@@ -141,34 +156,80 @@ void shadowrenderer_draw_scene(shadow_renderer_t* renderer, array_t* models, arr
     }
 
     if (num_light_casters <= 0) {
-        return;
+        goto end;
     }
 
-    ubo_use(renderer->ubo_matrices);
-    ubo_set_mat4(renderer->ubo_matrices, 4, light_space_transform);
+    ubo_t* ubo_matrices = renderer_get_matrices_ubo(renderer);
+    ubo_use(ubo_matrices);
+    ubo_set_mat4(ubo_matrices, 4, light_space_transform);
 
-    for (u32 i = 0; i < array_get_length(models); i++) {
-        model_component_t* model = array_get(models, i);
-        transform_component_t* transform = array_get(model_transforms, i);
-
-        if (!model->shadow_caster) {
-            continue;
-        }
+    for (u32 i = 0; i < array_get_length(shadow_renderer->models); i++) {
+        model_t* model = array_get(shadow_renderer->models, i);
+        transform_component_t* transform = array_get(shadow_renderer->model_transforms, i);
 
         mat4 model_matrix;
         transformcomponent_get_model_matrix(transform, model_matrix);
 
-        for (u32 j = 0; j < model_get_num_meshes(model->model); j++) {
-            mesh_t* mesh = model_get_meshes(model->model)[j];
+        for (u32 j = 0; j < model_get_num_meshes(model); j++) {
+            mesh_t* mesh = model_get_meshes(model)[j];
 
-            ubo_use(renderer->ubo_matrices);
-            ubo_set_mat4(renderer->ubo_matrices, 0, model_matrix);
+            ubo_use(ubo_matrices);
+            ubo_set_mat4(ubo_matrices, 0, model_matrix);
 
-            shader_use(renderer->shader);
+            shader_use(shadow_renderer->shader);
             mesh_use(mesh);
             glDrawElements(GL_TRIANGLES, mesh_get_num_indices(mesh), GL_UNSIGNED_INT, 0);
         }
     }
+
+end:
+    f32 width, height;
+    renderer_get_viewport_size(renderer, NULL, NULL, &width, &height);
+    glViewport(0, 0, width, height);
+}
+
+void shadowrenderer_clear(renderer_interface_t* interface, renderer_t* renderer, f32 r, f32 g, f32 b) {
+    shadow_renderer_t* shadow_renderer = (shadow_renderer_t*)interface->renderer;
+    array_clear(shadow_renderer->models);
+    array_clear(shadow_renderer->lights);
+    array_clear(shadow_renderer->model_transforms);
+    array_clear(shadow_renderer->light_transforms);
+
+    framebuffer_use(renderer_get_shadow_framebuffer(renderer));
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void shadowrenderer_delete(renderer_interface_t* interface) {
+    shadow_renderer_t* shadow_renderer = (shadow_renderer_t*)interface->renderer;
+    array_delete(shadow_renderer->models);
+    array_delete(shadow_renderer->lights);
+    array_delete(shadow_renderer->model_transforms);
+    array_delete(shadow_renderer->light_transforms);
+    shader_delete(shadow_renderer->shader);
+    PEAR_FREE(shadow_renderer);
+    PEAR_FREE(interface);
+}
+
+renderer_interface_t* shadowrenderer_new(renderer_t* renderer) {
+    shadow_renderer_t* shadow_renderer = (shadow_renderer_t*)PEAR_MALLOC(sizeof(shadow_renderer_t));
+    shadow_renderer->models = array_new(10);
+    shadow_renderer->lights = array_new(10);
+    shadow_renderer->model_transforms = array_new(10);
+    shadow_renderer->light_transforms = array_new(10);
+
+    shadow_renderer->shader = shader_new_from_file("shaders/shadow.vert", "shaders/shadow.frag");
+    shader_use(shadow_renderer->shader);
+    shader_set_ubo(shadow_renderer->shader, renderer_get_matrices_ubo(renderer), "ubo_matrices");
+
+    renderer_interface_t* interface = (renderer_interface_t*)PEAR_MALLOC(sizeof(renderer_interface_t));
+    interface->system = shadowrenderer_system;
+    interface->draw_function = shadowrenderer_draw;
+    interface->clear_function = shadowrenderer_clear;
+    interface->delete_function = shadowrenderer_delete;
+    interface->renderer = shadow_renderer;
+
+    return interface;
 }
 
 #endif

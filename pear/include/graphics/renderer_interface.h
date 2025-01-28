@@ -8,7 +8,7 @@ typedef struct renderer_t renderer_t;
 typedef struct renderer_interface_t renderer_interface_t;
 
 typedef void(*renderer_interface_draw_function_t)(renderer_interface_t*, renderer_t*);
-typedef void(*renderer_interface_clear_function_t)(renderer_interface_t*, f32, f32, f32);
+typedef void(*renderer_interface_clear_function_t)(renderer_interface_t*, renderer_t*, f32, f32, f32);
 typedef void(*renderer_interface_delete_function_t)(renderer_interface_t*);
 
 typedef struct renderer_interface_t {

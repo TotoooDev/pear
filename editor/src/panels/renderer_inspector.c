@@ -6,12 +6,6 @@
 #include <graphics/platform/opengl/texture.h>
 #include <core/app.h>
 
-static texture_t* editor_shadow_map = NULL;
-
-void panelrenderer_inspector_set_shadow_map(texture_t* shadow_map) {
-    editor_shadow_map = shadow_map;
-}
-
 void panel_renderer_inspector() {
     if (igBegin("renderer inspector", NULL, ImGuiWindowFlags_None)) {
         #ifdef PEAR_PLATFORM_OPENGL
@@ -49,14 +43,12 @@ void panel_renderer_inspector() {
 
         igSeparator();
 
-        if (editor_shadow_map != NULL) {
-            if (igTreeNode_Str("shadow map")) {
-                #ifdef PEAR_PLATFORM_OPENGL
-                    igImage(texture_get_id(editor_shadow_map), (ImVec2){ 128.0f, 128.0f }, (ImVec2){ 0.0f, 0.0f }, (ImVec2){ 1.0f, 1.0f }, (ImVec4){ 1.0f, 1.0f, 1.0f, 1.0f }, (ImVec4){ 0.0f, 0.0f, 0.0f, 0.0f });
-                #endif
+        if (igTreeNode_Str("shadow map")) {
+            #ifdef PEAR_PLATFORM_OPENGL
+                igImage(texture_get_id(renderer_get_shadow_map(app_get_renderer())), (ImVec2){ 128.0f, 128.0f }, (ImVec2){ 0.0f, 0.0f }, (ImVec2){ 1.0f, 1.0f }, (ImVec4){ 1.0f, 1.0f, 1.0f, 1.0f }, (ImVec4){ 0.0f, 0.0f, 0.0f, 0.0f });
+            #endif
 
-                igTreePop();
-            }
+            igTreePop();
         }
     }
     igEnd();

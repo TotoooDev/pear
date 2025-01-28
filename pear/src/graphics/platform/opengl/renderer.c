@@ -7,6 +7,7 @@
 #include <graphics/camera.h>
 #include <graphics/platform/opengl/renderers/skybox_renderer.h>
 #include <graphics/platform/opengl/renderers/model_renderer.h>
+#include <graphics/platform/opengl/renderers/shadow_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
@@ -24,7 +25,6 @@
 #include <core/alloc.h>
 
 #define RENDERER_NUM_MAX_LIGHTS 128
-#define RENDERER_SHADOW_MAP_SIZE 4096
 
 typedef struct renderer_t {
     bool enable_wireframe;
@@ -251,6 +251,7 @@ renderer_t* renderer_new() {
     renderer_init_screen_framebuffer(renderer);
     renderer_init_shadow_framebuffer(renderer);
 
+    array_add(renderer->interfaces, shadowrenderer_new(renderer));
     array_add(renderer->interfaces, skyboxrenderer_new(renderer));
     array_add(renderer->interfaces, modelrenderer_new(renderer));
 
@@ -286,7 +287,7 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
 
     for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
         renderer_interface_t* interface = array_get(renderer->interfaces, i);
-        interface->clear_function(interface, r, g, b);
+        interface->clear_function(interface, renderer, r, g, b);
     }
 
     framebuffer_use_default();
@@ -304,9 +305,9 @@ void renderer_draw(renderer_t* renderer) {
     glEnable(GL_CULL_FACE);
 
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
-    framebuffer_use(renderer->screen_framebuffer);
 
     for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
+        framebuffer_use(renderer->screen_framebuffer);
         renderer_interface_t* interface = array_get(renderer->interfaces, i);
         interface->draw_function(interface, renderer);
     }
@@ -333,6 +334,25 @@ texture_t* renderer_get_screen_texture(renderer_t* renderer) {
 
 texture_t* renderer_get_screen_depth_texture(renderer_t* renderer) {
     return renderer->screen_depth_texture;
+}
+
+texture_t* renderer_get_shadow_map(renderer_t* renderer) {
+    return renderer->shadow_map;
+}
+
+void renderer_get_viewport_size(renderer_t* renderer, f32* width, f32* height, f32* width_scaled, f32* height_scaled) {
+    if (width != NULL) {
+        *width = renderer->viewport_width;
+    }
+    if (height != NULL) {
+        *height = renderer->viewport_height;
+    }
+    if (width_scaled != NULL) {
+        *width_scaled = renderer->viewport_width_scaled;
+    }
+    if (height_scaled != NULL) {
+        *height_scaled = renderer->viewport_height_scaled;
+    }
 }
 
 void renderer_get_view_matrix(renderer_t* renderer, mat4 dest) {
@@ -375,6 +395,10 @@ void renderer_set_fov(renderer_t* renderer, f32 fov) {
 
 void renderer_enable_wireframe(renderer_t* renderer, bool active) {
     renderer->enable_wireframe = active;
+}
+
+framebuffer_t* renderer_get_shadow_framebuffer(renderer_t* renderer) {
+    return renderer->shadow_framebuffer;
 }
 
 ubo_t* renderer_get_matrices_ubo(renderer_t* renderer) {

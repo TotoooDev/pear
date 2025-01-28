@@ -97,9 +97,9 @@ void skyboxrenderer_draw(renderer_interface_t* interface, renderer_t* renderer) 
     glDepthFunc(GL_LESS);
 }
 
-void skyboxrenderer_clear(renderer_interface_t* interface, f32 r, f32 g, f32 b) {
-    skybox_renderer_t* renderer = (skybox_renderer_t*)interface->renderer;
-    array_clear(renderer->cubemaps);
+void skyboxrenderer_clear(renderer_interface_t* interface, renderer_t* renderer, f32 r, f32 g, f32 b) {
+    skybox_renderer_t* skybox_renderer = (skybox_renderer_t*)interface->renderer;
+    array_clear(skybox_renderer->cubemaps);
 }
 
 void skyboxrenderer_delete(renderer_interface_t* interface) {
