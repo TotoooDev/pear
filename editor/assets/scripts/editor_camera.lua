@@ -55,10 +55,6 @@ function on_button_down()
 end
 
 function on_button_up()
-    if not pear.editor.is_viewport_hovered then
-        return
-    end
-
     if not pear.mouse.button.middle then
         move_camera = false
     end
@@ -68,6 +64,10 @@ function on_button_up()
 end
 
 function on_scroll(x, y)
+    if not pear.editor.is_viewport_hovered then
+        return
+    end
+    
     radius = radius - y * 0.5
 end
 

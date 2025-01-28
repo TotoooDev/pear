@@ -16,7 +16,9 @@ void renderer_delete(renderer_t* renderer);
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b);
 void renderer_draw(renderer_t* renderer);
 
+void renderer_add_renderer_interface_before(renderer_t* renderer, renderer_interface_t* interface);
 void renderer_add_renderer_interface(renderer_t* renderer, renderer_interface_t* interface);
+void renderer_add_renderer_interface_after(renderer_t* renderer, renderer_interface_t* interface);
 
 u32 renderer_get_num_meshes(renderer_t* renderer);
 u32 renderer_get_num_vertices(renderer_t* renderer);

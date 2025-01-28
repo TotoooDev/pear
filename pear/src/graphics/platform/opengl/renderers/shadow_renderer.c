@@ -186,6 +186,7 @@ end:
     f32 width, height;
     renderer_get_viewport_size(renderer, NULL, NULL, &width, &height);
     glViewport(0, 0, width, height);
+    framebuffer_use(renderer_get_screen_framebuffer(renderer));
 }
 
 void shadowrenderer_clear(renderer_interface_t* interface, renderer_t* renderer, f32 r, f32 g, f32 b) {

@@ -48,7 +48,9 @@ typedef struct renderer_t {
     mat4 view;
     vec3 camera_pos;
 
+    array_t* interfaces_before; // before the scene is drawn (for shadow mapping, ...)
     array_t* interfaces;
+    array_t* interfaces_after; // after the scene is drawn (for post-processing, ...)
 
     framebuffer_t* screen_framebuffer;
     texture_t* screen_texture;
@@ -133,9 +135,18 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
 
     if (type == EVENT_TYPE_SCENE_NEW) {
         scene_new_event_t* event = (scene_new_event_t*)e;
+        scene_register_system(event->new_scene, renderer_system, renderer);
+
+        for (u32 i = 0; i < array_get_length(renderer->interfaces_before); i++) {
+            renderer_interface_t* interface = array_get(renderer->interfaces_before, i);
+            scene_register_system(event->new_scene, interface->system, interface);
+        }
         for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
             renderer_interface_t* interface = array_get(renderer->interfaces, i);
-            scene_register_system(event->new_scene, renderer_system, renderer);
+            scene_register_system(event->new_scene, interface->system, interface);
+        }
+        for (u32 i = 0; i < array_get_length(renderer->interfaces_after); i++) {
+            renderer_interface_t* interface = array_get(renderer->interfaces_after, i);
             scene_register_system(event->new_scene, interface->system, interface);
         }
     }
@@ -244,16 +255,18 @@ renderer_t* renderer_new() {
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
+    renderer->interfaces_before = array_new(10);
     renderer->interfaces = array_new(10);
+    renderer->interfaces_after = array_new(10);
 
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
     renderer_init_screen_framebuffer(renderer);
     renderer_init_shadow_framebuffer(renderer);
 
-    array_add(renderer->interfaces, shadowrenderer_new(renderer));
-    array_add(renderer->interfaces, skyboxrenderer_new(renderer));
+    array_add(renderer->interfaces_before, shadowrenderer_new(renderer));
     array_add(renderer->interfaces, modelrenderer_new(renderer));
+    array_add(renderer->interfaces, skyboxrenderer_new(renderer));
 
     renderer_calculate_projection(renderer);
 
@@ -263,11 +276,22 @@ renderer_t* renderer_new() {
 }
 
 void renderer_delete(renderer_t* renderer) {
+    for (u32 i = 0; i < array_get_length(renderer->interfaces_before); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces_before, i);
+        interface->delete_function(interface);
+    }
     for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
         renderer_interface_t* interface = array_get(renderer->interfaces, i);
         interface->delete_function(interface);
     }
+    for (u32 i = 0; i < array_get_length(renderer->interfaces_after); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces_after, i);
+        interface->delete_function(interface);
+    }
+    
+    array_delete(renderer->interfaces_before);
     array_delete(renderer->interfaces);
+    array_delete(renderer->interfaces_after);
 
     framebuffer_delete(renderer->screen_framebuffer);
     framebuffer_delete(renderer->shadow_framebuffer);
@@ -285,8 +309,16 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
     glClearColor(r, g, b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    for (u32 i = 0; i < array_get_length(renderer->interfaces_before); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces_before, i);
+        interface->clear_function(interface, renderer, r, g, b);
+    }
     for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
         renderer_interface_t* interface = array_get(renderer->interfaces, i);
+        interface->clear_function(interface, renderer, r, g, b);
+    }
+    for (u32 i = 0; i < array_get_length(renderer->interfaces_after); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces_after, i);
         interface->clear_function(interface, renderer, r, g, b);
     }
 
@@ -305,18 +337,38 @@ void renderer_draw(renderer_t* renderer) {
     glEnable(GL_CULL_FACE);
 
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
+    framebuffer_use(renderer->screen_framebuffer);
+
+    for (u32 i = 0; i < array_get_length(renderer->interfaces_before); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces_before, i);
+        interface->draw_function(interface, renderer);
+    }
 
     for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
-        framebuffer_use(renderer->screen_framebuffer);
         renderer_interface_t* interface = array_get(renderer->interfaces, i);
+        interface->draw_function(interface, renderer);
+    }
+
+    for (u32 i = 0; i < array_get_length(renderer->interfaces_after); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces_after, i);
         interface->draw_function(interface, renderer);
     }
 
     framebuffer_use_default();
 }
 
+void renderer_add_renderer_interface_before(renderer_t* renderer, renderer_interface_t* interface) {
+    array_add(renderer->interfaces_before, interface);
+    scene_register_system(app_get_scene(), interface->system, interface);
+}
+
 void renderer_add_renderer_interface(renderer_t* renderer, renderer_interface_t* interface) {
     array_add(renderer->interfaces, interface);
+    scene_register_system(app_get_scene(), interface->system, interface);
+}
+
+void renderer_add_renderer_interface_after(renderer_t* renderer, renderer_interface_t* interface) {
+    array_add(renderer->interfaces_after, interface);
     scene_register_system(app_get_scene(), interface->system, interface);
 }
 
@@ -399,6 +451,10 @@ void renderer_enable_wireframe(renderer_t* renderer, bool active) {
 
 framebuffer_t* renderer_get_shadow_framebuffer(renderer_t* renderer) {
     return renderer->shadow_framebuffer;
+}
+
+framebuffer_t* renderer_get_screen_framebuffer(renderer_t* renderer) {
+    return renderer->screen_framebuffer;
 }
 
 ubo_t* renderer_get_matrices_ubo(renderer_t* renderer) {
