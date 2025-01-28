@@ -17,8 +17,8 @@ component_attachment_t transformcomponent_get_attachment() {
 void transformcomponent_get_model_matrix(transform_component_t* transform, mat4 dest) {
     glm_mat4_identity(dest);
     glm_translate(dest, transform->pos);
-    glm_rotate(dest, transform->rotation[0], (vec3){ 1.0f, 0.0f, 0.0f });
-    glm_rotate(dest, transform->rotation[1], (vec3){ 0.0f, 1.0f, 0.0f });
-    glm_rotate(dest, transform->rotation[2], (vec3){ 0.0f, 0.0f, 1.0f });
+    glm_rotate(dest, glm_rad(transform->rotation[0]), (vec3){ 1.0f, 0.0f, 0.0f });
+    glm_rotate(dest, glm_rad(transform->rotation[1]), (vec3){ 0.0f, 1.0f, 0.0f });
+    glm_rotate(dest, glm_rad(transform->rotation[2]), (vec3){ 0.0f, 0.0f, 1.0f });
     glm_scale(dest, transform->scale);
 }
