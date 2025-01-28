@@ -14,6 +14,8 @@
 - [editor] add billboards for mesh-less components (camera, lights, ...)
 - [editor] add hot reload for scripts
 - [engine] fix data duplication (models, lights) in model renderer + shadow renderer
+- [engine] fix billboard texture upside down
+- [engine] fix billboard translation being too large
 - [engine] normal mapping
 - [engine] specular mapping
 - [engine] point shadows
