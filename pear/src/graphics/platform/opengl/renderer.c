@@ -8,6 +8,7 @@
 #include <graphics/platform/opengl/renderers/skybox_renderer.h>
 #include <graphics/platform/opengl/renderers/model_renderer.h>
 #include <graphics/platform/opengl/renderers/shadow_renderer.h>
+#include <graphics/platform/opengl/renderers/billboard_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
@@ -266,7 +267,8 @@ renderer_t* renderer_new() {
 
     array_add(renderer->interfaces_before, shadowrenderer_new(renderer));
     array_add(renderer->interfaces, modelrenderer_new(renderer));
-    array_add(renderer->interfaces, skyboxrenderer_new(renderer));
+    array_add(renderer->interfaces, billboardrenderer_new(renderer));
+    array_add(renderer->interfaces_after, skyboxrenderer_new(renderer));
 
     renderer_calculate_projection(renderer);
 
