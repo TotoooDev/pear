@@ -54,7 +54,6 @@ void app_init() {
     #endif
 
     scene_register_system(app->scene, script_system, NULL);
-    scene_register_system(app->scene, renderer_system, app->renderer);
     event_subscribe(app_on_event, NULL);
 
     #ifdef PEAR_ENABLE_EDITOR
@@ -82,7 +81,7 @@ void app_run() {
         renderer_clear(app->renderer, 0.2f, 0.2f, 0.2f);
 
         scene_update(app->scene, app->timestep);
-        renderer_draw_scene(app->renderer, app->scene);
+        renderer_draw(app->renderer);
 
         #ifdef PEAR_ENABLE_EDITOR
             if (app->enable_editor) {
@@ -110,7 +109,6 @@ void app_set_scene(scene_t* scene) {
     app->scene = scene;
 
     scene_register_system(app->scene, script_system, NULL);
-    scene_register_system(app->scene, renderer_system, app->renderer);
 }
 
 window_t* app_get_window() {

@@ -1,14 +1,10 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
-#include <graphics/renderer.h>
+#include <graphics/platform/opengl/renderer.h>
 #include <graphics/framebuffer.h>
 #include <graphics/mesh.h>
 #include <graphics/window.h>
 #include <graphics/camera.h>
-#include <graphics/platform/opengl/renderers/billboard_renderer.h>
-#include <graphics/platform/opengl/renderers/scene_renderer.h>
-#include <graphics/platform/opengl/renderers/screen_renderer.h>
-#include <graphics/platform/opengl/renderers/shadow_renderer.h>
 #include <graphics/platform/opengl/renderers/skybox_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
@@ -51,13 +47,7 @@ typedef struct renderer_t {
     mat4 view;
     vec3 camera_pos;
 
-    array_t* models;
-    array_t* billboards;
-    array_t* lights;
-    array_t* skyboxes;
-    array_t* model_transforms;
-    array_t* billboard_transforms;
-    array_t* light_transforms;
+    array_t* interfaces;
 
     framebuffer_t* screen_framebuffer;
     texture_t* screen_texture;
@@ -68,13 +58,22 @@ typedef struct renderer_t {
 
     ubo_t* ubo_matrices;
     ubo_t* ubo_lights;
-
-    billboard_renderer_t* billboard_renderer;
-    scene_renderer_t* scene_renderer;
-    screen_renderer_t* screen_renderer;
-    shadow_renderer_t* shadow_renderer;
-    skybox_renderer_t* skybox_renderer;
 } renderer_t;
+
+void renderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
+    if (!scene_has_component(scene, entity, "camera") || !scene_has_component(scene, entity, "transform")) {
+        return;
+    }
+
+    camera_component_t* camera = scene_get_component(scene, entity, "camera");
+    if (!camera->use) {
+        return;
+    }
+
+    renderer_t* renderer = (renderer_t*)user_data;
+    transform_component_t* transform = scene_get_component(scene, entity, "transform");
+    camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view);
+}
 
 void renderer_init_screen_framebuffer(renderer_t* renderer) {
     renderer->screen_framebuffer = framebuffer_new();
@@ -111,8 +110,6 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         texture_resize(renderer->screen_depth_texture, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
         framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_texture);
         framebuffer_add_texture(renderer->screen_framebuffer, renderer->screen_depth_texture);
-
-        screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->screen_texture);
     }
 
     if (type == EVENT_TYPE_WINDOW_SCALE_CHANGED) {
@@ -128,7 +125,15 @@ void renderer_on_event(event_type_t type, void* e, void* user_data) {
         texture_delete(renderer->screen_texture);
         texture_delete(renderer->screen_depth_texture);
         renderer_init_screen_framebuffer(renderer);
-        screenrenderer_set_screen_texture(renderer->screen_renderer, renderer->screen_texture);
+    }
+
+    if (type == EVENT_TYPE_SCENE_NEW) {
+        scene_new_event_t* event = (scene_new_event_t*)e;
+        for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
+            renderer_interface_t* interface = array_get(renderer->interfaces, i);
+            scene_register_system(event->new_scene, renderer_system, renderer);
+            scene_register_system(event->new_scene, interface->system, interface);
+        }
     }
 }
 
@@ -214,87 +219,6 @@ void renderer_init_shadow_framebuffer(renderer_t* renderer) {
     framebuffer_set_depth_only(renderer->shadow_framebuffer);
 }
 
-void renderer_handle_model(renderer_t* renderer, scene_t* scene, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
-    model_component_t* model = (model_component_t*)scene_get_component(scene, entity, "model");
-
-    if (!model->draw || model->model == NULL) {
-        return;
-    }
-
-    renderer->num_meshes += model_get_num_meshes(model->model);
-    for (u32 i = 0; i < model_get_num_meshes(model->model); i++) {
-        renderer->num_vertices += mesh_get_num_vertices(model_get_meshes(model->model)[i]);
-    }
-
-    array_add(renderer->models, model);
-    array_add(renderer->model_transforms, transform);
-}
-
-void renderer_handle_billboard(renderer_t* renderer, scene_t* scene, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
-    billboard_component_t* billboard = (billboard_component_t*)scene_get_component(scene, entity, "billboard");
-
-    if (!billboard->draw || billboard->texture == NULL) {
-        return;
-    }
-
-    array_add(renderer->billboards, billboard);
-    array_add(renderer->billboard_transforms, transform);
-}
-
-void renderer_handle_camera(renderer_t* renderer, scene_t* scene, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
-    camera_component_t* camera = (camera_component_t*)scene_get_component(scene, entity, "camera");
-
-    if (camera->use) {
-        camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view);
-        glm_vec3_copy(transform->pos, renderer->camera_pos);
-    }
-}
-
-void renderer_handle_light(renderer_t* renderer, scene_t* scene, entity_t* entity) {
-    transform_component_t* transform = (transform_component_t*)scene_get_component(scene, entity, "transform");
-    light_component_t* light = (light_component_t*)scene_get_component(scene, entity, "light");
-
-    if (!light->cast) {
-        return;
-    }
-
-    array_add(renderer->lights, light);
-    array_add(renderer->light_transforms, transform);
-}
-
-void renderer_handle_skybox(renderer_t* renderer, scene_t* scene, entity_t* entity) {
-    skybox_component_t* skybox = (skybox_component_t*)scene_get_component(scene, entity, "skybox");
-
-    if (!skybox->draw || skybox->cubemap == NULL) {
-        return;
-    }
-
-    array_add(renderer->skyboxes, skybox);
-}
-
-void renderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
-    renderer_t* renderer = (renderer_t*)user_data;
-
-    if (scene_has_component(scene, entity, "model") && scene_has_component(scene, entity, "transform")) {
-        renderer_handle_model(renderer, scene, entity);
-    }
-    if (scene_has_component(scene, entity, "billboard") && scene_has_component(scene, entity, "transform")) {
-        renderer_handle_billboard(renderer, scene, entity);
-    }
-    if (scene_has_component(scene, entity, "camera") && scene_has_component(scene, entity, "transform")) {
-        renderer_handle_camera(renderer, scene, entity);
-    }
-    if (scene_has_component(scene, entity, "light") && scene_has_component(scene, entity, "transform")) {
-        renderer_handle_light(renderer, scene, entity);
-    }
-    if (scene_has_component(scene, entity, "skybox")) {
-        renderer_handle_skybox(renderer, scene, entity);
-    }
-}
-
 renderer_t* renderer_new() {
     GLenum res = glewInit();
     if (res != GLEW_OK) {
@@ -316,24 +240,14 @@ renderer_t* renderer_new() {
     renderer->viewport_width_scaled = renderer->viewport_width * window_get_scale_x(app_get_window());
     renderer->viewport_height_scaled = renderer->viewport_height * window_get_scale_y(app_get_window());
     renderer->aspect_ratio = renderer->viewport_width / renderer->viewport_height;
-    renderer->models = array_new(10);
-    renderer->billboards = array_new(10);
-    renderer->lights = array_new(10);
-    renderer->skyboxes = array_new(10);
-    renderer->model_transforms = array_new(10);
-    renderer->billboard_transforms = array_new(10);
-    renderer->light_transforms = array_new(10);
-    
+    renderer->interfaces = array_new(10);
+
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
     renderer_init_screen_framebuffer(renderer);
     renderer_init_shadow_framebuffer(renderer);
-    
-    renderer->billboard_renderer = billboardrenderer_new(renderer->ubo_matrices);
-    renderer->scene_renderer = scenerenderer_new(renderer->ubo_matrices, renderer->ubo_lights, renderer->shadow_map);
-    renderer->screen_renderer = screenrenderer_new(renderer->screen_texture);
-    renderer->shadow_renderer = shadowrenderer_new(renderer->ubo_matrices, renderer->shadow_map);
-    renderer->skybox_renderer = skyboxrenderer_new(renderer->ubo_matrices);
+
+    array_add(renderer->interfaces, skyboxrenderer_new(renderer));
 
     renderer_calculate_projection(renderer);
 
@@ -343,12 +257,6 @@ renderer_t* renderer_new() {
 }
 
 void renderer_delete(renderer_t* renderer) {
-    scenerenderer_delete(renderer->scene_renderer);
-    screenrenderer_delete(renderer->screen_renderer);
-    shadowrenderer_delete(renderer->shadow_renderer);
-    skyboxrenderer_delete(renderer->skybox_renderer);
-    billboardrenderer_delete(renderer->billboard_renderer);
-
     framebuffer_delete(renderer->screen_framebuffer);
     framebuffer_delete(renderer->shadow_framebuffer);
     texture_delete(renderer->screen_texture);
@@ -356,70 +264,48 @@ void renderer_delete(renderer_t* renderer) {
     ubo_delete(renderer->ubo_matrices);
     ubo_delete(renderer->ubo_lights);
 
-    array_delete(renderer->models);
-    array_delete(renderer->billboards);
-    array_delete(renderer->lights);
-    array_delete(renderer->skyboxes);
-    array_delete(renderer->model_transforms);
-    array_delete(renderer->billboard_transforms);
-    array_delete(renderer->light_transforms);
-
     PEAR_FREE(renderer);
 }
 
 void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
-    array_clear(renderer->lights);
-    array_clear(renderer->models);
-    array_clear(renderer->billboards);
-    array_clear(renderer->skyboxes);
-    array_clear(renderer->light_transforms);
-    array_clear(renderer->model_transforms);
-    array_clear(renderer->billboard_transforms);
-
-    framebuffer_use(renderer->shadow_framebuffer);
-    shadowrenderer_clear(renderer->shadow_renderer);
-
     framebuffer_use(renderer->screen_framebuffer);
-    scenerenderer_clear(renderer->scene_renderer, r, g, b);
+
+    glClearColor(r, g, b, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces, i);
+        interface->clear_function(interface, r, g, b);
+    }
+
+    framebuffer_use_default();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     renderer->num_meshes = 0;
     renderer->num_vertices = 0;
 }
 
-void renderer_draw_scene(renderer_t* renderer, scene_t* scene) {
+void renderer_draw(renderer_t* renderer) {
     ubo_use(renderer->ubo_matrices);
     ubo_set_mat4(renderer->ubo_matrices, 1, renderer->view);
 
-    ubo_use(renderer->ubo_lights);
-    ubo_set_u32(renderer->ubo_lights, 0, array_get_length(renderer->lights));
-    ubo_set_vec3(renderer->ubo_lights, 1, renderer->camera_pos);
-
-    glViewport(0, 0, RENDERER_SHADOW_MAP_SIZE, RENDERER_SHADOW_MAP_SIZE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    framebuffer_use(renderer->shadow_framebuffer);
-    shadowrenderer_draw_scene(renderer->shadow_renderer, renderer->models, renderer->lights, renderer->model_transforms, renderer->light_transforms, renderer->projection, renderer->view);
-
-    if (renderer->enable_wireframe) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
 
     glViewport(0, 0, renderer->viewport_width_scaled, renderer->viewport_height_scaled);
     framebuffer_use(renderer->screen_framebuffer);
-    scenerenderer_draw_scene(renderer->scene_renderer, renderer->models, renderer->lights, renderer->model_transforms, renderer->light_transforms);
-    billboardrenderer_draw_scene(renderer->billboard_renderer, renderer->billboards, renderer->billboard_transforms, renderer->view);
 
-    glDepthFunc(GL_LEQUAL);
-    skyboxrenderer_draw_scene(renderer->skybox_renderer, renderer->skyboxes);
-    glDepthFunc(GL_LESS);
-
-    if (renderer->enable_wireframe) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces, i);
+        interface->draw_function(interface, renderer);
     }
 
-    glDisable(GL_DEPTH_TEST);
     framebuffer_use_default();
-    screenrenderer_render_to_screen(renderer->screen_renderer);
+}
+
+void renderer_add_renderer_interface(renderer_t* renderer, renderer_interface_t* interface) {
+    array_add(renderer->interfaces, interface);
+    scene_register_system(app_get_scene(), interface->system, interface);
 }
 
 u32 renderer_get_num_meshes(renderer_t* renderer) {
@@ -478,6 +364,14 @@ void renderer_set_fov(renderer_t* renderer, f32 fov) {
 
 void renderer_enable_wireframe(renderer_t* renderer, bool active) {
     renderer->enable_wireframe = active;
+}
+
+ubo_t* renderer_get_matrices_ubo(renderer_t* renderer) {
+    return renderer->ubo_matrices;
+}
+
+ubo_t* renderer_get_lights_ubo(renderer_t* renderer) {
+    return renderer->ubo_lights;
 }
 
 #endif
