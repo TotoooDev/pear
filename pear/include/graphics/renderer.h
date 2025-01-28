@@ -8,6 +8,8 @@
 
 typedef struct renderer_t renderer_t;
 
+// set this to false to enable off-screen rendering. you can retrieve the render in the screen_texture.
+void renderer_hint_enable_screen_renderer(bool enable);
 void renderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data);
 
 renderer_t* renderer_new();

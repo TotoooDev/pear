@@ -66,6 +66,12 @@ typedef struct renderer_t {
     ubo_t* ubo_lights;
 } renderer_t;
 
+static bool renderer_enable_screen_renderer = true;
+
+void renderer_hint_enable_screen_renderer(bool enable) {
+    renderer_enable_screen_renderer = enable;
+}
+
 void renderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_data) {
     if (!scene_has_component(scene, entity, "camera") || !scene_has_component(scene, entity, "transform")) {
         return;
@@ -261,7 +267,10 @@ renderer_t* renderer_new() {
     renderer->interfaces_before = array_new(10);
     renderer->interfaces = array_new(10);
     renderer->interfaces_after = array_new(10);
-    renderer->screen_renderer_interface = screenrenderer_new(renderer);
+
+    if (renderer_enable_screen_renderer) {
+        renderer->screen_renderer_interface = screenrenderer_new(renderer);
+    }
 
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
@@ -293,7 +302,10 @@ void renderer_delete(renderer_t* renderer) {
         renderer_interface_t* interface = array_get(renderer->interfaces_after, i);
         interface->delete_function(interface);
     }
-    renderer->screen_renderer_interface->delete_function(renderer->screen_renderer_interface);
+
+    if (renderer_enable_screen_renderer) {
+        renderer->screen_renderer_interface->delete_function(renderer->screen_renderer_interface);
+    }
     
     array_delete(renderer->interfaces_before);
     array_delete(renderer->interfaces);
@@ -328,7 +340,9 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
         interface->clear_function(interface, renderer, r, g, b);
     }
 
-    renderer->screen_renderer_interface->clear_function(renderer->screen_renderer_interface, renderer, r, g, b);
+    if (renderer_enable_screen_renderer) {
+        renderer->screen_renderer_interface->clear_function(renderer->screen_renderer_interface, renderer, r, g, b);
+    }
 
     renderer->num_meshes = 0;
     renderer->num_vertices = 0;
@@ -359,7 +373,9 @@ void renderer_draw(renderer_t* renderer) {
         interface->draw_function(interface, renderer);
     }
 
-    renderer->screen_renderer_interface->draw_function(renderer->screen_renderer_interface, renderer);
+    if (renderer_enable_screen_renderer) {
+        renderer->screen_renderer_interface->draw_function(renderer->screen_renderer_interface, renderer);
+    }
 
     framebuffer_use_default();
 }
