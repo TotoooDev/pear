@@ -4,6 +4,7 @@
 #include <graphics/renderer.h>
 #include <graphics/editor/editor.h>
 #include <core/app.h>
+#include <core/log.h>
 
 #ifdef PEAR_PLATFORM_OPENGL
 #include <graphics/platform/opengl/texture.h>
@@ -31,8 +32,22 @@ void panel_viewport_gizmo(ImVec2 pos, ImVec2 size) {
     ImGuizmo_SetOrthographic(false);
     ImGuizmo_SetDrawlist(NULL);
     ImGuizmo_SetRect(pos.x, pos.y, size.x, size.y);
-    if (ImGuizmo_Manipulate((f32*)view, (f32*)projection, UNIVERSAL, WORLD, (f32*)model_matrix, NULL, NULL, NULL, NULL)) {
-        ImGuizmo_DecomposeMatrixToComponents((f32*)model_matrix, transform->pos, transform->rotation, transform->scale);
+    ImGuizmo_Manipulate((f32*)view, (f32*)projection, UNIVERSAL, LOCAL, (f32*)model_matrix, NULL, NULL, NULL, NULL);
+    if (ImGuizmo_IsUsing()) {
+        vec4 translation;
+        mat4 rotation_matrix;
+        vec3 scale;
+        glm_decompose(model_matrix, translation, rotation_matrix, scale);
+        
+        vec3 rotation;
+        glm_euler_angles(rotation_matrix, rotation);
+        rotation[0] = glm_deg(rotation[0]);
+        rotation[1] = glm_deg(rotation[1]);
+        rotation[2] = glm_deg(rotation[2]);
+        
+        glm_vec3_copy(translation, transform->pos);
+        glm_vec3_copy(rotation, transform->rotation);
+        glm_vec3_copy(scale, transform->scale);
     }
 }
 
