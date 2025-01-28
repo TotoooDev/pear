@@ -9,6 +9,7 @@
 #include <graphics/platform/opengl/renderers/model_renderer.h>
 #include <graphics/platform/opengl/renderers/shadow_renderer.h>
 #include <graphics/platform/opengl/renderers/billboard_renderer.h>
+#include <graphics/platform/opengl/renderers/screen_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
@@ -52,6 +53,7 @@ typedef struct renderer_t {
     array_t* interfaces_before; // before the scene is drawn (for shadow mapping, ...)
     array_t* interfaces;
     array_t* interfaces_after; // after the scene is drawn (for post-processing, ...)
+    renderer_interface_t* screen_renderer_interface; // this one needs to be drawn after everything else so we don't store it in the arrays
 
     framebuffer_t* screen_framebuffer;
     texture_t* screen_texture;
@@ -259,6 +261,7 @@ renderer_t* renderer_new() {
     renderer->interfaces_before = array_new(10);
     renderer->interfaces = array_new(10);
     renderer->interfaces_after = array_new(10);
+    renderer->screen_renderer_interface = screenrenderer_new(renderer);
 
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
@@ -290,6 +293,7 @@ void renderer_delete(renderer_t* renderer) {
         renderer_interface_t* interface = array_get(renderer->interfaces_after, i);
         interface->delete_function(interface);
     }
+    renderer->screen_renderer_interface->delete_function(renderer->screen_renderer_interface);
     
     array_delete(renderer->interfaces_before);
     array_delete(renderer->interfaces);
@@ -324,8 +328,7 @@ void renderer_clear(renderer_t* renderer, f32 r, f32 g, f32 b) {
         interface->clear_function(interface, renderer, r, g, b);
     }
 
-    framebuffer_use_default();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    renderer->screen_renderer_interface->clear_function(renderer->screen_renderer_interface, renderer, r, g, b);
 
     renderer->num_meshes = 0;
     renderer->num_vertices = 0;
@@ -355,6 +358,8 @@ void renderer_draw(renderer_t* renderer) {
         renderer_interface_t* interface = array_get(renderer->interfaces_after, i);
         interface->draw_function(interface, renderer);
     }
+
+    renderer->screen_renderer_interface->draw_function(renderer->screen_renderer_interface, renderer);
 
     framebuffer_use_default();
 }

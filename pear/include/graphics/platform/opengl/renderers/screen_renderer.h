@@ -3,16 +3,9 @@
 #ifndef PEAR_GRAPHICS_OPENGL_SCREEN_RENDERER_H_
 #define PEAR_GRAPHICS_OPENGL_SCREEN_RENDERER_H_
 
-#include <graphics/texture.h>
-#include <core/types.h> 
+#include <graphics/renderer_interface.h>
 
-typedef struct screen_renderer_t screen_renderer_t;
-
-screen_renderer_t* screenrenderer_new(texture_t* screen_texture);
-void screenrenderer_delete(screen_renderer_t* renderer);
-
-void screenrenderer_render_to_screen(screen_renderer_t* renderer);
-void screenrenderer_set_screen_texture(screen_renderer_t* renderer, texture_t* screen_texture);
+renderer_interface_t* screenrenderer_new(renderer_t* renderer);
 
 #endif
 
