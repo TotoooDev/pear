@@ -1,7 +1,7 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
-#ifndef PEAR_GRAPHICS_PLATFORM_OPENGL_RENDERER_H_
-#define PEAR_GRAPHICS_PLATFORM_OPENGL_RENDERER_H_
+#ifndef PEAR_GRAPHICS_OPENGL_RENDERER_H_
+#define PEAR_GRAPHICS_OPENGL_RENDERER_H_
 
 #include <graphics/renderer.h>
 #include <graphics/platform/opengl/ubo.h>

@@ -1,6 +1,6 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
-#include <graphics/platform/opengl/renderers/scene_renderer.h>
+// #include <graphics/platform/opengl/renderers/scene_renderer.h>
 #include <graphics/mesh.h>
 #include <graphics/mesh_info.h>
 #include <graphics/texture.h>

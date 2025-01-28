@@ -6,6 +6,7 @@
 #include <graphics/window.h>
 #include <graphics/camera.h>
 #include <graphics/platform/opengl/renderers/skybox_renderer.h>
+#include <graphics/platform/opengl/renderers/model_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>
@@ -73,6 +74,9 @@ void renderer_system(scene_t* scene, entity_t* entity, f32 timestep, void* user_
     renderer_t* renderer = (renderer_t*)user_data;
     transform_component_t* transform = scene_get_component(scene, entity, "transform");
     camera_get_view_matrix(transform->pos, transform->rotation[0], transform->rotation[1], transform->rotation[2], renderer->view);
+
+    ubo_use(renderer->ubo_lights);
+    ubo_set_vec3(renderer->ubo_lights, 1, renderer->camera_pos);
 }
 
 void renderer_init_screen_framebuffer(renderer_t* renderer) {
@@ -248,6 +252,7 @@ renderer_t* renderer_new() {
     renderer_init_shadow_framebuffer(renderer);
 
     array_add(renderer->interfaces, skyboxrenderer_new(renderer));
+    array_add(renderer->interfaces, modelrenderer_new(renderer));
 
     renderer_calculate_projection(renderer);
 
@@ -257,6 +262,12 @@ renderer_t* renderer_new() {
 }
 
 void renderer_delete(renderer_t* renderer) {
+    for (u32 i = 0; i < array_get_length(renderer->interfaces); i++) {
+        renderer_interface_t* interface = array_get(renderer->interfaces, i);
+        interface->delete_function(interface);
+    }
+    array_delete(renderer->interfaces);
+
     framebuffer_delete(renderer->screen_framebuffer);
     framebuffer_delete(renderer->shadow_framebuffer);
     texture_delete(renderer->screen_texture);

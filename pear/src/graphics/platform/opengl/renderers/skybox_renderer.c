@@ -102,6 +102,15 @@ void skyboxrenderer_clear(renderer_interface_t* interface, f32 r, f32 g, f32 b) 
     array_clear(renderer->cubemaps);
 }
 
+void skyboxrenderer_delete(renderer_interface_t* interface) {
+    skybox_renderer_t* skybox_renderer = (skybox_renderer_t*)interface->renderer;
+    array_delete(skybox_renderer->cubemaps);
+    mesh_delete(skybox_renderer->cubemap_mesh);
+    shader_delete(skybox_renderer->shader);
+    PEAR_FREE(skybox_renderer);
+    PEAR_FREE(interface);
+}
+
 renderer_interface_t* skyboxrenderer_new(renderer_t* renderer) {
     skybox_renderer_t* skybox_renderer = (skybox_renderer_t*)PEAR_MALLOC(sizeof(skybox_renderer_t));
     skybox_renderer->shader = shader_new_from_file("shaders/skybox.vert", "shaders/skybox.frag");
@@ -116,6 +125,7 @@ renderer_interface_t* skyboxrenderer_new(renderer_t* renderer) {
     interface->system = skyboxrenderer_system;
     interface->draw_function = skyboxrenderer_draw;
     interface->clear_function = skyboxrenderer_clear;
+    interface->delete_function = skyboxrenderer_delete;
     interface->renderer = skybox_renderer;
 
     return interface;
