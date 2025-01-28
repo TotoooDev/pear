@@ -7,14 +7,20 @@
 #include <scene/components/model.h>
 #include <scene/components/lua_script.h>
 #include <scene/components/skybox.h>
+#include <scene/components/billboard.h>
 #include <loaders/model.h>
 #include <loaders/skybox.h>
+#include <loaders/image.h>
 #include <core/app.h>
 #include <vendor/tinyfiledialogs/tinyfiledialogs.h>
 #include <string.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <graphics/editor/vendor/cimgui/cimgui.h>
+
+#ifdef PEAR_PLATFORM_OPENGL
+#include <graphics/platform/opengl/texture.h>
+#endif
 
 void panel_entity_inspector_component_combo() {
     const char* items[] = {
@@ -206,6 +212,42 @@ void panel_entity_inspector_skybox(entity_t* entity) {
     }
 }
 
+void panel_entity_inspector_billboard(entity_t* entity) {
+    if (igTreeNodeEx_Str("billboard", ImGuiTreeNodeFlags_DefaultOpen)) {
+        billboard_component_t* billboard = (billboard_component_t*)scene_get_component(app_get_scene(), entity, "billboard");
+
+        if (billboard->texture == NULL) {
+            igText("no texture loaded");
+        }
+
+        if (igButton("choose texture", (ImVec2){ 0.0f ,0.0f })) {
+            if (billboard->texture != NULL) {
+                texture_delete(billboard->texture);
+            }
+
+            char* path = tinyfd_openFileDialog("choose lua script", "", 1, NULL, "image files", 0);
+            if (path != NULL) {
+                image_t* image = loader_load_image(path);
+                billboard->texture = texture_new_from_image(image, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_NEAREST);
+                // texture_set_path(billboard->texture, path);
+            }
+        }
+
+        igCheckbox("draw", &billboard->draw);
+
+        if (billboard->texture != NULL) {
+            if (igTreeNode_Str("texture")) {
+                #ifdef PEAR_PLATFORM_OPENGL
+                igImage(texture_get_id(billboard->texture), (ImVec2){ 128.0f, 128.0f }, (ImVec2){ 0.0f, 1.0f }, (ImVec2){ 1.0f, 0.0f }, (ImVec4){ 1.0f, 1.0f, 1.0f, 1.0f }, (ImVec4){ 0.0f, 0.0f, 0.0f, 0.0f });
+                #endif
+                igTreePop();
+            }
+        }
+
+        igTreePop();
+    }
+}
+
 void panel_entity_inspector() {
     if (igBegin("entity inspector", NULL, ImGuiWindowFlags_None)) {
         if (editor_get_selected_entity() == NULL) {
@@ -236,6 +278,10 @@ void panel_entity_inspector() {
 
         if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "model")) {
             panel_entity_inspector_model(editor_get_selected_entity());
+        }
+
+        if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "billboard")) {
+            panel_entity_inspector_billboard(editor_get_selected_entity());
         }
 
         if (scene_has_component(app_get_scene(), editor_get_selected_entity(), "lua_script")) {
