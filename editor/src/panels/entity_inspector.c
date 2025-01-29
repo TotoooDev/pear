@@ -225,9 +225,9 @@ void panel_entity_inspector_billboard(entity_t* entity) {
                 texture_delete(billboard->texture);
             }
 
-            char* path = tinyfd_openFileDialog("choose lua script", "", 1, NULL, "image files", 0);
+            char* path = tinyfd_openFileDialog("choose billboard texture", "", 1, NULL, "image files", 0);
             if (path != NULL) {
-                image_t* image = loader_load_image(path);
+                image_t* image = loader_load_image(path, true);
                 billboard->texture = texture_new_from_image(image, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_NEAREST);
                 // texture_set_path(billboard->texture, path);
             }

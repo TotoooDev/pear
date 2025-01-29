@@ -3,7 +3,7 @@
 
 #include <graphics/image.h>
 
-image_t* loader_load_image(const char* filename);
-image_t* loader_load_image_data(u8* data, u32 data_size);
+image_t* loader_load_image(const char* filename, bool flip_vertically);
+image_t* loader_load_image_data(u8* data, u32 data_size, bool flip_vertically);
 
 #endif

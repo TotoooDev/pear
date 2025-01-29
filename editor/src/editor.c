@@ -86,10 +86,10 @@ void editor_initialize() {
     editor_scene_path[0] = '\0';
     editor_excluded_entities = array_new(5);
     
-    image_t* lightbulb_image = loader_load_image("images/lightbulb.png");
+    image_t* lightbulb_image = loader_load_image("images/lightbulb.png", true);
     editor_lightbulb_texture = texture_new_from_image(lightbulb_image, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_LINEAR);
     image_delete(lightbulb_image);
-    image_t* camera_image = loader_load_image("images/camera.png");
+    image_t* camera_image = loader_load_image("images/camera.png", true);
     editor_camera_texture = texture_new_from_image(camera_image, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_LINEAR);
     image_delete(camera_image);
 

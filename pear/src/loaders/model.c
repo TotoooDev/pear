@@ -32,12 +32,12 @@ material_t* loader_load_material(cgltf_material* gltf_material, char* directory)
         image_t* image;
         if (gltf_texture->image->buffer_view != NULL) {
             u8* image_data = cgltf_buffer_view_data(gltf_texture->image->buffer_view);
-            image = loader_load_image_data(image_data, gltf_texture->image->buffer_view->size);
+            image = loader_load_image_data(image_data, gltf_texture->image->buffer_view->size, true);
         }
         else {
             char texture_path[1024];
             sprintf(texture_path, "%s/%s", directory, gltf_texture->image->uri);
-            image = loader_load_image(texture_path);
+            image = loader_load_image(texture_path, true);
         }
 
         texture_t* texture = texture_new_from_image(image, TEXTURE_WRAPPING_NONE, TEXTURE_FILTERING_NEAREST);

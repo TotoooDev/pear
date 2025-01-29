@@ -62,7 +62,7 @@ void panel_scene_inspector() {
                     editor_set_selected_entity(entity);
                     entity_selected = true;
                 }
-                else if (igIsMouseClicked_Bool(ImGuiMouseButton_Left, false) && !entity_selected) {
+                else if (igIsMouseClicked_Bool(ImGuiMouseButton_Left, false) && igIsItemHovered(ImGuiHoveredFlags_None) && !entity_selected) {
                     editor_set_selected_entity(NULL);
                 }
 

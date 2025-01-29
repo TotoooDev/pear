@@ -9,32 +9,32 @@ cubemap_t* loader_load_skybox(const char* directory) {
     char right_path[1024];
     strcpy(right_path, directory);
     strcat(right_path, "/right.jpg");
-    images[0] = loader_load_image(right_path);
+    images[0] = loader_load_image(right_path, false);
 
     char left_path[1024];
     strcpy(left_path, directory);
     strcat(left_path, "/left.jpg");
-    images[1] = loader_load_image(left_path);
+    images[1] = loader_load_image(left_path, false);
 
     char top_path[1024];
     strcpy(top_path, directory);
     strcat(top_path, "/top.jpg");
-    images[2] = loader_load_image(top_path);
+    images[2] = loader_load_image(top_path, false);
 
     char bottom_path[1024];
     strcpy(bottom_path, directory);
     strcat(bottom_path, "/bottom.jpg");
-    images[3] = loader_load_image(bottom_path);
+    images[3] = loader_load_image(bottom_path, false);
 
     char front_path[1024];
     strcpy(front_path, directory);
     strcat(front_path, "/front.jpg");
-    images[4] = loader_load_image(front_path);
+    images[4] = loader_load_image(front_path, false);
 
     char back_path[1024];
     strcpy(back_path, directory);
     strcat(back_path, "/back.jpg");
-    images[5] = loader_load_image(back_path);
+    images[5] = loader_load_image(back_path, false);
 
     cubemap_t* cubemap = cubemap_new_from_images(images, TEXTURE_WRAPPING_CLAMP, TEXTURE_FILTERING_LINEAR);
     return cubemap;
