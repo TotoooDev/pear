@@ -19,6 +19,7 @@
 - [engine] normal mapping
 - [engine] specular mapping
 - [engine] point shadows
+- [engine] fix scene handling only one scene_component_added_function_t for each component 
 
 ## low priority
 
