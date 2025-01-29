@@ -28,6 +28,7 @@ void panel_scene_inspector() {
         }
 
         igSeparator();
+        bool entity_selected = false;
         for (u32 i = 0; i < array_get_length(entities); i++) {
             entity_t* entity = (entity_t*)array_get(entities, i);
 
@@ -59,6 +60,10 @@ void panel_scene_inspector() {
             if (ret) {
                 if (igIsItemClicked(ImGuiMouseButton_Left)) {
                     editor_set_selected_entity(entity);
+                    entity_selected = true;
+                }
+                else if (igIsMouseClicked_Bool(ImGuiMouseButton_Left, false) && !entity_selected) {
+                    editor_set_selected_entity(NULL);
                 }
 
                 igTreePop();
