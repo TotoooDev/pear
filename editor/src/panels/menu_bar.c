@@ -38,8 +38,9 @@ void panel_menu_bar_open() {
     const char* filters[] = { "*.pear" };
     char* path = tinyfd_openFileDialog("choose scene", "", 1, filters, "pear scene files", 0);
     if (path != NULL) {
-        scene_t* scene = loader_load_scene(path);
+        scene_t* scene = scene_new();
         app_set_scene(scene);
+        loader_populate_scene(scene, path);
         editor_set_scene_path(path);
     }
 }

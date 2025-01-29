@@ -18,6 +18,8 @@ typedef struct scene_t {
     hashmap_t* components;
     array_t* systems;
     array_t* user_datas;
+    hashmap_t* component_added_functions;
+    hashmap_t* component_removed_functions;
     array_t* entities;
 
     u32 next_entity_id;
@@ -47,6 +49,8 @@ scene_t* scene_new() {
     scene->components = hashmap_new();
     scene->systems = array_new(5);
     scene->user_datas = array_new(5);
+    scene->component_added_functions = hashmap_new();
+    scene->component_removed_functions = hashmap_new();
     scene->entities = array_new(10);
     scene->next_entity_id = 0;
 
@@ -83,6 +87,14 @@ void scene_register_component(scene_t* scene, const char* name, component_attach
 void scene_register_system(scene_t* scene, scene_system_t system, void* user_data) {
     array_add(scene->systems, system);
     array_add(scene->user_datas, user_data);
+}
+
+void scene_add_component_added_function(scene_t* scene, const char* name, scene_component_added_function_t function) {
+    hashmap_set(scene->component_added_functions, name, function);
+}
+
+void scene_add_component_removed_function(scene_t* scene, const char* name, scene_component_removed_function_t function) {
+    hashmap_set(scene->component_removed_functions, name, function);
 }
 
 entity_t* scene_add_entity(scene_t* scene, const char* name) {
@@ -130,6 +142,11 @@ void* scene_add_component(scene_t* scene, entity_t* entity, const char* name) {
 
     hashmap_set(hashmap, name, component_data);
 
+    scene_component_added_function_t function = hashmap_get(scene->component_added_functions, name);
+    if (function != NULL) {
+        function(scene, entity);
+    }
+
     return component_data;
 }
 
@@ -144,6 +161,11 @@ void scene_remove_component(scene_t* scene, entity_t* entity, const char* name) 
         PEAR_FREE(hashmap_get(entity_get_hashmap(entity), name));
     }
     hashmap_remove(entity_get_hashmap(entity), name);
+
+    scene_component_removed_function_t function = hashmap_get(scene->component_removed_functions, name);
+    if (function != NULL) {
+        function(scene, entity);
+    }
 }
 
 bool scene_has_component(scene_t* scene, entity_t* entity, const char* name) {

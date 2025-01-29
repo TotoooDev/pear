@@ -9,12 +9,16 @@
 typedef struct scene_t scene_t;
 
 typedef void(*scene_system_t)(scene_t*, entity_t*, f32, void*);
+typedef void(*scene_component_added_function_t)(scene_t*, entity_t*);
+typedef void(*scene_component_removed_function_t)(scene_t*, entity_t*);
 
 scene_t* scene_new();
 void scene_delete(scene_t* scene);
 
 void scene_register_component(scene_t* scene, const char* name, component_attachment_t attachment, u32 component_data_size);
 void scene_register_system(scene_t* scene, scene_system_t system, void* user_data);
+void scene_add_component_added_function(scene_t* scene, const char* name, scene_component_added_function_t function);
+void scene_add_component_removed_function(scene_t* scene, const char* name, scene_component_removed_function_t function);
 
 entity_t* scene_add_entity(scene_t* scene, const char* name);
 void scene_remove_entity(scene_t* scene, entity_t* entity);

@@ -24,7 +24,7 @@ void loader_write_vec3(cJSON* json, vec3 vec) {
     cJSON_AddNumberToObject(json, "z", vec[2]);
 }
 
-scene_t* loader_load_scene(const char* filename) {
+void loader_populate_scene(scene_t* scene, const char* filename) {
     char* json_data = filesystem_read_file(filename);
     cJSON* json = cJSON_Parse(json_data);
     PEAR_FREE(json_data);
@@ -32,10 +32,8 @@ scene_t* loader_load_scene(const char* filename) {
     if (json == NULL) {
         const char* error = cJSON_GetErrorPtr();
         PEAR_ERROR("failed to parse scene file %s! %s", filename, error);
-        return NULL;
+        return;
     }
-
-    scene_t* scene = scene_new();
 
     cJSON* json_scene = cJSON_GetObjectItem(json, "scene");
     cJSON* json_entities = cJSON_GetObjectItem(json_scene, "entities");
@@ -121,7 +119,11 @@ scene_t* loader_load_scene(const char* filename) {
     }
 
     cJSON_Delete(json);
+}
 
+scene_t* loader_load_scene(const char* filename) {
+    scene_t* scene = scene_new();
+    loader_populate_scene(scene, filename);
     return scene;
 }
 
