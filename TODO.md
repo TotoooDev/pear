@@ -23,5 +23,4 @@
 
 - [editor] add a log panel
 - [editor] ask for confirmation from the user before creating/opening/closing a scene when it is not saved
-- [editor] add better editor billboards
 - [engine] use cglm functions to calculate the frustum corners in the shadow calculations
