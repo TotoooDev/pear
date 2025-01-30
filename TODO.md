@@ -21,6 +21,7 @@
 
 ## low priority
 
+- [editor] add a way to deselect an entity in the inspector
 - [editor] add a log panel
 - [editor] ask for confirmation from the user before creating/opening/closing a scene when it is not saved
 - [engine] use cglm functions to calculate the frustum corners in the shadow calculations
