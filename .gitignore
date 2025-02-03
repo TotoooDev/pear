@@ -1,6 +1,6 @@
 .vscode/
 bin/
-bin-intermediate/
+obj/
 **/assets/*
 !pear/assets/
 !pear/assets/shaders
