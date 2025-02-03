@@ -22,7 +22,13 @@ project "pear"
         }
 
         includedirs {
-            "vendor/glfw/include"
+            "vendor/glfw/include",
+            "vendor/glad/include",
+        }
+
+        files {
+            "vendor/glad/src/**.c",
+            "vendor/glad/include/**.h",
         }
 
     filter "system:linux"

@@ -2,7 +2,7 @@
 
 #include <graphics/platform/opengl/ubo.h>
 #include <core/alloc.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 typedef struct ubo_t {
     u32 id;

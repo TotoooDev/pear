@@ -6,7 +6,7 @@
 #include <graphics/texture.h>
 #include <core/log.h>
 #include <core/alloc.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 typedef struct framebuffer_t {
     u32 num_textures;

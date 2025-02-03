@@ -23,7 +23,7 @@
 #include <event/event_dispatcher.h>
 #include <core/app.h>
 #include <core/log.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <core/alloc.h>
 
 #define RENDERER_NUM_MAX_LIGHTS 128
@@ -244,9 +244,8 @@ void renderer_init_shadow_framebuffer(renderer_t* renderer) {
 }
 
 renderer_t* renderer_new() {
-    GLenum res = glewInit();
-    if (res != GLEW_OK) {
-        PEAR_ERROR("failed to initialize glew! %s", glewGetErrorString(res));
+    if (!gladLoadGL()) {
+        PEAR_ERROR("failed to initialize opengl context!");
         return NULL;
     }
 

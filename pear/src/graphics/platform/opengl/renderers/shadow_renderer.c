@@ -10,7 +10,7 @@
 #include <scene/components/light.h>
 #include <util/array.h>
 #include <core/alloc.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 typedef struct shadow_renderer_t {
     shader_t* shader;

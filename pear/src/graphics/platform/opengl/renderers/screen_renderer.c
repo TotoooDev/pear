@@ -6,7 +6,7 @@
 #include <graphics/platform/opengl/mesh.h>
 #include <graphics/platform/opengl/texture.h>
 #include <core/alloc.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 typedef struct screen_renderer_t {
     shader_t* shader;

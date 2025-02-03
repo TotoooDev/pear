@@ -4,7 +4,7 @@
 #include <graphics/platform/opengl/cubemap.h>
 #include <graphics/platform/opengl/texture.h>
 #include <core/alloc.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <string.h>
 
 typedef struct cubemap_t {

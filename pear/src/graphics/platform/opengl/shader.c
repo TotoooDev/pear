@@ -3,7 +3,7 @@
 #include <graphics/platform/opengl/shader.h>
 #include <util/filesystem.h>
 #include <core/log.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <core/alloc.h>
 
 #define SHADER_INFO_LOG_LENGTH 1024

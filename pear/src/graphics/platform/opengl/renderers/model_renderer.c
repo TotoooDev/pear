@@ -10,7 +10,7 @@
 #include <scene/components/light.h>
 #include <util/array.h>
 #include <core/alloc.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #define RENDERER_NUM_MAX_LIGHTS 128
 

@@ -2,7 +2,7 @@
 
 #include <graphics/texture.h>
 #include <graphics/platform/opengl/texture.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <core/alloc.h>
 
 typedef struct texture_t {

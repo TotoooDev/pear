@@ -4,7 +4,7 @@
 #define PEAR_GRAPHICS_OPENGL_TEXTURE_H_
 
 #include <graphics/texture.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 GLenum texture_format_to_opengl(texture_format_t format);
 GLenum texture_wrapping_to_opengl(texture_wrapping_t wrapping);

@@ -4,7 +4,7 @@
 #include <graphics/platform/opengl/mesh.h> 
 #include <graphics/platform/opengl/mesh_info.h>
 #include <core/log.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <core/alloc.h>
 
 typedef struct mesh_t {

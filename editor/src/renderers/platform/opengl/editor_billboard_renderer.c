@@ -9,7 +9,7 @@
 #include <components/editor_billboard.h>
 #include <util/array.h>
 #include <core/alloc.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 typedef struct editor_billboard_renderer_t {
     shader_t* shader;

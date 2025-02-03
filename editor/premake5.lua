@@ -30,26 +30,32 @@ project "editor"
             "PEAR_PLATFORM_GLFW",
         }
 
+        includedirs {
+            "../pear/vendor/glfw/include",
+            "../pear/vendor/glad/include",
+        }
+
+        files {
+            "vendor/glad/src/**.c",
+            "vendor/glad/include/**.h",
+        }
+
+        links { "glfw" }
+
     filter "system:linux"
         defines {
             "PEAR_PLATFORM_LINUX",
         }
+
         linkoptions {
             "-Wl,-rpath='${ORIGIN}.'"
         }
+        links { "m" }
 
         postbuildcommands {
             "cp -R assets/* " .. bin_directory,
             "cp -R ../pear/assets/* " .. bin_directory,
             "cp ../pear/lib/libcimgui_glfw.so " .. bin_directory
-        }
-
-        -- TO FIX
-        links {
-            "m",
-            "glfw",
-            "GL",
-            "GLEW"
         }
 
     filter "configurations:Debug"
