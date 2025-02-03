@@ -1,0 +1,3 @@
+[submodule "pear/vendor/glfw"]
+	path = pear/vendor/glfw
+	url = git@github.com:TotoooDev/glfw.git
