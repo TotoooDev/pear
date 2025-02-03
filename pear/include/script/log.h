@@ -2,7 +2,7 @@
 #define PEAR_SCRIPT_LOG_H_
 
 #include <core/types.h>
-#include <script/vendor/lua.h>
+#include <lua.h>
 
 i32 script_log_info(lua_State* l);
 i32 script_log_warn(lua_State* l);

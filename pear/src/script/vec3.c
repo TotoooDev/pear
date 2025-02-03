@@ -1,6 +1,6 @@
 #include <script/vec3.h>
-#include <script/vendor/lua.h>
-#include <script/vendor/lauxlib.h>
+#include <lua.h>
+#include <lauxlib.h>
 #include <string.h>
 
 #include <core/log.h>

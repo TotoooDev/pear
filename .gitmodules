@@ -1,3 +1,6 @@
 [submodule "pear/vendor/glfw"]
 	path = pear/vendor/glfw
 	url = git@github.com:TotoooDev/glfw.git
+[submodule "pear/vendor/lua"]
+	path = pear/vendor/lua
+	url = git@github.com:TotoooDev/lua.git

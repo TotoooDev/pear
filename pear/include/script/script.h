@@ -1,7 +1,7 @@
 #ifndef PEAR_SCRIPT_H_
 #define PEAR_SCRIPT_H_
 
-#include <script/vendor/lua.h>
+#include <lua.h>
 #include <scene/entity.h>
 #include <core/types.h>
 

@@ -8,6 +8,7 @@ project "pear"
 
     includedirs {
         "include",
+        "vendor/lua"
     }
 
     files {

@@ -16,7 +16,8 @@ project "editor"
 
     includedirs {
         "include",
-        "../pear/include"
+        "../pear/include",
+        "../pear/vendor/lua",
     }
 
     files {

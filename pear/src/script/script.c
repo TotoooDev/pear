@@ -9,9 +9,9 @@
 #include <util/filesystem.h>
 #include <core/log.h>
 #include <core/alloc.h>
-#include <script/vendor/lua.h>
-#include <script/vendor/lauxlib.h>
-#include <script/vendor/lualib.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 #include <string.h>
 
 // for these macros, we are under the assumption that the script will always be called "script"

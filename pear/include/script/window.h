@@ -1,8 +1,8 @@
 #ifndef SCRIPT_WINDOW_H_
 #define SCRIPT_WINDOW_H_
 
-#include <script/vendor/lua.h>
-#include <script/vendor/lauxlib.h>
+#include <lua.h>
+#include <lauxlib.h>
 #include <graphics/window.h>
 #include <core/app.h>
 #include <core/types.h>
