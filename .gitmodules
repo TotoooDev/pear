@@ -1,9 +1,6 @@
 [submodule "pear/vendor/glfw"]
 	path = pear/vendor/glfw
 	url = https://github.com/TotoooDev/glfw.git
-[submodule "pear/vendor/lua"]
-	path = pear/vendor/lua
-	url = https://github.com/TotoooDev/lua.git
 [submodule "pear/vendor/imgui/cimgui"]
 	path = pear/vendor/imgui/cimgui
 	url = https://github.com/cimgui/cimgui.git
