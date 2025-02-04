@@ -7,6 +7,8 @@ project "imgui"
         "cimgui/imgui",
         "cimguizmo",
         "cimguizmo/ImGuizmo",
+
+        "../glfw/include"
     }
 
     files {
