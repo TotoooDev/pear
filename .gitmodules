@@ -10,3 +10,6 @@
 [submodule "pear/vendor/imgui/cimguizmo"]
 	path = pear/vendor/imgui/cimguizmo
 	url = https://github.com/cimgui/cimguizmo.git
+[submodule "pear/vendor/cglm"]
+	path = pear/vendor/cglm
+	url = https://github.com/recp/cglm.git

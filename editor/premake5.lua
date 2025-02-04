@@ -19,6 +19,7 @@ project "editor"
         "../pear/vendor/imgui/cimgui",
         "../pear/vendor/imgui/cimgui/generator/output", -- for cimgui_impl.h
         "../pear/vendor/imgui/cimguizmo",
+        "../pear/vendor/cglm/include"
     }
 
     files {
