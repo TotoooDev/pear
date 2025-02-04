@@ -6,9 +6,9 @@
 #include <core/types.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <graphics/editor/vendor/cimgui/cimgui.h>
-#include <graphics/editor/vendor/cimgui/cimconfig.h>
-#include <graphics/editor/vendor/cimgui/cimguizmo.h>
+#include <cimgui.h>
+#include <cimconfig.h>
+#include <cimguizmo.h>
 
 typedef void(*editor_function_t)(void*);
 

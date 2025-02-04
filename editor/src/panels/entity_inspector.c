@@ -16,7 +16,7 @@
 #include <string.h>
 
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <graphics/editor/vendor/cimgui/cimgui.h>
+#include <cimgui.h>
 
 #ifdef PEAR_PLATFORM_OPENGL
 #include <graphics/platform/opengl/texture.h>

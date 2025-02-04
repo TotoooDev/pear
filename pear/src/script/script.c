@@ -365,7 +365,7 @@ lua_State* script_get_state(script_t* script) {
 
 #ifdef PEAR_ENABLE_EDITOR
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <graphics/editor/vendor/cimgui/cimgui.h>
+#include <cimgui.h>
 
 i32 script_button_item(lua_State* l) {
     const char* label = lua_tostring(l, 1);
