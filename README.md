@@ -1,32 +1,19 @@
 # pear
 
-pear is a work-in-progress 3D engine, designed with portability in mind. Its current graphics API is OpenGL, and only support Linux (Windows support is planned for the near future, but i primarly use Linux, so Windows might get updates later).
+pear is a work-in-progress 3d game engine, focused on portability.
 
-## Compiling from source
+## compiling
 
-First, install the following dependencies :
-- GLFW
-- GLEW
-- cglm
+pear uses [premake](https://premake.github.io/) as its build system, so you will need to install on your system. place the executable somewhere in your path, and you'll be good to go!
 
-Then execute the following script to generate the project (makefiles on Linux):
+### linux
 
-```bash
-./generate-projects.sh
-```
+first you will need to install a few depedencies. they are needed for glfw to compile properly. you can find which packages to install on the [glfw compilation guide](https://www.glfw.org/docs/latest/compile.html#compile_deps).
 
-Then, run this script to copy the assets to the binaries directory:
+once you've installed the depedencies, run `premake5 gmake` inside of the repository. this will generate the makfiles required to build the engine.
 
-```bash
-./copy-assets.sh
-```
+finally, you can run `make`, and the engine will compile! the binary will be located inside the bin/[config]-linux/editor directory.
 
-Now, you can run `make` to compile the project.
+### windows
 
-Once this is finished, your game is ready to run in the `bin/Debug-linux-x86_64/pear-project` directory!
-
-## Projects
-
-This repository contains multiple projects:
-- `pear` is the engine itself.
-- `pear-project` the project that uses the pear engine.
+coming soon!
