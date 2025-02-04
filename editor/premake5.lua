@@ -15,7 +15,7 @@ project "editor"
     includedirs {
         "include",
         "../pear/include",
-        "../pear/vendor/lua",
+        "../pear/vendor/lua/src",
         "../pear/vendor/imgui/cimgui",
         "../pear/vendor/imgui/cimgui/generator/output", -- for cimgui_impl.h
         "../pear/vendor/imgui/cimguizmo",

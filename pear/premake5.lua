@@ -8,7 +8,7 @@ project "pear"
 
     includedirs {
         "include",
-        "vendor/lua",
+        "vendor/lua/src",
         "vendor/imgui/cimgui",
         "vendor/imgui/cimgui/generator/output", -- for cimgui_impl.h
         "vendor/imgui/cimguizmo",
