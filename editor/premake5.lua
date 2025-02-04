@@ -6,10 +6,8 @@ project "editor"
     targetdir (bin_directory)
     objdir (bin_intermediate_directory)
 
-    -- TO FIX
-    libdirs ("../pear/lib")
     links {
-        "cimgui_glfw",
+        "imgui",
         "lua",
         "pear",
     }
@@ -18,6 +16,9 @@ project "editor"
         "include",
         "../pear/include",
         "../pear/vendor/lua",
+        "../pear/vendor/imgui/cimgui",
+        "../pear/vendor/imgui/cimgui/generator/output", -- for cimgui_impl.h
+        "../pear/vendor/imgui/cimguizmo",
     }
 
     files {
@@ -55,8 +56,7 @@ project "editor"
 
         postbuildcommands {
             "cp -R assets/* " .. bin_directory,
-            "cp -R ../pear/assets/* " .. bin_directory,
-            "cp ../pear/lib/libcimgui_glfw.so " .. bin_directory
+            "cp -R ../pear/assets/* " .. bin_directory
         }
 
     filter "configurations:Debug"

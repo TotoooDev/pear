@@ -6,9 +6,16 @@ project "pear"
     targetdir (bin_directory)
     objdir (bin_intermediate_directory)
 
+    links {
+        "imgui"
+    }
+
     includedirs {
         "include",
-        "vendor/lua"
+        "vendor/lua",
+        "vendor/imgui/cimgui",
+        "vendor/imgui/cimgui/generator/output", -- for cimgui_impl.h
+        "vendor/imgui/cimguizmo",
     }
 
     files {

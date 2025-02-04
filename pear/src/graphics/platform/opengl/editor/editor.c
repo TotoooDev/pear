@@ -10,10 +10,10 @@
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #define CIMGUI_USE_GLFW
 #define CIMGUI_USE_OPENGL3
-#include <graphics/editor/vendor/cimgui/cimgui.h>
-#include <graphics/editor/vendor/cimgui/cimconfig.h>
-#include <graphics/editor/vendor/cimgui/cimguizmo.h>
-#include <graphics/platform/opengl/editor/vendor/cimgui/cimgui_impl.h>
+#include <cimgui.h>
+#include <cimconfig.h>
+#include <cimguizmo.h>
+#include <cimgui_impl.h>
 
 static array_t* editor_functions;
 static array_t* editor_user_datas;

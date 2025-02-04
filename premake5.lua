@@ -7,6 +7,7 @@ bin_intermediate_directory = "../obj/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}"
 
 include "pear/vendor/glfw"
 include "pear/vendor/lua"
+include "pear/vendor/imgui"
 
 include "pear"
 include "editor"

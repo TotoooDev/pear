@@ -4,3 +4,9 @@
 [submodule "pear/vendor/lua"]
 	path = pear/vendor/lua
 	url = git@github.com:TotoooDev/lua.git
+[submodule "pear/vendor/imgui/cimgui"]
+	path = pear/vendor/imgui/cimgui
+	url = https://github.com/cimgui/cimgui.git
+[submodule "pear/vendor/imgui/cimguizmo"]
+	path = pear/vendor/imgui/cimguizmo
+	url = https://github.com/cimgui/cimguizmo.git
