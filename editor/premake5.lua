@@ -53,7 +53,7 @@ project "editor"
         linkoptions {
             "-Wl,-rpath='${ORIGIN}.'"
         }
-        links { "m" }
+        links { "m", "pthread" }
 
     filter "configurations:Debug"
 		defines {
