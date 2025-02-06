@@ -10,8 +10,6 @@
 
 typedef struct thread_t {
     pthread_t id;
-    thread_before_function_t before_function;
-    thread_after_function_t after_function;
     thread_function_t function;
     void* arg;
     void* ret;
@@ -19,24 +17,12 @@ typedef struct thread_t {
 
 void* thread_function(void* arg) {
     thread_t* thread = (thread_t*)arg;
-
-    if (thread->before_function != NULL) {
-        thread->before_function();
-    }
-
     thread->ret = thread->function(thread->arg);
-
-    if (thread->after_function != NULL) {
-        thread->after_function();
-    }
-
     return NULL;
 }
 
-thread_t* thread_new(thread_function_t function, void* arg, size_t arg_size, thread_before_function_t before_function, thread_after_function_t after_function) {
+thread_t* thread_new(thread_function_t function, void* arg, size_t arg_size) {
     thread_t* thread = (thread_t*)PEAR_MALLOC(sizeof(thread_t));
-    thread->before_function = before_function;
-    thread->after_function = after_function;
     thread->function = function;
     thread->ret = NULL;
 
@@ -69,11 +55,15 @@ void thread_launch(thread_t* thread) {
 }
 
 void thread_join(thread_t* thread) {
-    pthread_join(thread->id, &thread->ret);
+    pthread_join(thread->id, NULL);
 }
 
 void thread_sleep(u32 time_ms) {
     usleep(time_ms * 1000);
+}
+
+void thread_set_function(thread_t* thread, thread_function_t function) {
+    thread->function = function;
 }
 
 void thread_set_arg(thread_t* thread, void* arg, size_t arg_size) {
