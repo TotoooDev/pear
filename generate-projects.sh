@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./vendor/premake/premake5 gmake
+premake5 gmake
