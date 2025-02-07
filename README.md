@@ -19,3 +19,9 @@ finally, you can run `make`, and the engine will compile! the binary will be loc
 ### windows
 
 coming soon!
+
+## assets
+
+the assets used by pear are located in `pear/assets` and `editor/assets`. they respectively contain assets needed for the engine to work properly (shaders and stuff), and the assets needed for the editor to work (images, scripts, ...). all the assets are copied into the working directory after compilation. you can also copy the assets manually by executing the `copy-assets.sh` script.
+
+apart from the assets, shared libraries (.so and .dll files) are also copied in the working directory after compilation.
