@@ -55,11 +55,6 @@ project "editor"
         }
         links { "m" }
 
-        postbuildcommands {
-            "cp -R assets/* " .. bin_directory,
-            "cp -R ../pear/assets/* " .. bin_directory
-        }
-
     filter "configurations:Debug"
 		defines {
 			"PEAR_DEBUG",

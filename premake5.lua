@@ -11,3 +11,8 @@ include "pear/vendor/imgui"
 
 include "pear"
 include "editor"
+
+filter "system:linux"
+    postbuildcommands {
+        "../copy-assets.sh .."
+    }
