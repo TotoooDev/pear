@@ -5,11 +5,11 @@
 #include <graphics/mesh.h>
 #include <graphics/window.h>
 #include <graphics/camera.h>
-#include <graphics/platform/opengl/renderers/skybox_renderer.h>
-#include <graphics/platform/opengl/renderers/model_renderer.h>
-#include <graphics/platform/opengl/renderers/shadow_renderer.h>
-#include <graphics/platform/opengl/renderers/billboard_renderer.h>
-#include <graphics/platform/opengl/renderers/screen_renderer.h>
+#include <graphics/renderers/skybox_renderer.h>
+#include <graphics/renderers/model_renderer.h>
+#include <graphics/renderers/shadow_renderer.h>
+#include <graphics/renderers/billboard_renderer.h>
+#include <graphics/renderers/screen_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
 #include <graphics/platform/opengl/ubo_info.h>

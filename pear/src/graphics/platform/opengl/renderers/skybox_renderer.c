@@ -1,6 +1,6 @@
 #ifdef PEAR_PLATFORM_OPENGL
 
-#include <graphics/platform/opengl/renderers/skybox_renderer.h>
+#include <graphics/renderers/skybox_renderer.h>
 #include <graphics/platform/opengl/renderer.h>
 #include <graphics/platform/opengl/shader.h>
 #include <graphics/platform/opengl/mesh.h>
