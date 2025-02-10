@@ -2,6 +2,11 @@
 #include <core/timer.h>
 #include <graphics/window.h>
 #include <graphics/renderer.h>
+#include <graphics/renderers/skybox_renderer.h>
+#include <graphics/renderers/model_renderer.h>
+#include <graphics/renderers/shadow_renderer.h>
+#include <graphics/renderers/billboard_renderer.h>
+#include <graphics/renderers/screen_renderer.h>
 #include <graphics/editor/editor.h>
 #include <script/script.h>
 #include <event/event_dispatcher.h>
@@ -47,7 +52,12 @@ void app_init() {
     app->last_time = 0.0f;
     app->scene = scene_new();
     app->window = window_new("pear", 1080, 720);
+
     app->renderer = renderer_new();
+    renderer_add_renderer_interface_before(app->renderer, shadowrenderer_new(app->renderer));
+    renderer_add_renderer_interface(app->renderer, modelrenderer_new(app->renderer));
+    renderer_add_renderer_interface(app->renderer, billboardrenderer_new(app->renderer));
+    renderer_add_renderer_interface_after(app->renderer, skyboxrenderer_new(app->renderer));
 
     #ifdef PEAR_ENABLE_EDITOR
         app->enable_editor = true;

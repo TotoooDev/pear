@@ -5,10 +5,6 @@
 #include <graphics/mesh.h>
 #include <graphics/window.h>
 #include <graphics/camera.h>
-#include <graphics/renderers/skybox_renderer.h>
-#include <graphics/renderers/model_renderer.h>
-#include <graphics/renderers/shadow_renderer.h>
-#include <graphics/renderers/billboard_renderer.h>
 #include <graphics/renderers/screen_renderer.h>
 #include <graphics/platform/opengl/framebuffer.h>
 #include <graphics/platform/opengl/ubo.h>
@@ -275,11 +271,6 @@ renderer_t* renderer_new() {
     renderer_init_ubo_lights(renderer);
     renderer_init_screen_framebuffer(renderer);
     renderer_init_shadow_framebuffer(renderer);
-
-    array_add(renderer->interfaces_before, shadowrenderer_new(renderer));
-    array_add(renderer->interfaces, modelrenderer_new(renderer));
-    array_add(renderer->interfaces, billboardrenderer_new(renderer));
-    array_add(renderer->interfaces_after, skyboxrenderer_new(renderer));
 
     renderer_calculate_projection(renderer);
 
