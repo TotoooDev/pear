@@ -263,6 +263,7 @@ renderer_t* renderer_new() {
     renderer->interfaces = array_new(10);
     renderer->interfaces_after = array_new(10);
 
+
     renderer_init_ubo_matrices(renderer);
     renderer_init_ubo_lights(renderer);
     renderer_init_screen_framebuffer(renderer);
@@ -271,7 +272,7 @@ renderer_t* renderer_new() {
     if (renderer_enable_screen_renderer) {
         renderer->screen_renderer_interface = screenrenderer_new(renderer);
     }
-
+    
     array_add(renderer->interfaces_before, shadowrenderer_new(renderer));
     array_add(renderer->interfaces, modelrenderer_new(renderer));
     array_add(renderer->interfaces, billboardrenderer_new(renderer));
