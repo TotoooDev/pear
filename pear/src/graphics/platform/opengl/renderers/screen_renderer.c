@@ -74,8 +74,6 @@ renderer_interface_t* screenrenderer_new(renderer_t* renderer) {
     screenrenderer_init_mesh(screen_renderer);
 
     screen_renderer->shader = shader_new_from_file("shaders/framebuffer.vert", "shaders/framebuffer.frag");
-    shader_use(screen_renderer->shader);
-    shader_set_ubo(screen_renderer->shader, renderer_get_matrices_ubo(renderer), "ubo_matrices");
 
     renderer_interface_t* interface = (renderer_interface_t*)PEAR_MALLOC(sizeof(renderer_interface_t));
     interface->system = NULL;
