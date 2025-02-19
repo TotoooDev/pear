@@ -11,6 +11,7 @@ include "pear/vendor/imgui"
 
 include "pear"
 include "editor"
+include "runtime"
 
 filter "system:linux"
     postbuildcommands {
