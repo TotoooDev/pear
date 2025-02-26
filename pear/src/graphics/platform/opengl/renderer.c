@@ -272,11 +272,6 @@ renderer_t* renderer_new() {
     if (renderer_enable_screen_renderer) {
         renderer->screen_renderer_interface = screenrenderer_new(renderer);
     }
-    
-    array_add(renderer->interfaces_before, shadowrenderer_new(renderer));
-    array_add(renderer->interfaces, modelrenderer_new(renderer));
-    array_add(renderer->interfaces, billboardrenderer_new(renderer));
-    array_add(renderer->interfaces_after, skyboxrenderer_new(renderer));
 
     renderer_calculate_projection(renderer);
 
